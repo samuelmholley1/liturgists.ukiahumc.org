@@ -16,7 +16,7 @@ interface Service {
 // Generate calendar data for the current and next month
 const generateCalendarData = (services: Service[]) => {
   // Use a fixed date to avoid server/client hydration mismatches
-  const today = new Date('2025-10-13') // Current date from context
+  const today = new Date('2025-10-19') // Current date from context
   const currentMonth = today.getMonth()
   const currentYear = today.getFullYear()
   
@@ -41,7 +41,7 @@ const generateCalendarData = (services: Service[]) => {
     calendarDays.push({
       day,
       date: dateString,
-      isToday: dateString === '2025-10-13', // Fixed today date
+      isToday: dateString === '2025-10-19', // Fixed today date
       isSunday: date.getDay() === 0,
       hasService: !!hasService,
       serviceData: hasService
@@ -76,14 +76,55 @@ export default function Home() {
     try {
       const response = await fetch('/api/services')
       const data = await response.json()
-      if (data.success) {
+      if (data.success && data.services.length > 0) {
         setServices(data.services)
+      } else {
+        // Generate next 8 Sundays if no data in Airtable yet
+        setServices(generateUpcomingSundays())
       }
     } catch (error) {
       console.error('Error fetching services:', error)
+      // Fallback to generated Sundays on error
+      setServices(generateUpcomingSundays())
     } finally {
       setLoading(false)
     }
+  }
+
+  // Generate next 8 Sundays
+  const generateUpcomingSundays = (): Service[] => {
+    const sundays: Service[] = []
+    const today = new Date('2025-10-19') // Current date
+    let currentDate = new Date(today)
+    
+    // Find next Sunday
+    while (currentDate.getDay() !== 0) {
+      currentDate.setDate(currentDate.getDate() + 1)
+    }
+    
+    // Generate 8 Sundays
+    for (let i = 0; i < 8; i++) {
+      const dateString = currentDate.toISOString().split('T')[0]
+      const displayDate = currentDate.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      })
+      
+      sundays.push({
+        id: dateString,
+        date: dateString,
+        displayDate,
+        liturgist: null,
+        backup: null,
+        attendance: [],
+        notes: undefined
+      })
+      
+      currentDate.setDate(currentDate.getDate() + 7) // Next Sunday
+    }
+    
+    return sundays
   }
 
   // Add scroll behavior to highlight service when scrolling
@@ -99,7 +140,7 @@ export default function Home() {
     }
   }
 
-  const today = '2025-10-13' // Fixed date to avoid hydration issues
+  const today = '2025-10-19' // Fixed date to avoid hydration issues
   const upcomingServices = services.filter((service: Service) => service.date >= today)
   const calendarData = generateCalendarData(services)
 

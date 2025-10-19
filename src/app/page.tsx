@@ -185,11 +185,12 @@ export default function Home() {
         // Refresh services data
         fetchServices()
       } else {
-        alert('There was an error submitting your signup. Please try again.')
+        console.error('Signup failed:', data)
+        alert(`There was an error submitting your signup: ${data.error}\n\n${data.details || 'Please try again or contact the church office.'}`)
       }
     } catch (error) {
       console.error('Signup error:', error)
-      alert('There was an error submitting your signup. Please try again.')
+      alert(`There was an error submitting your signup: ${error}\n\nPlease try again or contact the church office.`)
     }
 
     setSelectedSignup(null)

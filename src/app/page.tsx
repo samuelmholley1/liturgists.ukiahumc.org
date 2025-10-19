@@ -17,8 +17,8 @@ const mockScheduleData = [
     },
     backup: null,
     attendance: [
-      { name: 'John Doe', status: 'yes' },
-      { name: 'Mary Smith', status: 'maybe' }
+      { name: 'John Doe', status: 'yes' as const },
+      { name: 'Mary Smith', status: 'maybe' as const }
     ],
     notes: 'World Communion Sunday'
   },
@@ -57,9 +57,10 @@ const mockScheduleData = [
       preferredContact: 'email' as const
     },
     attendance: [
-      { name: 'Bob Wilson', status: 'yes' },
-      { name: 'Carol Davis', status: 'no' }
-    ]
+      { name: 'Bob Wilson', status: 'yes' as const },
+      { name: 'Carol Davis', status: 'no' as const }
+    ],
+    notes: undefined
   },
   {
     id: '2025-11-10',
@@ -76,7 +77,8 @@ const mockScheduleData = [
     displayDate: 'November 17, 2025',
     liturgist: null,
     backup: null,
-    attendance: []
+    attendance: [],
+    notes: undefined
   },
   {
     id: '2025-11-24',
@@ -172,11 +174,47 @@ export default function Home() {
     setSelectedSignup({ serviceId, type })
   }
 
-  const handleSubmitSignup = (e: React.FormEvent) => {
+  const handleSubmitSignup = async (e: React.FormEvent) => {
     e.preventDefault()
-    // This would normally send data to an API
-    console.log('Signup request:', { ...selectedSignup, ...signupForm })
-    alert('Thank you for signing up! You will receive a confirmation email shortly.')
+    
+    if (!selectedSignup) return
+
+    const service = mockScheduleData.find(s => s.id === selectedSignup.serviceId)
+    if (!service) return
+
+    // Submit to Airtable via API
+    try {
+      const response = await fetch('/api/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          serviceDate: service.date,
+          displayDate: service.displayDate,
+          name: signupForm.name,
+          email: signupForm.email,
+          phone: signupForm.phone,
+          role: selectedSignup.type === 'liturgist' ? 'Liturgist' : 
+                selectedSignup.type === 'backup' ? 'Backup' : 'Attendance',
+          attendanceStatus: selectedSignup.type === 'attendance' ? 
+            (signupForm.attendanceStatus === 'yes' ? 'Yes' : 
+             signupForm.attendanceStatus === 'no' ? 'No' : 'Maybe') : undefined,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        alert('Thank you for signing up! Your information has been recorded.')
+      } else {
+        alert('There was an error submitting your signup. Please try again.')
+      }
+    } catch (error) {
+      console.error('Signup error:', error)
+      alert('There was an error submitting your signup. Please try again.')
+    }
+
     setSelectedSignup(null)
     setSignupForm({ name: '', email: '', phone: '', attendanceStatus: 'yes' })
   }

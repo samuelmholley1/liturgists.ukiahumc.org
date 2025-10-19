@@ -3,102 +3,18 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 
-// Mock data for now - this will come from a database later
-const mockScheduleData = [
-  {
-    id: '2025-10-13',
-    date: '2025-10-13',
-    displayDate: 'October 13, 2025',
-    liturgist: {
-      id: '1',
-      name: 'Sarah Johnson',
-      email: 'sarah@example.com',
-      preferredContact: 'email' as const
-    },
-    backup: null,
-    attendance: [
-      { name: 'John Doe', status: 'yes' as const },
-      { name: 'Mary Smith', status: 'maybe' as const }
-    ],
-    notes: 'World Communion Sunday'
-  },
-  {
-    id: '2025-10-20',
-    date: '2025-10-20',
-    displayDate: 'October 20, 2025',
-    liturgist: null,
-    backup: null,
-    attendance: [],
-    notes: 'First Sunday after Harvest Festival'
-  },
-  {
-    id: '2025-10-27',
-    date: '2025-10-27',
-    displayDate: 'October 27, 2025',
-    liturgist: null,
-    backup: null,
-    attendance: [],
-    notes: 'Reformation Sunday'
-  },
-  {
-    id: '2025-11-03',
-    date: '2025-11-03',
-    displayDate: 'November 3, 2025',
-    liturgist: {
-      id: '2',
-      name: 'John Smith',
-      email: 'john@example.com',
-      preferredContact: 'email' as const
-    },
-    backup: {
-      id: '3',
-      name: 'Alice Brown',
-      email: 'alice@example.com',
-      preferredContact: 'email' as const
-    },
-    attendance: [
-      { name: 'Bob Wilson', status: 'yes' as const },
-      { name: 'Carol Davis', status: 'no' as const }
-    ],
-    notes: undefined
-  },
-  {
-    id: '2025-11-10',
-    date: '2025-11-10',
-    displayDate: 'November 10, 2025',
-    liturgist: null,
-    backup: null,
-    attendance: [],
-    notes: 'Veterans Day Weekend'
-  },
-  {
-    id: '2025-11-17',
-    date: '2025-11-17',
-    displayDate: 'November 17, 2025',
-    liturgist: null,
-    backup: null,
-    attendance: [],
-    notes: undefined
-  },
-  {
-    id: '2025-11-24',
-    date: '2025-11-24',
-    displayDate: 'November 24, 2025',
-    liturgist: {
-      id: '4',
-      name: 'Mary Davis',
-      email: 'mary@example.com',
-      preferredContact: 'phone' as const,
-      phone: '707-555-0123'
-    },
-    backup: null,
-    attendance: [],
-    notes: 'Thanksgiving Sunday'
-  }
-]
+interface Service {
+  id: string
+  date: string
+  displayDate: string
+  liturgist: any | null
+  backup: any | null
+  attendance: any[]
+  notes?: string
+}
 
 // Generate calendar data for the current and next month
-const generateCalendarData = () => {
+const generateCalendarData = (services: Service[]) => {
   // Use a fixed date to avoid server/client hydration mismatches
   const today = new Date('2025-10-13') // Current date from context
   const currentMonth = today.getMonth()
@@ -120,7 +36,7 @@ const generateCalendarData = () => {
   for (let day = 1; day <= daysInMonth; day++) {
     const date = new Date(currentYear, currentMonth, day)
     const dateString = date.toISOString().split('T')[0]
-    const hasService = mockScheduleData.find(s => s.date === dateString)
+    const hasService = services.find((s: Service) => s.date === dateString)
     
     calendarDays.push({
       day,
@@ -148,10 +64,27 @@ export default function Home() {
     attendanceStatus: 'yes'
   })
   const [isClient, setIsClient] = useState(false)
+  const [services, setServices] = useState<Service[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     setIsClient(true)
+    fetchServices()
   }, [])
+
+  const fetchServices = async () => {
+    try {
+      const response = await fetch('/api/services')
+      const data = await response.json()
+      if (data.success) {
+        setServices(data.services)
+      }
+    } catch (error) {
+      console.error('Error fetching services:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Add scroll behavior to highlight service when scrolling
   const scrollToService = (serviceId: string) => {
@@ -167,8 +100,8 @@ export default function Home() {
   }
 
   const today = '2025-10-13' // Fixed date to avoid hydration issues
-  const upcomingServices = mockScheduleData.filter(service => service.date >= today)
-  const calendarData = generateCalendarData()
+  const upcomingServices = services.filter((service: Service) => service.date >= today)
+  const calendarData = generateCalendarData(services)
 
   const handleSignup = (serviceId: string, type: 'liturgist' | 'backup' | 'attendance') => {
     setSelectedSignup({ serviceId, type })
@@ -179,7 +112,7 @@ export default function Home() {
     
     if (!selectedSignup) return
 
-    const service = mockScheduleData.find(s => s.id === selectedSignup.serviceId)
+    const service = services.find((s: Service) => s.id === selectedSignup.serviceId)
     if (!service) return
 
     // Submit to Airtable via API
@@ -207,6 +140,8 @@ export default function Home() {
 
       if (data.success) {
         alert('Thank you for signing up! Your information has been recorded.')
+        // Refresh services data
+        fetchServices()
       } else {
         alert('There was an error submitting your signup. Please try again.')
       }
@@ -219,7 +154,18 @@ export default function Home() {
     setSignupForm({ name: '', email: '', phone: '', attendanceStatus: 'yes' })
   }
 
-  const selectedService = selectedSignup ? mockScheduleData.find(s => s.id === selectedSignup.serviceId) : null
+  const selectedService = selectedSignup ? services.find((s: Service) => s.id === selectedSignup.serviceId) : null
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading services...</p>
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">

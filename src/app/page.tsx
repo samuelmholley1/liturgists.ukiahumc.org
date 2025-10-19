@@ -15,10 +15,11 @@ interface Service {
 
 // Generate calendar data for the current and next month
 const generateCalendarData = (services: Service[]) => {
-  // Use a fixed date to avoid server/client hydration mismatches
-  const today = new Date('2025-10-19') // Current date from context
+  // Use current actual date
+  const today = new Date()
   const currentMonth = today.getMonth()
   const currentYear = today.getFullYear()
+  const todayString = today.toISOString().split('T')[0]
   
   const firstDay = new Date(currentYear, currentMonth, 1)
   const lastDay = new Date(currentYear, currentMonth + 1, 0)
@@ -41,7 +42,7 @@ const generateCalendarData = (services: Service[]) => {
     calendarDays.push({
       day,
       date: dateString,
-      isToday: dateString === '2025-10-19', // Fixed today date
+      isToday: dateString === todayString,
       isSunday: date.getDay() === 0,
       hasService: !!hasService,
       serviceData: hasService
@@ -94,7 +95,7 @@ export default function Home() {
   // Generate next 8 Sundays
   const generateUpcomingSundays = (): Service[] => {
     const sundays: Service[] = []
-    const today = new Date('2025-10-19') // Current date
+    const today = new Date() // Current date
     let currentDate = new Date(today)
     
     // Find next Sunday
@@ -140,7 +141,7 @@ export default function Home() {
     }
   }
 
-  const today = '2025-10-19' // Fixed date to avoid hydration issues
+  const today = new Date().toISOString().split('T')[0]
   const upcomingServices = services.filter((service: Service) => service.date >= today)
   const calendarData = generateCalendarData(services)
 
@@ -211,34 +212,34 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Pinned Calendar */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-lg border-b">
-        <div className="container mx-auto px-4 py-4 max-w-4xl">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-4">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md border-b">
+        <div className="container mx-auto px-4 py-2 max-w-4xl">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center space-x-3">
               <Image
                 src="/logo-for-church-larger.jpg"
                 alt="Ukiah United Methodist Church Logo"
-                width={60}
-                height={60}
+                width={40}
+                height={40}
                 className="rounded-full shadow-sm"
               />
               <div>
-                <h1 className="text-xl font-bold text-gray-800">Liturgist Schedule</h1>
-                <p className="text-sm text-blue-600">{calendarData.monthName}</p>
+                <h1 className="text-lg font-bold text-gray-800">Liturgist Schedule</h1>
+                <p className="text-xs text-blue-600">{calendarData.monthName}</p>
               </div>
             </div>
           </div>
           
-          <div className="grid grid-cols-7 gap-1 text-xs">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-              <div key={day} className="text-center font-medium text-gray-600 py-1">
+          <div className="grid grid-cols-7 gap-0.5 text-xs">
+            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
+              <div key={day} className="text-center font-medium text-gray-600 py-0.5">
                 {day}
               </div>
             ))}
             {calendarData.days.map((day, index) => (
               <div
                 key={index}
-                className={`text-center py-1 rounded transition-colors ${
+                className={`text-center py-0.5 rounded text-xs transition-colors ${
                   !day ? '' :
                   day.isToday ? 'bg-blue-600 text-white font-bold' :
                   day.isSunday && day.hasService ? (
@@ -257,7 +258,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="pt-40 container mx-auto px-4 py-8 max-w-4xl">
+      <div className="pt-32 container mx-auto px-4 py-8 max-w-4xl">
         {/* Signup Modal */}
         {selectedSignup && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">

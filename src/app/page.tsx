@@ -72,6 +72,14 @@ export default function Home() {
   useEffect(() => {
     setIsClient(true)
     fetchServices()
+    
+    // Auto-refresh every 15 minutes
+    const intervalId = setInterval(() => {
+      fetchServices()
+    }, 15 * 60 * 1000) // 15 minutes in milliseconds
+    
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId)
   }, [])
 
   const fetchServices = async () => {
@@ -102,7 +110,32 @@ export default function Home() {
   }
 
   const today = new Date().toISOString().split('T')[0]
-  const upcomingServices = services.filter((service: Service) => service.date >= today)
+  
+  // Determine the "main" service based on Pacific Time
+  // If before 6am Monday PT, highlight last Sunday. Otherwise, highlight next Sunday.
+  const getMainServiceDate = () => {
+    const now = new Date()
+    // Convert to Pacific Time
+    const pacificTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }))
+    const dayOfWeek = pacificTime.getDay()
+    const hour = pacificTime.getHours()
+    
+    // If it's Monday (1) and before 6am, use yesterday (Sunday)
+    if (dayOfWeek === 1 && hour < 6) {
+      const yesterday = new Date(pacificTime)
+      yesterday.setDate(yesterday.getDate() - 1)
+      return yesterday.toISOString().split('T')[0]
+    }
+    
+    // Otherwise find the next Sunday
+    let nextSunday = new Date(pacificTime)
+    while (nextSunday.getDay() !== 0) {
+      nextSunday.setDate(nextSunday.getDate() + 1)
+    }
+    return nextSunday.toISOString().split('T')[0]
+  }
+  
+  const mainServiceDate = getMainServiceDate()
   const calendarData = generateCalendarData(services)
 
   const handleSignup = (serviceId: string, type: 'liturgist' | 'backup' | 'attendance') => {
@@ -332,28 +365,46 @@ export default function Home() {
 
         {/* Upcoming Services */}
         <div className="bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-            <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
-            </svg>
-            Upcoming Services
-          </h2>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-semibold text-gray-800 flex items-center">
+              <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
+              </svg>
+              Liturgist Services
+            </h2>
+            <a 
+              href="/archive"
+              className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center"
+            >
+              View Archive
+              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
           <div className="space-y-6">
-            {upcomingServices.map((service) => (
+            {services.map((service: Service) => (
               <div 
                 key={service.id}
                 id={`service-${service.id}`}
                 className={`p-6 border rounded-lg transition-all duration-300 ${
-                  hoveredService === service.id 
-                    ? 'border-yellow-400 bg-yellow-50 shadow-lg' 
-                    : 'border-gray-200 hover:border-gray-300'
+                  service.date === mainServiceDate
+                    ? 'border-purple-500 bg-purple-50 shadow-xl ring-2 ring-purple-300'
+                    : hoveredService === service.id 
+                      ? 'border-yellow-400 bg-yellow-50 shadow-lg' 
+                      : 'border-gray-200 hover:border-gray-300'
                 }`}
                 onMouseEnter={() => setHoveredService(service.id)}
                 onMouseLeave={() => setHoveredService(null)}
               >
                 <div className="mb-4">
-                  <h3 className="text-xl font-semibold text-gray-800">
+                  <h3 className="text-xl font-semibold text-gray-800 flex items-center">
                     {service.displayDate}
+                    {service.date === mainServiceDate && (
+                      <span className="ml-2 px-2 py-1 text-xs font-bold text-purple-700 bg-purple-200 rounded-full">
+                        CURRENT SERVICE
+                      </span>
+                    )}
                   </h3>
                   {service.notes && (
                     <p className="text-sm text-gray-600 mt-1">{service.notes}</p>

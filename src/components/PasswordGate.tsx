@@ -43,8 +43,10 @@ export default function PasswordGate({ children }: PasswordGateProps) {
           <Image
             src="/logo-for-church-larger.jpg"
             alt="Ukiah United Methodist Church"
-            width={80}
-            height={80}
+            width={120}
+            height={120}
+            quality={100}
+            priority
             className="rounded-full shadow-md mx-auto mb-4"
           />
           <h1 className="text-2xl font-bold text-gray-800 mb-2">

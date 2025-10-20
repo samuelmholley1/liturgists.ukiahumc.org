@@ -77,55 +77,14 @@ export default function Home() {
     try {
       const response = await fetch('/api/services')
       const data = await response.json()
-      if (data.success && data.services.length > 0) {
+      if (data.success) {
         setServices(data.services)
-      } else {
-        // Generate next 8 Sundays if no data in Airtable yet
-        setServices(generateUpcomingSundays())
       }
     } catch (error) {
       console.error('Error fetching services:', error)
-      // Fallback to generated Sundays on error
-      setServices(generateUpcomingSundays())
     } finally {
       setLoading(false)
     }
-  }
-
-  // Generate next 8 Sundays
-  const generateUpcomingSundays = (): Service[] => {
-    const sundays: Service[] = []
-    const today = new Date() // Current date
-    let currentDate = new Date(today)
-    
-    // Find next Sunday
-    while (currentDate.getDay() !== 0) {
-      currentDate.setDate(currentDate.getDate() + 1)
-    }
-    
-    // Generate 8 Sundays
-    for (let i = 0; i < 8; i++) {
-      const dateString = currentDate.toISOString().split('T')[0]
-      const displayDate = currentDate.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      })
-      
-      sundays.push({
-        id: dateString,
-        date: dateString,
-        displayDate,
-        liturgist: null,
-        backup: null,
-        attendance: [],
-        notes: undefined
-      })
-      
-      currentDate.setDate(currentDate.getDate() + 7) // Next Sunday
-    }
-    
-    return sundays
   }
 
   // Add scroll behavior to highlight service when scrolling

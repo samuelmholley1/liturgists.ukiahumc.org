@@ -67,6 +67,7 @@ export default function Home() {
   const [isClient, setIsClient] = useState(false)
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
+  const [calendarOpen, setCalendarOpen] = useState(true)
 
   useEffect(() => {
     setIsClient(true)
@@ -171,54 +172,75 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Pinned Calendar */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md border-b">
-        <div className="container mx-auto px-4 py-2 max-w-4xl">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center space-x-3">
-              <Image
-                src="/logo-for-church-larger.jpg"
-                alt="Ukiah United Methodist Church Logo"
-                width={40}
-                height={40}
-                className="rounded-full shadow-sm"
-              />
-              <div>
-                <h1 className="text-lg font-bold text-gray-800">Liturgist Schedule</h1>
-                <p className="text-xs text-blue-600">{calendarData.monthName}</p>
+      {/* Pinned Calendar - Collapsible */}
+      {calendarOpen ? (
+        <div className="fixed top-4 left-4 z-50 bg-white shadow-xl rounded-lg border-2 border-gray-200 w-80">
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-2">
+                <Image
+                  src="/logo-for-church-larger.jpg"
+                  alt="Ukiah United Methodist Church Logo"
+                  width={32}
+                  height={32}
+                  className="rounded-full shadow-sm"
+                />
+                <div>
+                  <h1 className="text-sm font-bold text-gray-800">Liturgist Schedule</h1>
+                  <p className="text-xs text-blue-600">{calendarData.monthName}</p>
+                </div>
               </div>
+              <button
+                onClick={() => setCalendarOpen(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                title="Close calendar"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-7 gap-1 text-xs">
+              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
+                <div key={day} className="text-center font-medium text-gray-600 py-1">
+                  {day}
+                </div>
+              ))}
+              {calendarData.days.map((day, index) => (
+                <div
+                  key={index}
+                  className={`text-center py-2 rounded text-xs transition-colors ${
+                    !day ? '' :
+                    day.isToday ? 'bg-blue-600 text-white font-bold' :
+                    day.isSunday && day.hasService ? (
+                      hoveredService === day.serviceData?.id ? 'bg-yellow-300 font-bold border border-yellow-500' : 'bg-green-100 font-medium cursor-pointer hover:bg-green-200'
+                    ) :
+                    day.isSunday ? 'bg-orange-100 font-medium' :
+                    'text-gray-600'
+                  }`}
+                  title={day?.isSunday && day?.hasService ? `Service on ${day.serviceData?.displayDate}` : ''}
+                  onClick={day?.hasService && isClient ? () => scrollToService(day.serviceData!.id) : undefined}
+                >
+                  {day?.day || ''}
+                </div>
+              ))}
             </div>
           </div>
-          
-          <div className="grid grid-cols-7 gap-0.5 text-xs">
-            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
-              <div key={day} className="text-center font-medium text-gray-600 py-0.5">
-                {day}
-              </div>
-            ))}
-            {calendarData.days.map((day, index) => (
-              <div
-                key={index}
-                className={`text-center py-0.5 rounded text-xs transition-colors ${
-                  !day ? '' :
-                  day.isToday ? 'bg-blue-600 text-white font-bold' :
-                  day.isSunday && day.hasService ? (
-                    hoveredService === day.serviceData?.id ? 'bg-yellow-300 font-bold border border-yellow-500' : 'bg-green-100 font-medium cursor-pointer hover:bg-green-200'
-                  ) :
-                  day.isSunday ? 'bg-orange-100 font-medium' :
-                  'text-gray-600'
-                }`}
-                title={day?.isSunday && day?.hasService ? `Service on ${day.serviceData?.displayDate}` : ''}
-                onClick={day?.hasService && isClient ? () => scrollToService(day.serviceData!.id) : undefined}
-              >
-                {day?.day || ''}
-              </div>
-            ))}
-          </div>
         </div>
-      </div>
+      ) : (
+        <button
+          onClick={() => setCalendarOpen(true)}
+          className="fixed top-4 left-4 z-50 bg-blue-600 text-white rounded-full p-3 shadow-lg hover:bg-blue-700 transition-colors"
+          title="Open calendar"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </button>
+      )}
 
-      <div className="pt-32 container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Signup Modal */}
         {selectedSignup && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">

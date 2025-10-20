@@ -6,7 +6,7 @@ import PasswordGate from '@/components/PasswordGate'
 import { getAllLiturgists } from '@/admin/liturgists'
 
 // App version for cache busting - increment when you make changes
-const APP_VERSION = '2.1.0'
+const APP_VERSION = '2.2.0'
 
 interface Service {
   id: string
@@ -18,16 +18,14 @@ interface Service {
   notes?: string
 }
 
-// Generate calendar data for the current and next month
-const generateCalendarData = (services: Service[], mainServiceDate: string) => {
-  // Use current actual date
+// Generate calendar data for a specific month
+const generateCalendarData = (services: Service[], mainServiceDate: string, month: number, year: number) => {
+  // Use current actual date for today check
   const today = new Date()
-  const currentMonth = today.getMonth()
-  const currentYear = today.getFullYear()
   const todayString = today.toISOString().split('T')[0]
   
-  const firstDay = new Date(currentYear, currentMonth, 1)
-  const lastDay = new Date(currentYear, currentMonth + 1, 0)
+  const firstDay = new Date(year, month, 1)
+  const lastDay = new Date(year, month + 1, 0)
   const daysInMonth = lastDay.getDate()
   const startingDay = firstDay.getDay()
   
@@ -40,7 +38,7 @@ const generateCalendarData = (services: Service[], mainServiceDate: string) => {
   
   // Add days of the month
   for (let day = 1; day <= daysInMonth; day++) {
-    const date = new Date(currentYear, currentMonth, day)
+    const date = new Date(year, month, day)
     const dateString = date.toISOString().split('T')[0]
     const hasService = services.find((s: Service) => s.date === dateString)
     
@@ -79,8 +77,16 @@ export default function Home() {
   const [refreshing, setRefreshing] = useState(false)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [calendarOpen, setCalendarOpen] = useState(true)
+  const [currentQuarter, setCurrentQuarter] = useState('Q4-2025')
+  const [calendarMonth, setCalendarMonth] = useState(() => {
+    const today = new Date()
+    return { month: today.getMonth(), year: today.getFullYear() }
+  })
   
   const liturgists = getAllLiturgists()
+  
+  // Check if viewing a locked future quarter
+  const isLockedQuarter = currentQuarter === 'Q1-2026'
 
   useEffect(() => {
     setIsClient(true)
@@ -107,14 +113,16 @@ export default function Home() {
     
     fetchServices()
     
-    // Auto-refresh every 5 seconds for real-time updates
+    // Auto-refresh every 5 seconds for real-time updates (only for current unlocked quarter)
     const intervalId = setInterval(() => {
-      fetchServices(true) // Silent refresh
+      if (!isLockedQuarter) {
+        fetchServices(true) // Silent refresh
+      }
     }, 5000) // 5 seconds
     
     // Cleanup interval on unmount
     return () => clearInterval(intervalId)
-  }, [])
+  }, [currentQuarter, isLockedQuarter])
 
   const fetchServices = async (silent = false) => {
     if (!silent) {
@@ -122,7 +130,7 @@ export default function Home() {
     }
     
     try {
-      const response = await fetch('/api/services', {
+      const response = await fetch(`/api/services?quarter=${currentQuarter}`, {
         cache: 'no-store', // Prevent caching
         headers: {
           'Cache-Control': 'no-cache'
@@ -139,6 +147,34 @@ export default function Home() {
       setLoading(false)
       setRefreshing(false)
     }
+  }
+  
+  const handleQuarterChange = (direction: 'prev' | 'next') => {
+    if (direction === 'next' && currentQuarter === 'Q4-2025') {
+      setCurrentQuarter('Q1-2026')
+    } else if (direction === 'prev' && currentQuarter === 'Q1-2026') {
+      setCurrentQuarter('Q4-2025')
+    } else if (direction === 'prev' && currentQuarter === 'Q4-2025') {
+      setCurrentQuarter('Q3-2025')
+    } else if (direction === 'next' && currentQuarter === 'Q3-2025') {
+      setCurrentQuarter('Q4-2025')
+    }
+  }
+  
+  const handleCalendarMonthChange = (direction: 'prev' | 'next') => {
+    setCalendarMonth(prev => {
+      if (direction === 'next') {
+        if (prev.month === 11) {
+          return { month: 0, year: prev.year + 1 }
+        }
+        return { month: prev.month + 1, year: prev.year }
+      } else {
+        if (prev.month === 0) {
+          return { month: 11, year: prev.year - 1 }
+        }
+        return { month: prev.month - 1, year: prev.year }
+      }
+    })
   }
 
   // Add scroll behavior to highlight service when scrolling
@@ -181,7 +217,7 @@ export default function Home() {
   }
   
   const mainServiceDate = getMainServiceDate()
-  const calendarData = generateCalendarData(services, mainServiceDate)
+  const calendarData = generateCalendarData(services, mainServiceDate, calendarMonth.month, calendarMonth.year)
 
   const handleSignup = (serviceId: string) => {
     const service = services.find(s => s.id === serviceId)
@@ -335,9 +371,29 @@ export default function Home() {
                   height={32}
                   className="rounded-full shadow-sm"
                 />
-                <div>
+                <div className="flex-1">
                   <h1 className="text-sm font-bold text-gray-800">Liturgist Schedule</h1>
-                  <p className="text-xs text-blue-600">{calendarData.monthName}</p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleCalendarMonthChange('prev')}
+                      className="text-blue-600 hover:text-blue-800 p-0.5"
+                      title="Previous month"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <p className="text-xs text-blue-600 font-medium">{calendarData.monthName}</p>
+                    <button
+                      onClick={() => handleCalendarMonthChange('next')}
+                      className="text-blue-600 hover:text-blue-800 p-0.5"
+                      title="Next month"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
               <button
@@ -613,24 +669,64 @@ export default function Home() {
                 <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
                 </svg>
-                Liturgist Services
+                Liturgist Services - {currentQuarter.replace('-', ' ')}
               </h2>
-              {lastUpdated && (
+              {lastUpdated && !isLockedQuarter && (
                 <p className="text-xs text-gray-500 ml-8 mt-1">
                   Live updates • Last refreshed: {lastUpdated.toLocaleTimeString()}
                 </p>
               )}
             </div>
-            <a 
-              href="/archive"
-              className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center"
-            >
-              View Archive
-              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleQuarterChange('prev')}
+                disabled={currentQuarter === 'Q3-2025'}
+                className={`px-3 py-1 rounded-md text-sm font-medium flex items-center ${
+                  currentQuarter === 'Q3-2025'
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+              >
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Previous Quarter
+              </button>
+              <button
+                onClick={() => handleQuarterChange('next')}
+                disabled={currentQuarter === 'Q1-2026'}
+                className={`px-3 py-1 rounded-md text-sm font-medium flex items-center ${
+                  currentQuarter === 'Q1-2026'
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+              >
+                Next Quarter
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
           </div>
+          
+          {/* Locked Quarter Notice */}
+          {isLockedQuarter && (
+            <div className="mb-4 p-4 bg-amber-50 border border-amber-300 rounded-lg">
+              <div className="flex items-start gap-3">
+                <svg className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <div>
+                  <h3 className="font-bold text-amber-900 text-lg mb-1">Sign-ups Open in December</h3>
+                  <p className="text-sm text-amber-800">
+                    Q1 2026 sign-ups will open in the month before the quarter begins. 
+                    Check back in December 2025 to sign up for services in January-March 2026.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div className="space-y-3">
             {services.map((service: Service) => {
               const isExpanded = expandedService === service.id
@@ -641,25 +737,27 @@ export default function Home() {
                   key={service.id}
                   id={`service-${service.id}`}
                   className={`border rounded-lg transition-all duration-300 ${
-                    isMainService
-                      ? 'border-purple-500 bg-purple-50 shadow-md'
-                      : hoveredService === service.id 
-                        ? 'border-yellow-400 bg-yellow-50' 
-                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    isLockedQuarter 
+                      ? 'border-gray-300 bg-gray-100 opacity-60 cursor-not-allowed'
+                      : isMainService
+                        ? 'border-purple-500 bg-purple-50 shadow-md'
+                        : hoveredService === service.id 
+                          ? 'border-yellow-400 bg-yellow-50' 
+                          : 'border-gray-200 bg-white hover:border-gray-300'
                   }`}
-                  onMouseEnter={() => setHoveredService(service.id)}
-                  onMouseLeave={() => setHoveredService(null)}
+                  onMouseEnter={() => !isLockedQuarter && setHoveredService(service.id)}
+                  onMouseLeave={() => !isLockedQuarter && setHoveredService(null)}
                 >
                   {/* Compact Bar View */}
                   <div 
-                    className="p-3 cursor-pointer"
-                    onClick={() => setExpandedService(isExpanded ? null : service.id)}
+                    className={`p-3 ${isLockedQuarter ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                    onClick={() => !isLockedQuarter && setExpandedService(isExpanded ? null : service.id)}
                   >
                     <div className="flex items-center justify-between mb-2">
                       {/* Date and Current Badge */}
                       <div className="flex items-center space-x-2">
                         <p className="font-semibold text-gray-800 text-sm">
-                          {service.displayDate.replace(', 2025', '')}
+                          {service.displayDate.replace(/, \d{4}/, '')}
                         </p>
                         {isMainService && (
                           <span className="text-xs font-bold text-purple-600 bg-purple-200 px-2 py-0.5 rounded">CURRENT</span>
@@ -740,15 +838,24 @@ export default function Home() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
-                          handleSignup(service.id)
+                          if (!isLockedQuarter) {
+                            handleSignup(service.id)
+                          }
                         }}
-                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                        disabled={isLockedQuarter}
+                        className={`w-full py-2 px-4 rounded-lg transition-colors text-sm font-medium ${
+                          isLockedQuarter
+                            ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}
                       >
-                        Sign Up for This Service
+                        {isLockedQuarter ? 'Sign-ups Not Open Yet' : 'Sign Up for This Service'}
                       </button>
                       
                       <div className="text-xs text-gray-600 text-center">
-                        Click above to sign up as main liturgist or backup
+                        {isLockedQuarter 
+                          ? 'Check back in December 2025' 
+                          : 'Click above to sign up as main liturgist or backup'}
                       </div>
                     </div>
                   )}

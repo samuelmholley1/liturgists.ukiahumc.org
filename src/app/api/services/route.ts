@@ -7,8 +7,12 @@ export const revalidate = 0
 
 export async function GET(request: NextRequest) {
   try {
-    // Generate last 2 past Sundays + next 8 upcoming Sundays
-    const allSundays = generateRecentAndUpcomingSundays()
+    // Get quarter from query params (format: "Q4-2025" or "Q1-2026")
+    const { searchParams } = new URL(request.url)
+    const quarter = searchParams.get('quarter') || 'Q4-2025' // Default to Q4 2025
+    
+    // Generate Sundays for the requested quarter
+    const allSundays = generateSundaysForQuarter(quarter)
     
     // Get all signups from Airtable
     const signups = await getSignups()
@@ -85,7 +89,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { 
         success: true, 
-        services: generateRecentAndUpcomingSundays() 
+        services: generateSundaysForQuarter('Q4-2025') 
       },
       {
         headers: {
@@ -98,7 +102,65 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Generate last 4 past Sundays + all Sundays through end of current year
+// Generate Sundays for a specific quarter (e.g., "Q4-2025" or "Q1-2026")
+function generateSundaysForQuarter(quarterString: string) {
+  const sundays = []
+  const [quarter, year] = quarterString.split('-')
+  const yearNum = parseInt(year)
+  
+  // Determine month range for quarter
+  let startMonth: number, endMonth: number
+  if (quarter === 'Q1') {
+    startMonth = 0  // January
+    endMonth = 2    // March
+  } else if (quarter === 'Q2') {
+    startMonth = 3  // April
+    endMonth = 5    // June
+  } else if (quarter === 'Q3') {
+    startMonth = 6  // July
+    endMonth = 8    // September
+  } else { // Q4
+    startMonth = 9  // October
+    endMonth = 11   // December
+  }
+  
+  // Start from first day of first month in quarter
+  let currentDate = new Date(yearNum, startMonth, 1)
+  
+  // Find first Sunday
+  while (currentDate.getDay() !== 0) {
+    currentDate.setDate(currentDate.getDate() + 1)
+  }
+  
+  // End of last month in quarter
+  const endDate = new Date(yearNum, endMonth + 1, 0) // Last day of endMonth
+  
+  // Generate all Sundays in the quarter
+  while (currentDate <= endDate) {
+    const dateString = currentDate.toISOString().split('T')[0]
+    const displayDate = currentDate.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })
+    
+    sundays.push({
+      id: dateString,
+      date: dateString,
+      displayDate,
+      liturgist: null,
+      backup: null,
+      attendance: [],
+      notes: undefined
+    })
+    
+    currentDate.setDate(currentDate.getDate() + 7) // Next Sunday
+  }
+  
+  return sundays
+}
+
+// DEPRECATED - Keep for backward compatibility
 function generateRecentAndUpcomingSundays() {
   const sundays = []
   const today = new Date()

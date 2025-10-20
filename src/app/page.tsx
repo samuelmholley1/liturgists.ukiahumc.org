@@ -73,6 +73,8 @@ export default function Home() {
   const [isClient, setIsClient] = useState(false)
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [calendarOpen, setCalendarOpen] = useState(true)
   
   const liturgists = getAllLiturgists()
@@ -81,26 +83,37 @@ export default function Home() {
     setIsClient(true)
     fetchServices()
     
-    // Auto-refresh every 15 minutes
+    // Auto-refresh every 5 seconds for real-time updates
     const intervalId = setInterval(() => {
-      fetchServices()
-    }, 15 * 60 * 1000) // 15 minutes in milliseconds
+      fetchServices(true) // Silent refresh
+    }, 5000) // 5 seconds
     
     // Cleanup interval on unmount
     return () => clearInterval(intervalId)
   }, [])
 
-  const fetchServices = async () => {
+  const fetchServices = async (silent = false) => {
+    if (!silent) {
+      setRefreshing(true)
+    }
+    
     try {
-      const response = await fetch('/api/services')
+      const response = await fetch('/api/services', {
+        cache: 'no-store', // Prevent caching
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      })
       const data = await response.json()
       if (data.success) {
         setServices(data.services)
+        setLastUpdated(new Date())
       }
     } catch (error) {
       console.error('Error fetching services:', error)
     } finally {
       setLoading(false)
+      setRefreshing(false)
     }
   }
 
@@ -215,8 +228,25 @@ export default function Home() {
 
       if (data.success) {
         alert('Thank you for signing up! Your information has been recorded.')
-        // Refresh services data
-        fetchServices()
+        
+        // Close modal first
+        setSelectedSignup(null)
+        setSignupForm({
+          selectedPerson: '',
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          role: 'liturgist'
+        })
+        
+        // Force immediate refresh to show updated data
+        await fetchServices()
+        
+        // Refresh again after 1 second to ensure Airtable sync
+        setTimeout(() => {
+          fetchServices(true)
+        }, 1000)
       } else {
         console.error('Signup failed:', data)
         alert(`There was an error submitting your signup: ${data.error}\n\n${data.details || 'Please try again or contact the church office.'}`)
@@ -225,16 +255,6 @@ export default function Home() {
       console.error('Signup error:', error)
       alert(`There was an error submitting your signup: ${error}\n\nPlease try again or contact the church office.`)
     }
-
-    setSelectedSignup(null)
-    setSignupForm({
-      selectedPerson: '',
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      role: 'liturgist'
-    })
   }
 
   const selectedService = selectedSignup ? services.find((s: Service) => s.id === selectedSignup.serviceId) : null
@@ -255,6 +275,14 @@ export default function Home() {
   return (
     <PasswordGate>
       <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      
+      {/* Live Update Indicator */}
+      {refreshing && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-blue-600 text-white text-center py-1 text-xs">
+          <span className="animate-pulse">● Updating...</span>
+        </div>
+      )}
+      
       {/* Pinned Calendar - Collapsible */}
       {calendarOpen ? (
         <div className="fixed top-4 left-4 z-50 bg-white shadow-xl rounded-lg border-2 border-gray-200 w-80">
@@ -486,13 +514,20 @@ export default function Home() {
 
         {/* Upcoming Services */}
         <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-gray-800 flex items-center">
-              <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
-              </svg>
-              Liturgist Services
-            </h2>
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-800 flex items-center">
+                <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
+                </svg>
+                Liturgist Services
+              </h2>
+              {lastUpdated && (
+                <p className="text-xs text-gray-500 ml-8 mt-1">
+                  Live updates • Last refreshed: {lastUpdated.toLocaleTimeString()}
+                </p>
+              )}
+            </div>
             <a 
               href="/archive"
               className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center"
@@ -550,44 +585,56 @@ export default function Home() {
                     </div>
                     
                     {/* Two Rows: Liturgist and Backup */}
-                    <div className="space-y-1 text-xs">
+                    <div className="space-y-1.5 text-xs">
                       {/* Liturgist Row */}
-                      <div className="flex items-center justify-between py-1">
-                        <span className="font-medium text-gray-600 w-20">Liturgist:</span>
-                        {service.liturgist ? (
-                          <div className="flex-1 flex items-center justify-between text-green-700">
-                            <span className="font-medium">{service.liturgist.name}</span>
-                            <div className="flex items-center space-x-2 text-green-600">
-                              {service.liturgist.email && (
-                                <span className="text-xs">{service.liturgist.email}</span>
-                              )}
-                              {service.liturgist.phone && (
-                                <span className="text-xs">• {service.liturgist.phone}</span>
-                              )}
-                            </div>
+                      <div className="flex items-center gap-3 py-1">
+                        <div className="flex items-center gap-2 min-w-fit">
+                          <span className="font-medium text-gray-600">Liturgist:</span>
+                          {service.liturgist ? (
+                            <span className="font-semibold text-green-700 px-2 py-0.5 bg-green-50 rounded">
+                              {service.liturgist.name}
+                            </span>
+                          ) : (
+                            <span className="font-semibold text-red-600 px-2 py-0.5 bg-red-50 rounded">
+                              EMPTY
+                            </span>
+                          )}
+                        </div>
+                        {service.liturgist && (
+                          <div className="flex items-center gap-2 text-green-600 text-xs truncate">
+                            {service.liturgist.email && (
+                              <span className="truncate">{service.liturgist.email}</span>
+                            )}
+                            {service.liturgist.phone && (
+                              <span>• {service.liturgist.phone}</span>
+                            )}
                           </div>
-                        ) : (
-                          <span className="text-red-500 font-medium">Empty - Sign Up!</span>
                         )}
                       </div>
                       
                       {/* Backup Row */}
-                      <div className="flex items-center justify-between py-1">
-                        <span className="font-medium text-gray-600 w-20">Backup:</span>
-                        {service.backup ? (
-                          <div className="flex-1 flex items-center justify-between text-orange-700">
-                            <span className="font-medium">{service.backup.name}</span>
-                            <div className="flex items-center space-x-2 text-orange-600">
-                              {service.backup.email && (
-                                <span className="text-xs">{service.backup.email}</span>
-                              )}
-                              {service.backup.phone && (
-                                <span className="text-xs">• {service.backup.phone}</span>
-                              )}
-                            </div>
+                      <div className="flex items-center gap-3 py-1">
+                        <div className="flex items-center gap-2 min-w-fit">
+                          <span className="font-medium text-gray-600">Backup:</span>
+                          {service.backup ? (
+                            <span className="font-semibold text-orange-700 px-2 py-0.5 bg-orange-50 rounded">
+                              {service.backup.name}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 px-2 py-0.5">
+                              none
+                            </span>
+                          )}
+                        </div>
+                        {service.backup && (
+                          <div className="flex items-center gap-2 text-orange-600 text-xs truncate">
+                            {service.backup.email && (
+                              <span className="truncate">{service.backup.email}</span>
+                            )}
+                            {service.backup.phone && (
+                              <span>• {service.backup.phone}</span>
+                            )}
                           </div>
-                        ) : (
-                          <span className="text-gray-400 font-medium">None</span>
                         )}
                       </div>
                     </div>

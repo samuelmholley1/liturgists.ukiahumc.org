@@ -4,6 +4,7 @@
 export interface Liturgist {
   name: string
   email: string
+  phone?: string
   frequency: 'regular' | 'occasional'
 }
 

@@ -21,7 +21,7 @@ export const liturgists: Liturgist[] = [
     frequency: 'regular'
   },
   {
-    name: 'Lori',
+    name: 'Lori Bialkowsky',
     email: 'lbialkowsky@hotmail.com',
     frequency: 'regular'
   },

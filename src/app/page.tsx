@@ -5,6 +5,9 @@ import Image from 'next/image'
 import PasswordGate from '@/components/PasswordGate'
 import { getAllLiturgists } from '@/admin/liturgists'
 
+// App version for cache busting - increment when you make changes
+const APP_VERSION = '2.1.0'
+
 interface Service {
   id: string
   date: string
@@ -81,6 +84,27 @@ export default function Home() {
 
   useEffect(() => {
     setIsClient(true)
+    
+    // Check version and force reload if outdated
+    const storedVersion = localStorage.getItem('appVersion')
+    if (storedVersion && storedVersion !== APP_VERSION) {
+      console.log('New version detected, clearing cache and reloading...')
+      localStorage.setItem('appVersion', APP_VERSION)
+      // Unregister service worker and reload
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          registrations.forEach((registration) => registration.unregister())
+        }).then(() => {
+          window.location.reload()
+        })
+      } else {
+        window.location.reload()
+      }
+      return
+    } else if (!storedVersion) {
+      localStorage.setItem('appVersion', APP_VERSION)
+    }
+    
     fetchServices()
     
     // Auto-refresh every 5 seconds for real-time updates

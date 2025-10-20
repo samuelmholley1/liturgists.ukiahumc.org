@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSignups } from '@/lib/airtable'
 
+// Disable all caching for this API route
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function GET(request: NextRequest) {
   try {
     // Generate last 2 past Sundays + next 8 upcoming Sundays
@@ -65,14 +69,32 @@ export async function GET(request: NextRequest) {
       a.date.localeCompare(b.date)
     )
 
-    return NextResponse.json({ success: true, services })
+    return NextResponse.json(
+      { success: true, services },
+      { 
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        }
+      }
+    )
   } catch (error) {
     console.error('API Error:', error)
     // Return all Sundays even on error
-    return NextResponse.json({ 
-      success: true, 
-      services: generateRecentAndUpcomingSundays() 
-    })
+    return NextResponse.json(
+      { 
+        success: true, 
+        services: generateRecentAndUpcomingSundays() 
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        }
+      }
+    )
   }
 }
 

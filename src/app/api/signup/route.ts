@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { submitSignup } from '@/lib/airtable'
 
+// Disable all caching for this API route
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()

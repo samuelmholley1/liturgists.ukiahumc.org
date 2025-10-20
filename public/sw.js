@@ -1,13 +1,16 @@
-const CACHE_NAME = 'uumc-bulletin-v1';
+const CACHE_NAME = 'uumc-liturgist-v2';
 const urlsToCache = [
-  '/',
   '/android-chrome-192x192.png',
   '/android-chrome-512x512.png',
   '/apple-touch-icon.png',
-  '/favicon.ico'
+  '/favicon.ico',
+  '/logo-for-church-larger.jpg'
 ];
 
 self.addEventListener('install', (event) => {
+  // Force the waiting service worker to become the active service worker
+  self.skipWaiting();
+  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -17,25 +20,59 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+  
+  // Never cache API routes or the main page - always fetch fresh
+  if (url.pathname.startsWith('/api/') || url.pathname === '/' || url.pathname === '') {
+    event.respondWith(
+      fetch(request)
+        .catch(() => {
+          // If network fails, we have no fallback for dynamic content
+          return new Response('Network error', { status: 503 });
+        })
+    );
+    return;
+  }
+  
+  // For static assets (images, icons), use cache-first strategy
   event.respondWith(
-    caches.match(event.request)
+    caches.match(request)
       .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request);
+        if (response) {
+          return response;
+        }
+        return fetch(request).then((response) => {
+          // Cache successful responses for static assets
+          if (response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
+          return response;
+        });
       })
   );
 });
 
 self.addEventListener('activate', (event) => {
+  // Take control of all pages immediately
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    Promise.all([
+      // Delete old caches
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              console.log('Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }),
+      // Take control immediately
+      self.clients.claim()
+    ])
   );
 });

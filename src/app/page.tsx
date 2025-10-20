@@ -14,7 +14,7 @@ interface Service {
 }
 
 // Generate calendar data for the current and next month
-const generateCalendarData = (services: Service[]) => {
+const generateCalendarData = (services: Service[], mainServiceDate: string) => {
   // Use current actual date
   const today = new Date()
   const currentMonth = today.getMonth()
@@ -43,6 +43,7 @@ const generateCalendarData = (services: Service[]) => {
       day,
       date: dateString,
       isToday: dateString === todayString,
+      isMainService: dateString === mainServiceDate,
       isSunday: date.getDay() === 0,
       hasService: !!hasService,
       serviceData: hasService
@@ -57,6 +58,7 @@ const generateCalendarData = (services: Service[]) => {
 
 export default function Home() {
   const [hoveredService, setHoveredService] = useState<string | null>(null)
+  const [expandedService, setExpandedService] = useState<string | null>(null)
   const [selectedSignup, setSelectedSignup] = useState<{serviceId: string, type: 'liturgist' | 'backup' | 'attendance'} | null>(null)
   const [signupForm, setSignupForm] = useState({
     name: '',
@@ -136,7 +138,7 @@ export default function Home() {
   }
   
   const mainServiceDate = getMainServiceDate()
-  const calendarData = generateCalendarData(services)
+  const calendarData = generateCalendarData(services, mainServiceDate)
 
   const handleSignup = (serviceId: string, type: 'liturgist' | 'backup' | 'attendance') => {
     setSelectedSignup({ serviceId, type })
@@ -245,6 +247,7 @@ export default function Home() {
                   key={index}
                   className={`text-center py-2 rounded text-xs transition-colors ${
                     !day ? '' :
+                    day.isMainService ? 'bg-purple-600 text-white font-bold cursor-pointer hover:bg-purple-700' :
                     day.isToday ? 'bg-blue-600 text-white font-bold' :
                     day.isSunday && day.hasService ? (
                       hoveredService === day.serviceData?.id ? 'bg-yellow-300 font-bold border border-yellow-500' : 'bg-green-100 font-medium cursor-pointer hover:bg-green-200'
@@ -252,7 +255,10 @@ export default function Home() {
                     day.isSunday ? 'bg-orange-100 font-medium' :
                     'text-gray-600'
                   }`}
-                  title={day?.isSunday && day?.hasService ? `Service on ${day.serviceData?.displayDate}` : ''}
+                  title={
+                    day?.isMainService ? `Current Service: ${day.serviceData?.displayDate}` :
+                    day?.isSunday && day?.hasService ? `Service on ${day.serviceData?.displayDate}` : ''
+                  }
                   onClick={day?.hasService && isClient ? () => scrollToService(day.serviceData!.id) : undefined}
                 >
                   {day?.day || ''}
@@ -382,119 +388,191 @@ export default function Home() {
               </svg>
             </a>
           </div>
-          <div className="space-y-6">
-            {services.map((service: Service) => (
-              <div 
-                key={service.id}
-                id={`service-${service.id}`}
-                className={`p-6 border rounded-lg transition-all duration-300 ${
-                  service.date === mainServiceDate
-                    ? 'border-purple-500 bg-purple-50 shadow-xl ring-2 ring-purple-300'
-                    : hoveredService === service.id 
-                      ? 'border-yellow-400 bg-yellow-50 shadow-lg' 
-                      : 'border-gray-200 hover:border-gray-300'
-                }`}
-                onMouseEnter={() => setHoveredService(service.id)}
-                onMouseLeave={() => setHoveredService(null)}
-              >
-                <div className="mb-4">
-                  <h3 className="text-xl font-semibold text-gray-800 flex items-center">
-                    {service.displayDate}
-                    {service.date === mainServiceDate && (
-                      <span className="ml-2 px-2 py-1 text-xs font-bold text-purple-700 bg-purple-200 rounded-full">
-                        CURRENT SERVICE
-                      </span>
-                    )}
-                  </h3>
-                  {service.notes && (
-                    <p className="text-sm text-gray-600 mt-1">{service.notes}</p>
-                  )}
-                </div>
-
-                {/* Liturgist Section */}
-                <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-                  <h4 className="font-medium text-gray-800 mb-2">Main Liturgist</h4>
-                  {service.liturgist ? (
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium text-blue-700">{service.liturgist.name}</p>
-                        <p className="text-sm text-blue-600">{service.liturgist.email}</p>
+          <div className="space-y-3">
+            {services.map((service: Service) => {
+              const isExpanded = expandedService === service.id
+              const isMainService = service.date === mainServiceDate
+              
+              return (
+                <div 
+                  key={service.id}
+                  id={`service-${service.id}`}
+                  className={`border rounded-lg transition-all duration-300 ${
+                    isMainService
+                      ? 'border-purple-500 bg-purple-50 shadow-md'
+                      : hoveredService === service.id 
+                        ? 'border-yellow-400 bg-yellow-50' 
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                  }`}
+                  onMouseEnter={() => setHoveredService(service.id)}
+                  onMouseLeave={() => setHoveredService(null)}
+                >
+                  {/* Compact Bar View */}
+                  <div 
+                    className="p-4 cursor-pointer flex items-center justify-between"
+                    onClick={() => setExpandedService(isExpanded ? null : service.id)}
+                  >
+                    <div className="flex items-center space-x-4 flex-1">
+                      {/* Date */}
+                      <div className="min-w-[140px]">
+                        <p className="font-semibold text-gray-800 text-sm">
+                          {service.displayDate.replace(', 2025', '')}
+                        </p>
+                        {isMainService && (
+                          <span className="text-xs font-bold text-purple-600">CURRENT</span>
+                        )}
                       </div>
-                      <div className="flex items-center text-green-600">
-                        <svg className="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                        <span className="text-sm font-medium">Filled</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => handleSignup(service.id, 'liturgist')}
-                      className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Sign Up to be Main Liturgist
-                    </button>
-                  )}
-                </div>
-
-                {/* Backup Section */}
-                <div className="mb-4 p-4 bg-orange-50 rounded-lg">
-                  <h4 className="font-medium text-gray-800 mb-2">Backup Liturgist</h4>
-                  {service.backup ? (
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium text-orange-700">{service.backup.name}</p>
-                        <p className="text-sm text-orange-600">{service.backup.email}</p>
-                      </div>
-                      <div className="flex items-center text-green-600">
-                        <svg className="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                        <span className="text-sm font-medium">Filled</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => handleSignup(service.id, 'backup')}
-                      className="w-full bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-700 transition-colors"
-                    >
-                      Sign Up to be Backup Liturgist
-                    </button>
-                  )}
-                </div>
-
-                {/* Attendance Section */}
-                <div className="p-4 bg-green-50 rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-medium text-gray-800">Church Attendance</h4>
-                    <button
-                      onClick={() => handleSignup(service.id, 'attendance')}
-                      className="bg-green-600 text-white py-1 px-3 rounded-lg hover:bg-green-700 transition-colors text-sm"
-                    >
-                      Update Status
-                    </button>
-                  </div>
-                  {service.attendance.length > 0 ? (
-                    <div className="text-sm space-y-1">
-                      {service.attendance.map((person, index) => (
-                        <div key={index} className="flex justify-between">
-                          <span className="text-green-700">{person.name}</span>
-                          <span className={`capitalize ${
-                            person.status === 'yes' ? 'text-green-600' :
-                            person.status === 'no' ? 'text-red-600' :
-                            'text-yellow-600'
-                          }`}>
-                            {person.status === 'maybe' ? 'unsure' : person.status}
+                      
+                      {/* Status Indicators */}
+                      <div className="flex items-center space-x-6 flex-1">
+                        {/* Liturgist Status */}
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs text-gray-600 font-medium">Liturgist:</span>
+                          {service.liturgist ? (
+                            <div className="flex items-center text-green-600">
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                              </svg>
+                              <span className="text-xs ml-1 font-medium">{service.liturgist.name}</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center text-red-500">
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                              </svg>
+                              <span className="text-xs ml-1 font-medium">Empty</span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Backup Status */}
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs text-gray-600 font-medium">Backup:</span>
+                          {service.backup ? (
+                            <div className="flex items-center text-green-600">
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                              </svg>
+                              <span className="text-xs ml-1 font-medium">{service.backup.name}</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center text-gray-400">
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                              </svg>
+                              <span className="text-xs ml-1">None</span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Attendance Count */}
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs text-gray-600 font-medium">Attending:</span>
+                          <span className="text-xs font-semibold text-blue-600">
+                            {service.attendance.filter(p => p.status === 'yes').length} people
                           </span>
                         </div>
-                      ))}
+                      </div>
                     </div>
-                  ) : (
-                    <p className="text-sm text-gray-600">No attendance responses yet</p>
+                    
+                    {/* Expand Icon */}
+                    <svg 
+                      className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+
+                  {/* Expanded Details */}
+                  {isExpanded && (
+                    <div className="px-4 pb-4 space-y-3 border-t border-gray-200 pt-3">
+                      {/* Liturgist Section */}
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <h4 className="font-medium text-gray-800 mb-2 text-sm">Main Liturgist</h4>
+                        {service.liturgist ? (
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="font-medium text-blue-700 text-sm">{service.liturgist.name}</p>
+                              <p className="text-xs text-blue-600">{service.liturgist.email}</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleSignup(service.id, 'liturgist')
+                            }}
+                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                          >
+                            Sign Up to be Main Liturgist
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Backup Section */}
+                      <div className="p-3 bg-orange-50 rounded-lg">
+                        <h4 className="font-medium text-gray-800 mb-2 text-sm">Backup Liturgist</h4>
+                        {service.backup ? (
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="font-medium text-orange-700 text-sm">{service.backup.name}</p>
+                              <p className="text-xs text-orange-600">{service.backup.email}</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleSignup(service.id, 'backup')
+                            }}
+                            className="w-full bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-700 transition-colors text-sm"
+                          >
+                            Sign Up to be Backup Liturgist
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Attendance Section */}
+                      <div className="p-3 bg-green-50 rounded-lg">
+                        <div className="flex justify-between items-center mb-2">
+                          <h4 className="font-medium text-gray-800 text-sm">Church Attendance</h4>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleSignup(service.id, 'attendance')
+                            }}
+                            className="bg-green-600 text-white py-1 px-3 rounded-lg hover:bg-green-700 transition-colors text-xs"
+                          >
+                            Update Status
+                          </button>
+                        </div>
+                        {service.attendance.length > 0 ? (
+                          <div className="text-xs space-y-1">
+                            {service.attendance.map((person: any, index: number) => (
+                              <div key={index} className="flex justify-between">
+                                <span className="text-green-700">{person.name}</span>
+                                <span className={`capitalize ${
+                                  person.status === 'yes' ? 'text-green-600' :
+                                  person.status === 'no' ? 'text-red-600' :
+                                  'text-yellow-600'
+                                }`}>
+                                  {person.status === 'maybe' ? 'unsure' : person.status}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-gray-600">No attendance responses yet</p>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
 

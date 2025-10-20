@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Generate last 2 past Sundays + all Sundays through end of current year
+// Generate last 4 past Sundays + all Sundays through end of current year
 function generateRecentAndUpcomingSundays() {
   const sundays = []
   const today = new Date()
@@ -89,8 +89,8 @@ function generateRecentAndUpcomingSundays() {
     currentDate.setDate(currentDate.getDate() - 1)
   }
   
-  // Go back 2 more Sundays to include previous 2
-  currentDate.setDate(currentDate.getDate() - 14)
+  // Go back 4 more Sundays to include previous 4 weeks
+  currentDate.setDate(currentDate.getDate() - 28)
   
   // Generate all Sundays from 2 weeks ago through end of year
   while (currentDate <= endOfYear) {

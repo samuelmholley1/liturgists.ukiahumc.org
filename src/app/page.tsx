@@ -160,6 +160,21 @@ export default function Home() {
   const calendarData = generateCalendarData(services, mainServiceDate)
 
   const handleSignup = (serviceId: string) => {
+    const service = services.find(s => s.id === serviceId)
+    
+    // Check if both roles are taken
+    if (service?.liturgist && service?.backup) {
+      alert('Both the Main Liturgist and Backup positions are filled for this service. Please choose a different Sunday.')
+      return
+    }
+    
+    // Auto-select the available role
+    let defaultRole: 'liturgist' | 'backup' = 'liturgist'
+    if (service?.liturgist && !service?.backup) {
+      defaultRole = 'backup'
+    }
+    
+    setSignupForm(prev => ({ ...prev, role: defaultRole }))
     setSelectedSignup({ serviceId })
   }
   
@@ -360,9 +375,31 @@ export default function Home() {
         {selectedSignup && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">
                 Sign up for {selectedService?.displayDate}
               </h3>
+              
+              {/* Status Info Box */}
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="text-sm space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-gray-700">Main Liturgist:</span>
+                    {selectedService?.liturgist ? (
+                      <span className="text-green-700 font-semibold">✓ Filled by {selectedService.liturgist.name}</span>
+                    ) : (
+                      <span className="text-red-600 font-semibold">Available</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-gray-700">Backup:</span>
+                    {selectedService?.backup ? (
+                      <span className="text-orange-700 font-semibold">✓ Filled by {selectedService.backup.name}</span>
+                    ) : (
+                      <span className="text-gray-500">Available</span>
+                    )}
+                  </div>
+                </div>
+              </div>
               
               <form onSubmit={handleSubmitSignup} className="space-y-4">
                 {/* Person Dropdown */}
@@ -424,29 +461,56 @@ export default function Home() {
                       Sign up as: *
                     </label>
                     <div className="space-y-2">
-                      <label className="flex items-center">
+                      <label className={`flex items-center ${selectedService?.liturgist ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
                         <input
                           type="radio"
                           name="role"
                           value="liturgist"
                           checked={signupForm.role === 'liturgist'}
                           onChange={(e) => setSignupForm({ ...signupForm, role: 'liturgist' })}
+                          disabled={!!selectedService?.liturgist}
                           className="mr-2"
                         />
-                        <span className="text-sm">Main Liturgist</span>
+                        <span className="text-sm">
+                          Main Liturgist
+                          {selectedService?.liturgist && (
+                            <span className="ml-2 text-xs text-red-600 font-medium">
+                              (Taken by {selectedService.liturgist.name})
+                            </span>
+                          )}
+                        </span>
                       </label>
-                      <label className="flex items-center">
+                      <label className={`flex items-center ${selectedService?.backup ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
                         <input
                           type="radio"
                           name="role"
                           value="backup"
                           checked={signupForm.role === 'backup'}
                           onChange={(e) => setSignupForm({ ...signupForm, role: 'backup' })}
+                          disabled={!!selectedService?.backup}
                           className="mr-2"
                         />
-                        <span className="text-sm">Backup Liturgist</span>
+                        <span className="text-sm">
+                          Backup Liturgist
+                          {selectedService?.backup && (
+                            <span className="ml-2 text-xs text-orange-600 font-medium">
+                              (Taken by {selectedService.backup.name})
+                            </span>
+                          )}
+                        </span>
                       </label>
                     </div>
+                    
+                    {/* Explanation text */}
+                    <div className="mt-3 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                      <strong>Note:</strong> Positions update every 5 seconds. Grayed out options have already been filled. If your preferred role is unavailable, choose a different Sunday or select the available role.
+                    </div>
+                    
+                    {selectedService?.liturgist && selectedService?.backup && (
+                      <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
+                        <strong>⚠️ Both positions are filled.</strong> Please choose a different Sunday.
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -485,7 +549,12 @@ export default function Home() {
                 <div className="flex gap-3 mt-6">
                   <button
                     type="submit"
-                    className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    disabled={selectedService?.liturgist && selectedService?.backup}
+                    className={`flex-1 py-2 rounded-lg transition-colors ${
+                      selectedService?.liturgist && selectedService?.backup
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
                   >
                     Submit
                   </button>

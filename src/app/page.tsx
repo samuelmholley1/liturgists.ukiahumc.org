@@ -78,6 +78,7 @@ export default function Home() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [calendarOpen, setCalendarOpen] = useState(true)
   const [currentQuarter, setCurrentQuarter] = useState('Q4-2025')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const today = new Date()
     return { month: today.getMonth(), year: today.getFullYear() }
@@ -150,6 +151,17 @@ export default function Home() {
   }
   
   const handleQuarterChange = (direction: 'prev' | 'next') => {
+    // Close any open signup modal when changing quarters (prevent state leak)
+    setSelectedSignup(null)
+    setSignupForm({
+      selectedPerson: '',
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      role: 'liturgist'
+    })
+    
     if (direction === 'next' && currentQuarter === 'Q4-2025') {
       setCurrentQuarter('Q1-2026')
     } else if (direction === 'prev' && currentQuarter === 'Q1-2026') {
@@ -268,7 +280,7 @@ export default function Home() {
     const handleSubmitSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!selectedSignup) return
+    if (!selectedSignup || isSubmitting) return
 
     const service = services.find((s: Service) => s.id === selectedSignup.serviceId)
     if (!service) return
@@ -293,6 +305,24 @@ export default function Home() {
       alert('Please enter a valid email address before submitting.')
       return
     }
+
+    // Phone number validation (optional field, but must be valid format if provided)
+    if (signupForm.phone && signupForm.phone.trim().length > 0) {
+      const phoneRegex = /^[\d\s\-\(\)\+\.]+$/
+      if (!phoneRegex.test(signupForm.phone)) {
+        alert('Please enter a valid phone number (digits, spaces, dashes, and parentheses only).')
+        return
+      }
+      // Ensure at least 10 digits for US phone numbers
+      const digitsOnly = signupForm.phone.replace(/\D/g, '')
+      if (digitsOnly.length < 10) {
+        alert('Please enter a complete phone number with at least 10 digits.')
+        return
+      }
+    }
+
+    // Prevent double submission
+    setIsSubmitting(true)
 
     // Submit to Airtable via API
     try {
@@ -345,6 +375,9 @@ export default function Home() {
     } catch (error) {
       console.error('Signup error:', error)
       alert(`There was an error submitting your signup: ${error}\n\nPlease try again or contact the church office.`)
+    } finally {
+      // Re-enable submit button after request completes
+      setIsSubmitting(false)
     }
   }
 
@@ -647,14 +680,14 @@ export default function Home() {
                 <div className="flex gap-3 mt-6">
                   <button
                     type="submit"
-                    disabled={selectedService?.liturgist && selectedService?.backup}
+                    disabled={isSubmitting || (selectedService?.liturgist && selectedService?.backup)}
                     className={`flex-1 py-2 rounded-lg transition-colors ${
-                      selectedService?.liturgist && selectedService?.backup
+                      isSubmitting || (selectedService?.liturgist && selectedService?.backup)
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-blue-600 text-white hover:bg-blue-700'
                     }`}
                   >
-                    Submit
+                    {isSubmitting ? 'Submitting...' : 'Submit'}
                   </button>
                   <button
                     type="button"

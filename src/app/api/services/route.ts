@@ -25,20 +25,14 @@ export async function GET(request: NextRequest) {
       serviceMap.set(service.date, service)
     })
 
-    // Merge in signups from Airtable
+    // Merge in signups from Airtable (only for dates within this quarter)
     signups.forEach((signup: any) => {
       const serviceDate = signup.serviceDate
       
+      // Skip signups that are not in this quarter's date range
       if (!serviceMap.has(serviceDate)) {
-        serviceMap.set(serviceDate, {
-          id: serviceDate,
-          date: serviceDate,
-          displayDate: signup.displayDate,
-          liturgist: null,
-          backup: null,
-          attendance: [],
-          notes: undefined
-        })
+        // Don't add services from outside the requested quarter
+        return
       }
 
       const service = serviceMap.get(serviceDate)

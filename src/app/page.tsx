@@ -813,11 +813,16 @@ export default function Home() {
                         {isMainService && (
                           <span className="text-xs font-bold text-purple-600 bg-purple-200 px-2 py-0.5 rounded">CURRENT</span>
                         )}
-                        {service.notes && (
-                          <span className="text-xs font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
-                            ADVENT • Candle Lighting
-                          </span>
-                        )}
+                        {service.notes && (() => {
+                          // Extract candle name from notes like "Advent Week 1 — Light the Hope candle"
+                          const match = service.notes.match(/Light the (\w+) candle/)
+                          const candleName = match ? match[1] : ''
+                          return (
+                            <span className="text-xs font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
+                              ADVENT • Liturgist lights {candleName} candle
+                            </span>
+                          )
+                        })()}
                       </div>
                       
                       {/* Expand Icon */}

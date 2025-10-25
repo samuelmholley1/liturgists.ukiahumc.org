@@ -144,6 +144,9 @@ function generateSundaysForQuarter(quarterString: string) {
       day: 'numeric' 
     })
     
+    // Special notes for certain dates (e.g., Advent candle lighting)
+    const notes = dateString === '2025-11-30' ? 'Advent Week 1 — Liturgist lights the Advent candle.' : undefined
+
     sundays.push({
       id: dateString,
       date: dateString,
@@ -151,7 +154,7 @@ function generateSundaysForQuarter(quarterString: string) {
       liturgist: null,
       backup: null,
       attendance: [],
-      notes: undefined
+      notes
     })
     
     currentDate.setDate(currentDate.getDate() + 7) // Next Sunday

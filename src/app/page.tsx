@@ -281,6 +281,13 @@ export default function Home() {
       fullName = signupForm.selectedPerson
     }
 
+    // Basic email validation (extra check beyond browser's native validation)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(signupForm.email)) {
+      alert('Please enter a valid email address before submitting.')
+      return
+    }
+
     // Submit to Airtable via API
     try {
       const response = await fetch('/api/signup', {
@@ -302,7 +309,10 @@ export default function Home() {
       const data = await response.json()
 
       if (data.success) {
-        alert('Thank you for signing up! Your information has been recorded.')
+        // Success message includes role and date, and any special notes
+        const roleLabel = signupForm.role === 'liturgist' ? 'Main Liturgist' : 'Backup'
+        const specialNote = service.notes ? `\n\nNote: ${service.notes}` : ''
+        alert(`✅ Thank you! You are signed up as ${roleLabel} for ${service.displayDate}.${specialNote}`)
         
         // Close modal first
         setSelectedSignup(null)
@@ -419,6 +429,7 @@ export default function Home() {
                   className={`text-center py-2 rounded text-xs transition-colors ${
                     !day ? '' :
                     day.isMainService ? 'bg-purple-600 text-white font-bold cursor-pointer hover:bg-purple-700' :
+                    day.serviceData?.notes ? 'bg-amber-200 text-amber-900 font-semibold cursor-pointer' :
                     day.isToday ? 'bg-blue-600 text-white font-bold' :
                     day.isSunday && day.hasService ? (
                       hoveredService === day.serviceData?.id ? 'bg-yellow-300 font-bold border border-yellow-500' : 'bg-green-100 font-medium cursor-pointer hover:bg-green-200'
@@ -428,6 +439,7 @@ export default function Home() {
                   }`}
                   title={
                     day?.isMainService ? `Current Service: ${day.serviceData?.displayDate}` :
+                    day?.serviceData?.notes ? `${day.serviceData?.notes}` :
                     day?.isSunday && day?.hasService ? `Service on ${day.serviceData?.displayDate}` : ''
                   }
                   onClick={day?.hasService && isClient ? () => scrollToService(day.serviceData!.id) : undefined}
@@ -761,6 +773,11 @@ export default function Home() {
                         </p>
                         {isMainService && (
                           <span className="text-xs font-bold text-purple-600 bg-purple-200 px-2 py-0.5 rounded">CURRENT</span>
+                        )}
+                        {service.notes && (
+                          <span className="text-xs font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
+                            ADVENT • Candle Lighting
+                          </span>
                         )}
                       </div>
                       

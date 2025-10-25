@@ -145,7 +145,16 @@ function generateSundaysForQuarter(quarterString: string) {
     })
     
     // Special notes for certain dates (e.g., Advent candle lighting)
-    const notes = dateString === '2025-11-30' ? 'Advent Week 1 — Liturgist lights the Advent candle.' : undefined
+    let notes: string | undefined = undefined
+    if (dateString === '2025-11-30') {
+      notes = 'Advent Week 1 — Light the Hope candle'
+    } else if (dateString === '2025-12-07') {
+      notes = 'Advent Week 2 — Light the Peace candle'
+    } else if (dateString === '2025-12-14') {
+      notes = 'Advent Week 3 — Light the Joy candle'
+    } else if (dateString === '2025-12-21') {
+      notes = 'Advent Week 4 — Light the Love candle'
+    }
 
     sundays.push({
       id: dateString,

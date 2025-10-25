@@ -814,14 +814,38 @@ export default function Home() {
                           <span className="text-xs font-bold text-purple-600 bg-purple-200 px-2 py-0.5 rounded">CURRENT</span>
                         )}
                         {service.notes && (() => {
-                          // Extract candle name from notes like "Advent Week 1 — Light the Hope candle"
-                          const match = service.notes.match(/Light the (\w+) candle/)
-                          const candleName = match ? match[1] : ''
-                          return (
-                            <span className="text-xs font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
-                              ADVENT • Liturgist lights {candleName} candle
-                            </span>
-                          )
+                          // Check if it's Christmas Eve
+                          if (service.notes.includes('Christmas Eve')) {
+                            return (
+                              <span className="text-xs font-semibold text-red-700 bg-red-100 px-2 py-0.5 rounded">
+                                🕯️ CHRISTMAS EVE • Light Christ Candle + all 4 Advent candles
+                              </span>
+                            )
+                          }
+                          
+                          // Extract info from Advent notes like "Advent Week 2 — Light the Hope and Peace candles (2 candles)"
+                          const weekMatch = service.notes.match(/Advent Week (\d)/)
+                          const countMatch = service.notes.match(/\((\d) candles?\)/)
+                          
+                          if (weekMatch && countMatch) {
+                            const week = weekMatch[1]
+                            const count = countMatch[1]
+                            const candleMap: Record<string, string> = {
+                              '1': 'Hope',
+                              '2': 'Hope + Peace',
+                              '3': 'Hope + Peace + Joy',
+                              '4': 'Hope + Peace + Joy + Love'
+                            }
+                            const candles = candleMap[week] || ''
+                            
+                            return (
+                              <span className="text-xs font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
+                                🕯️ ADVENT WK {week} • Light {candles} ({count} candle{count !== '1' ? 's' : ''})
+                              </span>
+                            )
+                          }
+                          
+                          return null
                         })()}
                       </div>
                       

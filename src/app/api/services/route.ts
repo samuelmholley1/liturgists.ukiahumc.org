@@ -177,14 +177,15 @@ function generateSundaysForQuarter(quarterString: string) {
     let notes: string | undefined = undefined
     const adventDates = calculateAdventSundays(yearNum)
     
+    // Advent candles are lit cumulatively each week
     if (dateString === adventDates[0]) {
-      notes = 'Advent Week 1 — Light the Hope candle'
+      notes = 'Advent Week 1 — Light the Hope candle (1 candle)'
     } else if (dateString === adventDates[1]) {
-      notes = 'Advent Week 2 — Light the Peace candle'
+      notes = 'Advent Week 2 — Light the Hope and Peace candles (2 candles)'
     } else if (dateString === adventDates[2]) {
-      notes = 'Advent Week 3 — Light the Joy candle'
+      notes = 'Advent Week 3 — Light the Hope, Peace, and Joy candles (3 candles)'
     } else if (dateString === adventDates[3]) {
-      notes = 'Advent Week 4 — Light the Love candle'
+      notes = 'Advent Week 4 — Light the Hope, Peace, Joy, and Love candles (4 candles)'
     }
 
     sundays.push({
@@ -199,6 +200,30 @@ function generateSundaysForQuarter(quarterString: string) {
     
     currentDate.setDate(currentDate.getDate() + 7) // Next Sunday
   }
+  
+  // Add Christmas Eve service if it falls in this quarter
+  const christmasEve = new Date(yearNum, 11, 24) // December 24
+  if (christmasEve.getMonth() >= startMonth && christmasEve.getMonth() <= endMonth) {
+    const christmasEveDate = christmasEve.toISOString().split('T')[0]
+    const christmasEveDisplay = christmasEve.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })
+    
+    sundays.push({
+      id: christmasEveDate,
+      date: christmasEveDate,
+      displayDate: christmasEveDisplay + ' (Christmas Eve)',
+      liturgist: null,
+      backup: null,
+      attendance: [],
+      notes: 'Christmas Eve Service — Light the Christ Candle (white center candle) + all 4 Advent candles'
+    })
+  }
+  
+  // Sort all services by date (Christmas Eve might not be chronological)
+  sundays.sort((a, b) => a.date.localeCompare(b.date))
   
   return sundays
 }

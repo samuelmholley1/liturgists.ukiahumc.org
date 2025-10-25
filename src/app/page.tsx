@@ -838,7 +838,7 @@ export default function Home() {
                         <div className="flex items-center gap-2 min-w-fit">
                           <span className="font-medium text-gray-600">Liturgist:</span>
                           {service.liturgist ? (
-                            <span className="font-semibold text-green-700 px-2 py-0.5 bg-green-50 rounded">
+                            <span className="font-semibold text-green-700 px-2 py-0.5 bg-green-50 rounded truncate max-w-[200px]" title={service.liturgist.name}>
                               {service.liturgist.name}
                             </span>
                           ) : (
@@ -850,10 +850,10 @@ export default function Home() {
                         {service.liturgist && (
                           <div className="flex items-center gap-2 text-green-600 text-xs truncate">
                             {service.liturgist.email && (
-                              <span className="truncate">{service.liturgist.email}</span>
+                              <span className="truncate max-w-[200px]" title={service.liturgist.email}>{service.liturgist.email}</span>
                             )}
                             {service.liturgist.phone && (
-                              <span>• {service.liturgist.phone}</span>
+                              <span className="whitespace-nowrap">• {service.liturgist.phone}</span>
                             )}
                           </div>
                         )}
@@ -864,7 +864,7 @@ export default function Home() {
                         <div className="flex items-center gap-2 min-w-fit">
                           <span className="font-medium text-gray-600">Backup:</span>
                           {service.backup ? (
-                            <span className="font-semibold text-orange-700 px-2 py-0.5 bg-orange-50 rounded">
+                            <span className="font-semibold text-orange-700 px-2 py-0.5 bg-orange-50 rounded truncate max-w-[200px]" title={service.backup.name}>
                               {service.backup.name}
                             </span>
                           ) : (
@@ -876,10 +876,10 @@ export default function Home() {
                         {service.backup && (
                           <div className="flex items-center gap-2 text-orange-600 text-xs truncate">
                             {service.backup.email && (
-                              <span className="truncate">{service.backup.email}</span>
+                              <span className="truncate max-w-[200px]" title={service.backup.email}>{service.backup.email}</span>
                             )}
                             {service.backup.phone && (
-                              <span>• {service.backup.phone}</span>
+                              <span className="whitespace-nowrap">• {service.backup.phone}</span>
                             )}
                           </div>
                         )}

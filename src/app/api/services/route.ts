@@ -102,6 +102,37 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// Calculate the 4 Advent Sundays for a given year
+// Advent starts on the 4th Sunday before Christmas (Dec 25)
+function calculateAdventSundays(year: number): string[] {
+  // Christmas is always December 25
+  const christmas = new Date(year, 11, 25) // Month is 0-indexed, so 11 = December
+  
+  // Find what day of the week Christmas falls on (0 = Sunday, 6 = Saturday)
+  const christmasDay = christmas.getDay()
+  
+  // Calculate how many days back to the previous Sunday from Christmas
+  // If Christmas is Sunday (0), we go back 0 days
+  // If Christmas is Monday (1), we go back 1 day to Sunday
+  // etc.
+  const daysToSunday = christmasDay === 0 ? 7 : christmasDay
+  
+  // Find the Sunday before (or on) Christmas
+  const sundayBeforeChristmas = new Date(year, 11, 25 - daysToSunday)
+  
+  // Count back 4 Sundays (including the one we just found)
+  // This gives us the 4 Advent Sundays
+  const adventSundays: string[] = []
+  
+  for (let i = 3; i >= 0; i--) {
+    const adventSunday = new Date(sundayBeforeChristmas)
+    adventSunday.setDate(sundayBeforeChristmas.getDate() - (i * 7))
+    adventSundays.push(adventSunday.toISOString().split('T')[0])
+  }
+  
+  return adventSundays
+}
+
 // Generate Sundays for a specific quarter (e.g., "Q4-2025" or "Q1-2026")
 function generateSundaysForQuarter(quarterString: string) {
   const sundays = []
@@ -124,6 +155,9 @@ function generateSundaysForQuarter(quarterString: string) {
     endMonth = 11   // December
   }
   
+  // TIMEZONE NOTE: Date generation uses local server timezone (PDT/PST for Ukiah, CA)
+  // All users are in same timezone, so this works correctly for the congregation.
+  // If deploying for multi-timezone use, dates should be normalized to UTC.
   // Start from first day of first month in quarter
   let currentDate = new Date(yearNum, startMonth, 1)
   
@@ -144,15 +178,18 @@ function generateSundaysForQuarter(quarterString: string) {
       day: 'numeric' 
     })
     
-    // Special notes for certain dates (e.g., Advent candle lighting)
+    // Dynamic Advent date calculation - works for any year
+    // Advent starts on the 4th Sunday before Christmas (Dec 25)
     let notes: string | undefined = undefined
-    if (dateString === '2025-11-30') {
+    const adventDates = calculateAdventSundays(yearNum)
+    
+    if (dateString === adventDates[0]) {
       notes = 'Advent Week 1 — Light the Hope candle'
-    } else if (dateString === '2025-12-07') {
+    } else if (dateString === adventDates[1]) {
       notes = 'Advent Week 2 — Light the Peace candle'
-    } else if (dateString === '2025-12-14') {
+    } else if (dateString === adventDates[2]) {
       notes = 'Advent Week 3 — Light the Joy candle'
-    } else if (dateString === '2025-12-21') {
+    } else if (dateString === adventDates[3]) {
       notes = 'Advent Week 4 — Light the Love candle'
     }
 

@@ -281,9 +281,15 @@ export default function Home() {
       fullName = signupForm.selectedPerson
     }
 
-    // Basic email validation (extra check beyond browser's native validation)
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(signupForm.email)) {
+    // Validate name is not empty (CRITICAL: prevents spaces-only names)
+    if (!fullName || fullName.trim().length === 0) {
+      alert('Please enter a valid name before submitting.')
+      return
+    }
+
+    // Enhanced email validation (reject trailing dots, invalid domains)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+    if (!emailRegex.test(signupForm.email) || signupForm.email.endsWith('.')) {
       alert('Please enter a valid email address before submitting.')
       return
     }

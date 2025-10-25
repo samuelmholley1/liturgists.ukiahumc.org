@@ -1,7 +1,120 @@
 # 🚨 PRE-LAUNCH TESTING CHECKLIST - Liturgist App
 
-**Last Updated:** October 23, 2025  
-**Status:** ⚠️ NEEDS TESTING BEFORE EMAIL BLAST
+**Last Updated:** October 25, 2025  
+**Status:** 🔴 CRITICAL BUGS FOUND - DO NOT LAUNCH WITHOUT FIXES
+
+---
+
+## 🚨 RED TEAM FINDINGS - BLOCKING ISSUES
+
+### **CRITICAL SEVERITY** ⛔ (Fix Before ANY Launch)
+
+#### 1. **Empty Name Validation - CRITICAL BUG**
+- **Issue:** User selects "Other", enters only spaces in name fields
+- **Bug:** `fullName = ${firstName} ${lastName}.trim()` → Results in empty string
+- **Impact:** Invalid records in Airtable with no name
+- **File:** `src/app/page.tsx` line ~279
+- **Status:** ❌ NOT FIXED
+- **Priority:** FIX IMMEDIATELY
+
+#### 2. **Race Condition - Duplicate Signups**
+- **Issue:** No server-side duplicate prevention
+- **Bug:** Two users can sign up for same role simultaneously (within ~5 second window)
+- **Impact:** Airtable gets duplicate signups, page shows only one, confusion ensues
+- **File:** `src/app/api/signup/route.ts` - missing duplicate check
+- **Status:** ❌ NOT FIXED
+- **Priority:** FIX IMMEDIATELY
+
+#### 3. **Email Validation Edge Cases**
+- **Issue:** Regex `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` accepts invalid emails
+- **Examples:** "test@test." (trailing dot), "a@b.c" (invalid TLD)
+- **Impact:** Invalid emails in database, bounce emails
+- **File:** `src/app/page.tsx` line ~287
+- **Status:** ⚠️ PARTIAL (has validation but weak)
+- **Priority:** FIX IMMEDIATELY
+
+---
+
+### **HIGH SEVERITY** ⚠️ (Very Likely to Cause Problems)
+
+#### 4. **Airtable Rate Limit Bomb**
+- **Issue:** 5-second polling × 50+ concurrent users = rate limit breach
+- **Calculation:** Airtable allows 5 req/sec, app does 1 req/5sec per user
+- **Impact:** With 25+ simultaneous users, API returns 429 errors, app breaks
+- **Status:** ❌ NO RATE LIMIT HANDLING
+- **Priority:** HIGH
+
+#### 5. **Date Format Mismatch (Resolved but Document)**
+- **Issue:** API generates `toLocaleDateString()`, Airtable stores ISO timestamps
+- **Status:** ✅ VERIFIED WORKING (October 25 testing)
+- **Note:** Both use 'YYYY-MM-DD' for Service Date field, matching confirmed
+- **Priority:** MONITOR
+
+#### 6. **Advent Hardcoded Year (2026 Will Break)**
+- **Issue:** Advent dates hardcoded as '2025-11-30', '2025-12-07', etc.
+- **Impact:** System silently fails in 2026, no Advent annotations appear
+- **File:** `src/app/api/services/route.ts` lines 149-159
+- **Status:** ❌ WILL BREAK JAN 1, 2026
+- **Priority:** HIGH (but not blocking for Nov 2025 launch)
+
+---
+
+### **MEDIUM SEVERITY** 🟡 (Should Fix Before Full Launch)
+
+#### 7. **Phone Number Validation - None**
+- **Issue:** No validation, accepts anything: "asdf", "call me", emoji
+- **Impact:** Messy data, hard to use for actual calls
+- **Status:** ❌ NO VALIDATION
+- **Priority:** MEDIUM
+
+#### 8. **Service Worker Cache Issues**
+- **Issue:** Network-first strategy, but fallback to stale cache on network fail
+- **Impact:** Users see old data if API temporarily down
+- **Status:** ⚠️ MITIGATED (v2 with network-first, but not perfect)
+- **Priority:** MEDIUM
+
+#### 9. **Modal State Leak**
+- **Issue:** User opens signup modal, navigates quarters, submits
+- **Bug:** Modal might submit wrong date if service context changes
+- **Status:** ❌ NOT TESTED
+- **Priority:** MEDIUM
+
+#### 10. **Timezone Issues**
+- **Issue:** Date generation uses local timezone
+- **Impact:** Hawaii user (UTC-10) might see off-by-one day errors
+- **Status:** ⚠️ POTENTIAL BUG (not tested with non-PST users)
+- **Priority:** MEDIUM (low impact for Ukiah congregation)
+
+---
+
+### **LOW SEVERITY** 🟢 (Document and Monitor)
+
+11. **Long Name Overflow** - No CSS truncation for very long names
+12. **No Loading Spinner** - Users might double-click submit button
+13. **Alert Instead of Toast** - Poor UX for success messages
+14. **Password Weakness** - "lovewins" is public, anyone can access
+15. **Browser Compatibility** - No fallback for old browsers without service workers
+
+---
+
+---
+
+## ✅ IMMEDIATE FIXES APPLIED (October 25, 2025)
+
+### Fixed Issue #1: Empty Name Validation ✅
+- Added validation: `if (!fullName || fullName.trim().length === 0)`
+- Prevents submission with blank/spaces-only names
+- File: `src/app/page.tsx`
+
+### Fixed Issue #2: Server-Side Duplicate Prevention ✅
+- Added duplicate check in API route before Airtable submission
+- Returns 409 Conflict error if role already taken
+- File: `src/app/api/signup/route.ts`
+
+### Fixed Issue #3: Enhanced Email Validation ✅
+- Improved regex to reject trailing dots and invalid formats
+- Added domain validation check
+- File: `src/app/page.tsx`
 
 ---
 

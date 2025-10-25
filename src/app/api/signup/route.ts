@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { submitSignup } from '@/lib/airtable'
+import { submitSignup, getSignups } from '@/lib/airtable'
 
 // Disable all caching for this API route
 export const dynamic = 'force-dynamic'
@@ -36,6 +36,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Server configuration error - missing Airtable credentials' },
         { status: 500 }
+      )
+    }
+
+    // CRITICAL: Server-side duplicate prevention (race condition fix)
+    const existingSignups = await getSignups()
+    const duplicate = existingSignups.find(
+      (s: any) => s.serviceDate === body.serviceDate && s.role === body.role
+    )
+    
+    if (duplicate) {
+      console.warn('Duplicate signup attempt blocked:', {
+        serviceDate: body.serviceDate,
+        role: body.role,
+        existingName: duplicate.name,
+        attemptedName: body.name
+      })
+      return NextResponse.json(
+        { 
+          error: `This role is already taken by ${duplicate.name}. Please refresh the page to see updated availability.`,
+          isDuplicate: true
+        },
+        { status: 409 } // 409 Conflict
       )
     }
 

@@ -101,3 +101,164 @@ Running 16 tests using 1 worker
 
 [1A[2K[4/16] [chromium] › e2e/liturgist-signup.spec.ts:67:7 › Liturgist Signup App - E2E Tests › 04 - Advent badges show cumulative candles
 [1A[2K[5/16] [chromium] › e2e/liturgist-signup.spec.ts:77:7 › Liturgist Signup App - E2E Tests › 05 - Signup modal opens and closes
+[1A[2K  4) [chromium] › e2e/liturgist-signup.spec.ts:77:7 › Liturgist Signup App - E2E Tests › 05 - Signup modal opens and closes 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('button').filter({ hasText: /cancel/i }).last()[22m
+    [2m    - locator resolved to <button class="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Cancel</button>[22m
+    [2m  - attempting click action[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">…</div> intercepts pointer events[22m
+    [2m    - retrying click action[22m
+    [2m    - waiting 20ms[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">…</div> intercepts pointer events[22m
+    [2m    - retrying click action[22m
+    [2m      - waiting 100ms[22m
+    [2m    55 × waiting for element to be visible, enabled and stable[22m
+    [2m       - element is visible, enabled and stable[22m
+    [2m       - scrolling into view if needed[22m
+    [2m       - done scrolling[22m
+    [2m       - <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">…</div> intercepts pointer events[22m
+    [2m     - retrying click action[22m
+    [2m       - waiting 500ms[22m
+    [2m    - waiting for element to be visible, enabled and stable[22m
+
+
+      85 |     // Close modal with Cancel button
+      86 |     const cancelButton = page.locator('button').filter({ hasText: /cancel/i }).last() // Last cancel is in modal
+    > 87 |     await cancelButton.click()
+         |                        ^
+      88 |     
+      89 |     // Modal should disappear
+      90 |     await page.waitForTimeout(500)
+        at /Users/samuelholley/Projects/liturgists.ukiahumc.org/e2e/liturgist-signup.spec.ts:87:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/liturgist-signup-Liturgist-76d35-gnup-modal-opens-and-closes-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/liturgist-signup-Liturgist-76d35-gnup-modal-opens-and-closes-chromium/error-context.md
+
+
+[1A[2K[6/16] [chromium] › e2e/liturgist-signup.spec.ts:94:7 › Liturgist Signup App - E2E Tests › 06 - Empty name validation
+[1A[2K[7/16] [chromium] › e2e/liturgist-signup.spec.ts:115:7 › Liturgist Signup App - E2E Tests › 07 - Email validation
+[1A[2K  5) [chromium] › e2e/liturgist-signup.spec.ts:115:7 › Liturgist Signup App - E2E Tests › 07 - Email validation 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('input[type="email"]').first()[22m
+    [2m    - locator resolved to <input readonly required="" type="email" value="kay.hoofin.it@gmail.com" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>[22m
+    [2m    - fill("invalid-email")[22m
+    [2m  - attempting fill action[22m
+    [2m    2 × waiting for element to be visible, enabled and editable[22m
+    [2m      - element is not editable[22m
+    [2m    - retrying fill action[22m
+    [2m    - waiting 20ms[22m
+    [2m    2 × waiting for element to be visible, enabled and editable[22m
+    [2m      - element is not editable[22m
+    [2m    - retrying fill action[22m
+    [2m      - waiting 100ms[22m
+    [2m    57 × waiting for element to be visible, enabled and editable[22m
+    [2m       - element is not editable[22m
+    [2m     - retrying fill action[22m
+    [2m       - waiting 500ms[22m
+
+
+      125 |     
+      126 |     // Test invalid email
+    > 127 |     await page.locator('input[type="email"]').first().fill('invalid-email')
+          |                                                       ^
+      128 |     await page.locator('input[type="tel"]').first().fill('555-555-5555')
+      129 |     await page.locator('button').filter({ hasText: /submit/i }).first().click()
+      130 |     
+        at /Users/samuelholley/Projects/liturgists.ukiahumc.org/e2e/liturgist-signup.spec.ts:127:55
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/liturgist-signup-Liturgist-e2221-Tests-07---Email-validation-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/liturgist-signup-Liturgist-e2221-Tests-07---Email-validation-chromium/error-context.md
+
+
+[1A[2K[8/16] [chromium] › e2e/liturgist-signup.spec.ts:135:7 › Liturgist Signup App - E2E Tests › 08 - Phone validation
+[1A[2K  6) [chromium] › e2e/liturgist-signup.spec.ts:135:7 › Liturgist Signup App - E2E Tests › 08 - Phone validation 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('input[type="email"]').first()[22m
+    [2m    - locator resolved to <input readonly required="" type="email" value="kay.hoofin.it@gmail.com" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>[22m
+    [2m    - fill("test@example.com")[22m
+    [2m  - attempting fill action[22m
+    [2m    2 × waiting for element to be visible, enabled and editable[22m
+    [2m      - element is not editable[22m
+    [2m    - retrying fill action[22m
+    [2m    - waiting 20ms[22m
+    [2m    2 × waiting for element to be visible, enabled and editable[22m
+    [2m      - element is not editable[22m
+    [2m    - retrying fill action[22m
+    [2m      - waiting 100ms[22m
+    [2m    56 × waiting for element to be visible, enabled and editable[22m
+    [2m       - element is not editable[22m
+    [2m     - retrying fill action[22m
+    [2m       - waiting 500ms[22m
+
+
+      145 |     
+      146 |     // Valid email
+    > 147 |     await page.locator('input[type="email"]').first().fill('test@example.com')
+          |                                                       ^
+      148 |     
+      149 |     // Test invalid phone
+      150 |     await page.locator('input[type="tel"]').first().fill('abc')
+        at /Users/samuelholley/Projects/liturgists.ukiahumc.org/e2e/liturgist-signup.spec.ts:147:55
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/liturgist-signup-Liturgist-0ae0c-Tests-08---Phone-validation-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/liturgist-signup-Liturgist-0ae0c-Tests-08---Phone-validation-chromium/error-context.md
+
+
+[1A[2K[9/16] [chromium] › e2e/liturgist-signup.spec.ts:158:7 › Liturgist Signup App - E2E Tests › 09 - Duplicate signup prevention (UI check)
+[1A[2K[10/16] [chromium] › e2e/liturgist-signup.spec.ts:175:7 › Liturgist Signup App - E2E Tests › 10 - Real-time updates indicator
+[1A[2K[11/16] [chromium] › e2e/liturgist-signup.spec.ts:186:7 › Liturgist Signup App - E2E Tests › 11 - Quarterly navigation
+[1A[2K  7) [chromium] › e2e/liturgist-signup.spec.ts:186:7 › Liturgist Signup App - E2E Tests › 11 - Quarterly navigation 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.selectOption: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('select').first()[22m
+
+
+      188 |     
+      189 |     // Switch to Q3 2025
+    > 190 |     await quarterSelect.selectOption('Q3-2025')
+          |                         ^
+      191 |     await page.waitForTimeout(1000)
+      192 |     await expect(page.getByText(/July|August|September/i).first()).toBeVisible()
+      193 |     
+        at /Users/samuelholley/Projects/liturgists.ukiahumc.org/e2e/liturgist-signup.spec.ts:190:25
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/liturgist-signup-Liturgist-fbae5-s-11---Quarterly-navigation-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/liturgist-signup-Liturgist-fbae5-s-11---Quarterly-navigation-chromium/error-context.md
+
+
+[1A[2K[12/16] [chromium] › e2e/liturgist-signup.spec.ts:205:7 › Liturgist Signup App - E2E Tests › 12 - Modal state doesn't leak between quarters

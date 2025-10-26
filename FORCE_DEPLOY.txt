@@ -1,0 +1,3 @@
+Force deployment at ${new Date().toISOString()}
+The email fix is not working - old subject line still being sent.
+This file will trigger a fresh Vercel deployment.

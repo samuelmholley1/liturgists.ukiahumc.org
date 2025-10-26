@@ -12,11 +12,11 @@ test.describe('Liturgist Signup App - E2E Tests', () => {
     const passwordInput = page.locator('input[type="password"]')
     if (await passwordInput.isVisible({ timeout: 2000 }).catch(() => false)) {
       await passwordInput.fill(PASSWORD)
-      await page.getByRole('button', { name: /enter/i }).click()
+      await page.getByRole('button', { name: /access schedule/i }).click()
     }
     
     // Wait for main page to load
-    await expect(page.getByText(/Liturgist Signup/i)).toBeVisible()
+    await expect(page.getByText(/Liturgist Services/i)).toBeVisible()
   })
 
   test('01 - Password gate works', async ({ page }) => {
@@ -30,13 +30,13 @@ test.describe('Liturgist Signup App - E2E Tests', () => {
     
     // Wrong password fails
     await page.locator('input[type="password"]').fill('wrongpassword')
-    await page.getByRole('button', { name: /enter/i }).click()
+    await page.getByRole('button', { name: /access schedule/i }).click()
     await expect(page.getByText(/incorrect/i)).toBeVisible()
     
     // Correct password succeeds
     await page.locator('input[type="password"]').fill(PASSWORD)
-    await page.getByRole('button', { name: /enter/i }).click()
-    await expect(page.getByText(/Liturgist Signup/i)).toBeVisible({ timeout: 5000 })
+    await page.getByRole('button', { name: /access schedule/i }).click()
+    await expect(page.getByText(/Liturgist Services/i)).toBeVisible({ timeout: 5000 })
   })
 
   test('02 - All Q4 2025 Sundays appear', async ({ page }) => {
@@ -189,7 +189,7 @@ test.describe('Liturgist Signup App - E2E Tests', () => {
     // (This is visual verification - we can't easily assert it appeared)
     
     // Check that page is still functional after refresh
-    await expect(page.getByText(/Liturgist Signup/i)).toBeVisible()
+    await expect(page.getByText(/Liturgist Services/i)).toBeVisible()
   })
 
   test('11 - Quarterly navigation', async ({ page }) => {
@@ -253,7 +253,7 @@ test.describe('Liturgist Signup App - E2E Tests', () => {
     await page.setViewportSize({ width: 375, height: 667 })
     
     // Page should still be usable
-    await expect(page.getByText(/Liturgist Signup/i)).toBeVisible()
+    await expect(page.getByText(/Liturgist Services/i)).toBeVisible()
     
     // Quarter selector should be visible
     await expect(page.locator('select').first()).toBeVisible()

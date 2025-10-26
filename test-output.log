@@ -1,0 +1,43 @@
+
+> liturgists-ukiahumc@0.1.0 test:e2e
+> playwright test
+
+
+Running 16 tests using 1 worker
+
+[1A[2K[1/16] [chromium] › e2e/liturgist-signup.spec.ts:22:7 › Liturgist Signup App - E2E Tests › 01 - Password gate works
+[1A[2K  1) [chromium] › e2e/liturgist-signup.spec.ts:22:7 › Liturgist Signup App - E2E Tests › 01 - Password gate works 
+
+    [31mTest timeout of 30000ms exceeded while running "beforeEach" hook.[39m
+
+       5 | test.describe('Liturgist Signup App - E2E Tests', () => {
+       6 |   
+    >  7 |   test.beforeEach(async ({ page }) => {
+         |        ^
+       8 |     // Navigate to the app
+       9 |     await page.goto('/')
+      10 |     
+        at /Users/samuelholley/Projects/liturgists.ukiahumc.org/e2e/liturgist-signup.spec.ts:7:8
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for getByRole('button', { name: /enter/i })[22m
+
+
+      13 |     if (await passwordInput.isVisible({ timeout: 2000 }).catch(() => false)) {
+      14 |       await passwordInput.fill(PASSWORD)
+    > 15 |       await page.getByRole('button', { name: /enter/i }).click()
+         |                                                          ^
+      16 |     }
+      17 |     
+      18 |     // Wait for main page to load
+        at /Users/samuelholley/Projects/liturgists.ukiahumc.org/e2e/liturgist-signup.spec.ts:15:58
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/liturgist-signup-Liturgist-9409c-ts-01---Password-gate-works-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/liturgist-signup-Liturgist-9409c-ts-01---Password-gate-works-chromium/error-context.md
+
+
+[1A[2K[2/16] [chromium] › e2e/liturgist-signup.spec.ts:42:7 › Liturgist Signup App - E2E Tests › 02 - All Q4 2025 Sundays appear

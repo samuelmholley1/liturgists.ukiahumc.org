@@ -509,6 +509,17 @@ export default function Home() {
       {modalState?.isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-2xl p-6 max-w-md w-full">
+            {/* Church Logo */}
+            <div className="flex justify-center mb-3">
+              <Image 
+                src="/logo-for-church-larger.jpg" 
+                alt="Church Logo" 
+                width={60} 
+                height={60} 
+                className="rounded-full"
+              />
+            </div>
+            
             {/* Icon */}
             <div className="flex items-center justify-center mb-4">
               {modalState.type === 'success' && (
@@ -663,7 +674,7 @@ export default function Home() {
                     'text-gray-600'
                   }`}
                   title={
-                    day?.isMainService ? `Current Service: ${day.serviceData?.displayDate}` :
+                    day?.isMainService ? `Next Service: ${day.serviceData?.displayDate}` :
                     day?.serviceData?.notes ? `${day.serviceData?.notes}` :
                     day?.isSunday && day?.hasService ? `Service on ${day.serviceData?.displayDate}` : ''
                   }
@@ -990,7 +1001,7 @@ export default function Home() {
                       {service.displayDate.replace(/, \d{4}/, '')}
                     </p>
                     {isMainService && (
-                      <span className="text-xs font-bold text-purple-600 bg-purple-200 px-2 py-0.5 rounded">CURRENT</span>
+                      <span className="text-xs font-bold text-purple-600 bg-purple-200 px-2 py-0.5 rounded">NEXT SERVICE</span>
                     )}
                     {service.notes && (() => {
                       // Check if it's Christmas Eve

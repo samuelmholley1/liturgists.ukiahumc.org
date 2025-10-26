@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import PasswordGate from '@/components/PasswordGate'
 import { getAllLiturgists } from '@/admin/liturgists'
+import { reportError } from '@/lib/errorReporting'
 
 // App version for cache busting - increment when you make changes
 const APP_VERSION = '2.2.0'
@@ -152,6 +153,12 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Error fetching services:', error)
+      
+      // Report error to admin
+      await reportError(error, {
+        action: 'Fetch Services',
+        serviceDate: currentQuarter
+      })
     } finally {
       setLoading(false)
       setRefreshing(false)
@@ -309,6 +316,14 @@ export default function Home() {
           }
         } catch (error) {
           console.error('Error cancelling signup:', error)
+          
+          // Report error to admin
+          await reportError(error, {
+            userName: personName,
+            serviceDate: displayDate,
+            action: 'Cancel Signup'
+          })
+          
           setModalState({
             isOpen: true,
             type: 'error',
@@ -467,6 +482,15 @@ export default function Home() {
         }, 1000)
       } else {
         console.error('Signup failed:', data)
+        
+        // Report error to admin
+        await reportError(new Error(data.error || 'Signup failed'), {
+          userName: fullName,
+          userEmail: signupForm.email,
+          serviceDate: service.displayDate,
+          action: 'Submit Signup'
+        })
+        
         setModalState({
           isOpen: true,
           type: 'error',
@@ -476,6 +500,15 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Signup error:', error)
+      
+      // Report error to admin
+      await reportError(error, {
+        userName: fullName,
+        userEmail: signupForm.email,
+        serviceDate: service.displayDate,
+        action: 'Submit Signup'
+      })
+      
       setModalState({
         isOpen: true,
         type: 'error',

@@ -6,7 +6,20 @@ import { sendEmail, generateSignupEmail, generateCancellationEmail, generateErro
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
+
+// Irrefutable stamp for identifying which handler actually runs
+function stamp(tag: string) {
+  return {
+    tag,                               // e.g., 'signup.DELETE'
+    sha: process.env.VERCEL_GIT_COMMIT_SHA ?? 'dev',
+    region: process.env.VERCEL_REGION ?? 'unknown',
+    url: process.env.VERCEL_URL ?? 'local',
+    at: new Date().toISOString(),
+  };
+}
 export async function POST(request: NextRequest) {
+  const handlerStamp = stamp('signup.POST');
+  console.log('🔍 HANDLER STAMP:' , handlerStamp);
   try {
     const body = await request.json()
     
@@ -21,10 +34,12 @@ export async function POST(request: NextRequest) {
         hasEmail: !!body.email,
         hasRole: !!body.role
       })
-      return NextResponse.json(
-        { error: 'Missing required fields' },
+      const errorResponse1 = NextResponse.json(
+        { error: 'Missing required fields', handler: handlerStamp },
         { status: 400 }
-      )
+      );
+      errorResponse1.headers.set('X-Handler', JSON.stringify(handlerStamp));
+      return errorResponse1;
     }
 
     // Check environment variables
@@ -34,10 +49,12 @@ export async function POST(request: NextRequest) {
         hasBaseID: !!process.env.AIRTABLE_BASE_ID,
         hasTableName: !!process.env.AIRTABLE_TABLE_NAME
       })
-      return NextResponse.json(
-        { error: 'Server configuration error - missing Airtable credentials' },
+      const errorResponse2 = NextResponse.json(
+        { error: 'Server configuration error - missing Airtable credentials', handler: handlerStamp },
         { status: 500 }
-      )
+      );
+      errorResponse2.headers.set('X-Handler', JSON.stringify(handlerStamp));
+      return errorResponse2;
     }
 
     // CRITICAL: Server-side duplicate prevention (race condition fix)
@@ -163,34 +180,35 @@ export async function POST(request: NextRequest) {
       console.error('Failed to send error notification email:', emailError)
     }
     
-    return NextResponse.json(
-      { error: 'Internal server error', details: String(error) },
-      { status: 500 }
-    )
+    const errorResponse = NextResponse.json({ error: 'Internal server error', details: String(error), handler: handlerStamp }, { status: 500 });
+    errorResponse.headers.set('X-Handler', JSON.stringify(handlerStamp));
+    return errorResponse;
   }
 }
 
 export async function GET(request: NextRequest) {
-  try {
+export async function GET(request: NextRequest) {
+  const handlerStamp = stamp('signup.GET');
+  console.log('🚨🚨�� GET HANDLER CALLED - IS THIS HANDLING DELETES?? 🚨🚨🚨');
+  console.log('🔍 HANDLER STAMP:', handlerStamp);
+  
     const { searchParams } = new URL(request.url)
     const recordId = searchParams.get('recordId')
     const action = searchParams.get('action')
     
     if (!recordId || action !== 'cancel') {
-      return NextResponse.json(
-        { error: 'Invalid request parameters' },
-        { status: 400 }
-      )
+      const errorResponse1 = NextResponse.json({ error: 'Invalid request parameters', handler: handlerStamp }, { status: 400 });
+      errorResponse1.headers.set('X-Handler', JSON.stringify(handlerStamp));
+      return errorResponse1;
     }
 
     // Get record info before deleting (for email notification)
     const recordData = await getSignupById(recordId)
     
     if (!recordData.success || !recordData.record) {
-      return NextResponse.json(
-        { error: 'Signup not found' },
-        { status: 404 }
-      )
+      const errorResponse2 = NextResponse.json({ error: 'Signup not found', handler: handlerStamp }, { status: 404 });
+      errorResponse2.headers.set('X-Handler', JSON.stringify(handlerStamp));
+      return errorResponse2;
     }
 
     // Delete from Airtable
@@ -401,15 +419,18 @@ export async function GET(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const handlerStamp = stamp('signup.DELETE');
+  console.log('🚨🚨🚨 DELETE HANDLER CALLED - THIS SHOULD ALWAYS APPEAR! 🚨🚨��');
+  console.log('🔍 HANDLER STAMP:', handlerStamp);
+  
   try {
     const { searchParams } = new URL(request.url)
     const recordId = searchParams.get('recordId')
     
     if (!recordId) {
-      return NextResponse.json(
-        { error: 'Missing recordId parameter' },
-        { status: 400 }
-      )
+      const errorResponse1 = NextResponse.json({ error: 'Missing recordId parameter', handler: handlerStamp }, { status: 400 });
+      errorResponse1.headers.set('X-Handler', JSON.stringify(handlerStamp));
+      return errorResponse1;
     }
 
     // Get record info before deleting (for email notification)
@@ -471,10 +492,9 @@ export async function DELETE(request: NextRequest) {
         }
       }
       
-      return NextResponse.json({ 
-        success: true, 
-        message: 'Signup cancelled successfully'
-      })
+      const response = NextResponse.json({ success: true, message: 'Signup cancelled successfully', handler: handlerStamp });
+      response.headers.set('X-Handler', JSON.stringify(handlerStamp));
+      return response;
     } else {
       console.error('Airtable deletion failed:', result.error)
       
@@ -494,10 +514,9 @@ export async function DELETE(request: NextRequest) {
       } catch (emailError) {
         console.error('Failed to send error email:', emailError)
       }      
-      return NextResponse.json(
-        { error: 'Failed to cancel signup', details: String(result.error) },
-        { status: 500 }
-      )
+      const errorResponse2 = NextResponse.json({ error: 'Failed to cancel signup', details: String(result.error), handler: handlerStamp }, { status: 500 });
+      errorResponse2.headers.set('X-Handler', JSON.stringify(handlerStamp));
+      return errorResponse2;
     }
   } catch (error) {
     console.error('API Error:', error)
@@ -519,9 +538,8 @@ export async function DELETE(request: NextRequest) {
       console.error('Failed to send error notification email:', emailError)
     }
     
-    return NextResponse.json(
-      { error: 'Internal server error', details: String(error) },
-      { status: 500 }
-    )
+    const errorResponse = NextResponse.json({ error: 'Internal server error', details: String(error), handler: handlerStamp }, { status: 500 });
+    errorResponse.headers.set('X-Handler', JSON.stringify(handlerStamp));
+    return errorResponse;
   }
 }

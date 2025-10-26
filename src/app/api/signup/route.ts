@@ -488,13 +488,12 @@ export async function DELETE(request: NextRequest) {
         
         await sendEmail({
           to: 'alerts@samuelholley.com',
-          subject: '🚨 ERROR: Liturgist Cancellation Failed',
+          subject: '❌ Cancellation Failed',
           html: errorEmailHtml
         })
       } catch (emailError) {
-        console.error('Failed to send error notification email:', emailError)
-      }
-      
+        console.error('Failed to send error email:', emailError)
+      }      
       return NextResponse.json(
         { error: 'Failed to cancel signup', details: String(result.error) },
         { status: 500 }

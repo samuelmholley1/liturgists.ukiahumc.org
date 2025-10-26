@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
         // If Sam signs up: TO sam@ only (no CC)
         // If others sign up: TO their email, CC sam@
         const isSamSigningUp = body.email.toLowerCase() === 'sam@samuelholley.com'
-        const isBackup = body.role.toLowerCase() === 'backup'
+        const isBackup = body.role.toLowerCase().trim() === 'backup'
         const subjectPrefix = isBackup ? '✅ Backup Liturgist Confirmed' : '✅ Liturgist Signup Confirmed'
         
         await sendEmail({
@@ -225,7 +225,11 @@ export async function GET(request: NextRequest) {
         const userEmail = recordData.record.email as string
         const userRole = recordData.record.role as string
         const isSamCancelling = userEmail.toLowerCase() === 'sam@samuelholley.com'
-        const isBackup = userRole.toLowerCase() === 'backup'
+        
+        // DEBUG: Log the raw role value from Airtable
+        console.log(`DEBUG RAW AIRTABLE DATA: role="${userRole}" (type: ${typeof userRole}, length: ${userRole.length})`)
+        
+        const isBackup = userRole.toLowerCase().trim() === 'backup'
         const subjectPrefix = isBackup ? '❌ Backup Liturgist Cancelled' : '❌ Liturgist Signup Cancelled'
         
         console.log(`DEBUG Cancellation: role="${userRole}", isBackup=${isBackup}, subject="${subjectPrefix}"`)

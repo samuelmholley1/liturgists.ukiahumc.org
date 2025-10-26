@@ -193,7 +193,9 @@ export function generateSignupEmail(data: {
       <div class="container">
         <div class="header">
           <div class="logo">
-            <img src="https://liturgists.ukiahumc.org/logo-for-church-larger.jpg" alt="Ukiah United Methodist Church" />
+            <a href="https://liturgists.ukiahumc.org" style="display: block;">
+              <img src="https://liturgists.ukiahumc.org/logo-for-church-larger.jpg" alt="Ukiah United Methodist Church" />
+            </a>
           </div>
           <div class="success-icon">✅</div>
           <h1>Signup Confirmed</h1>
@@ -394,7 +396,9 @@ export function generateCancellationEmail(data: {
       <div class="container">
         <div class="header">
           <div class="logo">
-            <img src="https://liturgists.ukiahumc.org/logo-for-church-larger.jpg" alt="Ukiah United Methodist Church" />
+            <a href="https://liturgists.ukiahumc.org" style="display: block;">
+              <img src="https://liturgists.ukiahumc.org/logo-for-church-larger.jpg" alt="Ukiah United Methodist Church" />
+            </a>
           </div>
           <div class="cancel-icon">❌</div>
           <h1>Signup Cancelled</h1>
@@ -418,7 +422,7 @@ export function generateCancellationEmail(data: {
           </div>
           
           <div class="button-container">
-            <a href="https://liturgists.ukiahumc.org" class="button">Sign Up for Another Service</a>
+            <a href="https://liturgists.ukiahumc.org" class="button">Return to Schedule</a>
           </div>
           
           <p class="timestamp">

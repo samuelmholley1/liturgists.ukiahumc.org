@@ -840,7 +840,11 @@ export default function Home() {
                       Sign up as: *
                     </label>
                     <div className="space-y-2">
-                      <label className={`flex items-center ${selectedService?.liturgist ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+                      <label className={`flex items-center p-3 border-2 rounded-lg transition-all ${
+                        signupForm.role === 'liturgist' 
+                          ? 'bg-blue-50 border-blue-500 shadow-sm' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      } ${selectedService?.liturgist ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
                         <input
                           type="radio"
                           name="role"
@@ -848,18 +852,27 @@ export default function Home() {
                           checked={signupForm.role === 'liturgist'}
                           onChange={(e) => setSignupForm({ ...signupForm, role: 'liturgist' })}
                           disabled={!!selectedService?.liturgist}
-                          className="mr-2"
+                          className="mr-3 w-4 h-4 text-blue-600"
                         />
-                        <span className="text-sm">
-                          Main Liturgist
+                        <div className="flex-1">
+                          <span className={`text-sm font-medium ${signupForm.role === 'liturgist' ? 'text-blue-900' : 'text-gray-700'}`}>
+                            Main Liturgist
+                            {signupForm.role === 'liturgist' && (
+                              <span className="ml-2 px-2 py-0.5 bg-blue-600 text-white text-xs rounded-full">Selected</span>
+                            )}
+                          </span>
                           {selectedService?.liturgist && (
                             <span className="ml-2 text-xs text-red-600 font-medium">
                               (Taken by {selectedService.liturgist.name})
                             </span>
                           )}
-                        </span>
+                        </div>
                       </label>
-                      <label className={`flex items-center ${selectedService?.backup ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+                      <label className={`flex items-center p-3 border-2 rounded-lg transition-all ${
+                        signupForm.role === 'backup' 
+                          ? 'bg-blue-50 border-blue-500 shadow-sm' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      } ${selectedService?.backup ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
                         <input
                           type="radio"
                           name="role"
@@ -867,16 +880,21 @@ export default function Home() {
                           checked={signupForm.role === 'backup'}
                           onChange={(e) => setSignupForm({ ...signupForm, role: 'backup' })}
                           disabled={!!selectedService?.backup}
-                          className="mr-2"
+                          className="mr-3 w-4 h-4 text-blue-600"
                         />
-                        <span className="text-sm">
-                          Backup Liturgist
+                        <div className="flex-1">
+                          <span className={`text-sm font-medium ${signupForm.role === 'backup' ? 'text-blue-900' : 'text-gray-700'}`}>
+                            Backup Liturgist
+                            {signupForm.role === 'backup' && (
+                              <span className="ml-2 px-2 py-0.5 bg-blue-600 text-white text-xs rounded-full">Selected</span>
+                            )}
+                          </span>
                           {selectedService?.backup && (
                             <span className="ml-2 text-xs text-orange-600 font-medium">
                               (Taken by {selectedService.backup.name})
                             </span>
                           )}
-                        </span>
+                        </div>
                       </label>
                     </div>
                     

@@ -10,6 +10,20 @@ interface EmailParams {
 }
 
 export async function sendEmail({ to, cc, replyTo, subject, html }: EmailParams) {
+  // FORENSIC DEBUGGING STAMP
+  const stamp = {
+    handler: process.env.VERCEL_URL ?? 'local',
+    sha: process.env.VERCEL_GIT_COMMIT_SHA ?? 'dev',
+    region: process.env.VERCEL_REGION ?? 'unknown',
+    at: new Date().toISOString(),
+    import: typeof import.meta !== 'undefined' ? (import.meta as any).url : 'no-import-meta'
+  }
+  console.log('🔍 MAIL-STAMP', stamp, { subject, to, cc })
+  
+  // Add debug stamp to email and unique subject identifier
+  const debugSubject = `${subject} [debug ${stamp.sha?.slice(0,7)}]`
+  const stampedHtml = html + `<pre style="font-size:10px;opacity:.6;margin-top:20px;padding:10px;background:#f0f0f0;">🔍 MAIL-STAMP ${JSON.stringify(stamp)}</pre>`
+  
   // Create transporter using Zoho SMTP
   const transporter = nodemailer.createTransport({
     host: 'smtp.zoho.com',
@@ -26,8 +40,12 @@ export async function sendEmail({ to, cc, replyTo, subject, html }: EmailParams)
     to,
     cc,
     replyTo: replyTo || 'sam@samuelholley.com',
-    subject,
-    html,
+    subject: debugSubject,  // Use debug subject with stamp
+    html: stampedHtml,      // Use stamped HTML
+    headers: {
+      'X-Route': `email.sendEmail@${stamp.sha?.slice(0,7)}`,
+      'X-Handler': `lib-email@${stamp.sha?.slice(0,7)}`
+    }
   }
 
   try {

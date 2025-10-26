@@ -547,10 +547,10 @@ export default function Home() {
               <Image 
                 src="/logo-for-church-larger.jpg" 
                 alt="Church Logo" 
-                width={120} 
-                height={120} 
+                width={180} 
+                height={180} 
                 quality={100}
-                className="rounded-lg shadow-lg"
+                className="rounded-lg shadow-lg object-contain"
               />
             </div>
             
@@ -648,9 +648,10 @@ export default function Home() {
                 <Image
                   src="/logo-for-church-larger.jpg"
                   alt="Ukiah United Methodist Church Logo"
-                  width={32}
-                  height={32}
-                  className="rounded-full shadow-sm"
+                  width={48}
+                  height={48}
+                  quality={100}
+                  className="rounded-md shadow-sm object-contain"
                 />
                 <div className="flex-1">
                   <h1 className="text-sm font-bold text-gray-800">Liturgist Schedule</h1>
@@ -1070,11 +1071,11 @@ export default function Home() {
                   {/* Two Rows: Liturgist and Backup - Always Visible */}
                   <div className="space-y-2 text-sm">
                     {/* Liturgist Row */}
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2 flex-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
                         <span className="font-medium text-gray-700 whitespace-nowrap">Liturgist:</span>
                         {service.liturgist ? (
-                          <>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 min-w-0 flex-1">
                             <span className="font-semibold text-green-900 truncate" title={service.liturgist.name}>
                               {service.liturgist.name}
                             </span>
@@ -1083,12 +1084,12 @@ export default function Home() {
                                 {service.liturgist.email}
                               </span>
                             )}
-                          </>
+                          </div>
                         ) : (
                           <button
                             onClick={() => handleSignup(service.id, 'liturgist')}
                             disabled={isLockedQuarter}
-                            className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-full hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-full hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                           >
                             Sign Up
                           </button>
@@ -1097,24 +1098,24 @@ export default function Home() {
                       
                       {/* Cancel Button - Right Side (only if filled) */}
                       {service.liturgist && (
-                        <div className="flex-shrink-0">
+                        <div className="flex-shrink-0 sm:ml-2">
                           <button
                             onClick={() => handleCancelSignup(service.liturgist!.id, service.liturgist!.name, service.displayDate, 'Liturgist')}
                             disabled={isLockedQuarter}
-                            className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap w-full sm:w-auto"
                           >
-                            Cancel Liturgist
+                            Cancel
                           </button>
                         </div>
                       )}
                     </div>
                     
                     {/* Backup Row */}
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2 flex-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
                         <span className="font-medium text-gray-700 whitespace-nowrap">Backup:</span>
                         {service.backup ? (
-                          <>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 min-w-0 flex-1">
                             <span className="font-semibold text-blue-900 truncate" title={service.backup.name}>
                               {service.backup.name}
                             </span>
@@ -1123,12 +1124,12 @@ export default function Home() {
                                 {service.backup.email}
                               </span>
                             )}
-                          </>
+                          </div>
                         ) : (
                           <button
                             onClick={() => handleSignup(service.id, 'backup')}
                             disabled={isLockedQuarter}
-                            className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                           >
                             Sign Up
                           </button>
@@ -1137,13 +1138,13 @@ export default function Home() {
                       
                       {/* Cancel Button - Right Side (only if filled) */}
                       {service.backup && (
-                        <div className="flex-shrink-0">
+                        <div className="flex-shrink-0 sm:ml-2">
                           <button
                             onClick={() => handleCancelSignup(service.backup!.id, service.backup!.name, service.displayDate, 'Backup')}
                             disabled={isLockedQuarter}
-                            className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap w-full sm:w-auto"
                           >
-                            Cancel Backup
+                            Cancel
                           </button>
                         </div>
                       )}

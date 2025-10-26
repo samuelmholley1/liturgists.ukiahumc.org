@@ -95,10 +95,12 @@ export function generateSignupEmail(data: {
           margin-bottom: 20px; 
         }
         .logo img { 
-          width: 150px; 
-          height: 150px; 
+          width: 200px; 
+          height: auto; 
           border-radius: 8px; 
           border: 4px solid rgba(255,255,255,0.3);
+          display: block;
+          margin: 0 auto;
         }
         .content { 
           padding: 40px 30px;
@@ -173,7 +175,7 @@ export function generateSignupEmail(data: {
         }
         h1 {
           margin: 0;
-          font-size: 28px;
+          font-size: 22px;
           font-weight: 600;
         }
         .message-text {
@@ -301,10 +303,12 @@ export function generateCancellationEmail(data: {
           margin-bottom: 20px; 
         }
         .logo img { 
-          width: 150px; 
-          height: 150px; 
+          width: 200px; 
+          height: auto; 
           border-radius: 8px; 
           border: 4px solid rgba(255,255,255,0.3);
+          display: block;
+          margin: 0 auto;
         }
         .content { 
           padding: 40px 30px;
@@ -372,7 +376,7 @@ export function generateCancellationEmail(data: {
         }
         h1 {
           margin: 0;
-          font-size: 28px;
+          font-size: 22px;
           font-weight: 600;
         }
         .message-text {
@@ -531,7 +535,7 @@ export function generateErrorEmail(data: {
         }
         h1 {
           margin: 0;
-          font-size: 28px;
+          font-size: 22px;
           font-weight: 600;
         }
         .message-text {

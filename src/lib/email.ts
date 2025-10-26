@@ -67,21 +67,122 @@ export function generateSignupEmail(data: {
     <!DOCTYPE html>
     <html>
     <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-        .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
-        .logo { text-align: center; margin-bottom: 20px; }
-        .logo img { max-width: 120px; height: auto; border-radius: 8px; }
-        .info-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea; }
-        .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e9ecef; }
-        .info-label { font-weight: bold; color: #495057; }
-        .info-value { color: #212529; }
-        .footer { text-align: center; color: #6c757d; font-size: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #dee2e6; }
-        .success-icon { font-size: 48px; margin-bottom: 10px; }
-        .button { display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; margin: 10px 5px; }
-        .cancel-button { background: #dc3545; }
+        body { 
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+          line-height: 1.6; 
+          color: #1a1a1a; 
+          background-color: #f5f5f5;
+          margin: 0;
+          padding: 0;
+        }
+        .container { 
+          max-width: 600px; 
+          margin: 20px auto; 
+          background: #ffffff;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .header { 
+          background: #2c5282; 
+          color: white; 
+          padding: 40px 30px; 
+          text-align: center;
+        }
+        .logo { 
+          margin-bottom: 20px; 
+        }
+        .logo img { 
+          width: 150px; 
+          height: 150px; 
+          border-radius: 8px; 
+          border: 4px solid rgba(255,255,255,0.3);
+        }
+        .content { 
+          padding: 40px 30px;
+        }
+        .info-box { 
+          background: #f8f9fa; 
+          padding: 24px; 
+          border-radius: 6px; 
+          margin: 24px 0; 
+          border-left: 4px solid #2c5282;
+        }
+        .info-row { 
+          display: flex; 
+          justify-content: space-between; 
+          padding: 12px 0; 
+          border-bottom: 1px solid #e2e8f0;
+          font-size: 15px;
+        }
+        .info-row:last-child {
+          border-bottom: none;
+        }
+        .info-label { 
+          font-weight: 600; 
+          color: #4a5568;
+          min-width: 120px;
+        }
+        .info-value { 
+          color: #1a1a1a;
+          text-align: right;
+          word-break: break-word;
+        }
+        .success-icon { 
+          font-size: 56px; 
+          margin-bottom: 16px; 
+        }
+        .button-container {
+          text-align: center;
+          margin: 32px 0;
+        }
+        .button { 
+          display: inline-block; 
+          padding: 14px 32px; 
+          background: #2c5282; 
+          color: white !important; 
+          text-decoration: none; 
+          border-radius: 6px; 
+          margin: 8px 4px;
+          font-weight: 600;
+          font-size: 15px;
+        }
+        .button:hover {
+          background: #2a4365;
+        }
+        .cancel-button { 
+          background: #c53030;
+        }
+        .cancel-button:hover {
+          background: #9b2c2c;
+        }
+        .footer-text {
+          text-align: center;
+          color: #718096;
+          font-size: 13px;
+          padding: 20px 30px;
+          border-top: 1px solid #e2e8f0;
+        }
+        .timestamp {
+          font-size: 13px;
+          color: #718096;
+          text-align: center;
+          margin-top: 24px;
+        }
+        h1 {
+          margin: 0;
+          font-size: 28px;
+          font-weight: 600;
+        }
+        .message-text {
+          font-size: 17px;
+          margin: 0 0 24px 0;
+          text-align: center;
+          color: #2d3748;
+          font-weight: 500;
+        }
       </style>
     </head>
     <body>
@@ -91,10 +192,10 @@ export function generateSignupEmail(data: {
             <img src="https://liturgists.ukiahumc.org/logo-for-church-larger.jpg" alt="Ukiah United Methodist Church" />
           </div>
           <div class="success-icon">✅</div>
-          <h1 style="margin: 0;">Signup Confirmed</h1>
+          <h1>Signup Confirmed</h1>
         </div>
         <div class="content">
-          <p style="font-size: 18px; margin-top: 0; text-align: center;"><strong>You signed up for liturgist service!</strong></p>
+          <p class="message-text">You signed up for liturgist service!</p>
           
           <div class="info-box">
             <div class="info-row">
@@ -113,31 +214,31 @@ export function generateSignupEmail(data: {
               <span class="info-label">Your Role:</span>
               <span class="info-value">${role}</span>
             </div>
-            <div class="info-row" style="border-bottom: none;">
+            <div class="info-row">
               <span class="info-label">Service Date:</span>
               <span class="info-value">${formattedDate}</span>
             </div>
             ${notes ? `
-            <div class="info-row" style="border-bottom: none; border-top: 1px solid #e9ecef;">
+            <div class="info-row">
               <span class="info-label">Your Notes:</span>
               <span class="info-value">${notes}</span>
             </div>
             ` : ''}
           </div>
           
-          <p style="text-align: center; margin: 20px 0;">
+          <div class="button-container">
             <a href="https://liturgists.ukiahumc.org" class="button">View Full Schedule</a>
             <a href="https://liturgists.ukiahumc.org/api/signup?recordId=${recordId}&action=cancel" class="button cancel-button">Cancel This Signup</a>
-          </p>
+          </div>
           
-          <p style="font-size: 14px; color: #6c757d; margin-bottom: 0; text-align: center;">
+          <p class="timestamp">
             Need to cancel? Click the button above or contact the church office.<br/>
-            Timestamp: ${new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })} PT
+            Confirmation sent: ${new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })} PT
           </p>
         </div>
-        <div class="footer">
-          <p>Ukiah United Methodist Church<br/>
-          Liturgist Signup System</p>
+        <div class="footer-text">
+          <strong>Ukiah United Methodist Church</strong><br/>
+          Liturgist Signup System
         </div>
       </div>
     </body>
@@ -172,20 +273,115 @@ export function generateCancellationEmail(data: {
     <!DOCTYPE html>
     <html>
     <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-        .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
-        .logo { text-align: center; margin-bottom: 20px; }
-        .logo img { max-width: 120px; height: auto; border-radius: 8px; }
-        .info-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f5576c; }
-        .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e9ecef; }
-        .info-label { font-weight: bold; color: #495057; }
-        .info-value { color: #212529; }
-        .footer { text-align: center; color: #6c757d; font-size: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #dee2e6; }
-        .cancel-icon { font-size: 48px; margin-bottom: 10px; }
-        .button { display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; margin-top: 20px; }
+        body { 
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+          line-height: 1.6; 
+          color: #1a1a1a; 
+          background-color: #f5f5f5;
+          margin: 0;
+          padding: 0;
+        }
+        .container { 
+          max-width: 600px; 
+          margin: 20px auto; 
+          background: #ffffff;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .header { 
+          background: #744210; 
+          color: white; 
+          padding: 40px 30px; 
+          text-align: center;
+        }
+        .logo { 
+          margin-bottom: 20px; 
+        }
+        .logo img { 
+          width: 150px; 
+          height: 150px; 
+          border-radius: 8px; 
+          border: 4px solid rgba(255,255,255,0.3);
+        }
+        .content { 
+          padding: 40px 30px;
+        }
+        .info-box { 
+          background: #f8f9fa; 
+          padding: 24px; 
+          border-radius: 6px; 
+          margin: 24px 0; 
+          border-left: 4px solid #744210;
+        }
+        .info-row { 
+          display: flex; 
+          justify-content: space-between; 
+          padding: 12px 0; 
+          border-bottom: 1px solid #e2e8f0;
+          font-size: 15px;
+        }
+        .info-row:last-child {
+          border-bottom: none;
+        }
+        .info-label { 
+          font-weight: 600; 
+          color: #4a5568;
+          min-width: 120px;
+        }
+        .info-value { 
+          color: #1a1a1a;
+          text-align: right;
+          word-break: break-word;
+        }
+        .cancel-icon { 
+          font-size: 56px; 
+          margin-bottom: 16px; 
+        }
+        .button-container {
+          text-align: center;
+          margin: 32px 0;
+        }
+        .button { 
+          display: inline-block; 
+          padding: 14px 32px; 
+          background: #2c5282; 
+          color: white !important; 
+          text-decoration: none; 
+          border-radius: 6px; 
+          font-weight: 600;
+          font-size: 15px;
+        }
+        .button:hover {
+          background: #2a4365;
+        }
+        .footer-text {
+          text-align: center;
+          color: #718096;
+          font-size: 13px;
+          padding: 20px 30px;
+          border-top: 1px solid #e2e8f0;
+        }
+        .timestamp {
+          font-size: 13px;
+          color: #718096;
+          text-align: center;
+          margin-top: 24px;
+        }
+        h1 {
+          margin: 0;
+          font-size: 28px;
+          font-weight: 600;
+        }
+        .message-text {
+          font-size: 17px;
+          margin: 0 0 24px 0;
+          text-align: center;
+          color: #2d3748;
+          font-weight: 500;
+        }
       </style>
     </head>
     <body>
@@ -195,10 +391,10 @@ export function generateCancellationEmail(data: {
             <img src="https://liturgists.ukiahumc.org/logo-for-church-larger.jpg" alt="Ukiah United Methodist Church" />
           </div>
           <div class="cancel-icon">❌</div>
-          <h1 style="margin: 0;">Signup Cancelled</h1>
+          <h1>Signup Cancelled</h1>
         </div>
         <div class="content">
-          <p style="font-size: 18px; margin-top: 0; text-align: center;"><strong>You cancelled your liturgist signup.</strong></p>
+          <p class="message-text">You cancelled your liturgist signup.</p>
           
           <div class="info-box">
             <div class="info-row">
@@ -209,24 +405,24 @@ export function generateCancellationEmail(data: {
               <span class="info-label">Your Role:</span>
               <span class="info-value">${role}</span>
             </div>
-            <div class="info-row" style="border-bottom: none;">
+            <div class="info-row">
               <span class="info-label">Service Date:</span>
               <span class="info-value">${formattedDate}</span>
             </div>
           </div>
           
-          <p style="text-align: center; margin: 20px 0;">
+          <div class="button-container">
             <a href="https://liturgists.ukiahumc.org" class="button">Sign Up for Another Service</a>
-          </p>
+          </div>
           
-          <p style="font-size: 14px; color: #6c757d; margin-bottom: 0; text-align: center;">
-            Thank you for letting us know. We appreciate your service to the church.<br/>
-            Timestamp: ${new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })} PT
+          <p class="timestamp">
+            Thank you for letting us know. We appreciate your communication.<br/>
+            Cancellation confirmed: ${new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })} PT
           </p>
         </div>
-        <div class="footer">
-          <p>Ukiah United Methodist Church<br/>
-          Liturgist Signup System</p>
+        <div class="footer-text">
+          <strong>Ukiah United Methodist Church</strong><br/>
+          Liturgist Signup System
         </div>
       </div>
     </body>
@@ -248,33 +444,115 @@ export function generateErrorEmail(data: {
     <!DOCTYPE html>
     <html>
     <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: linear-gradient(135deg, #ff6b6b 0%, #c92a2a 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-        .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
-        .error-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #c92a2a; }
-        .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e9ecef; }
-        .info-label { font-weight: bold; color: #495057; }
-        .info-value { color: #212529; word-break: break-all; }
-        .code-block { background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 12px; overflow-x: auto; margin-top: 15px; }
-        .footer { text-align: center; color: #6c757d; font-size: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #dee2e6; }
-        .error-icon { font-size: 48px; margin-bottom: 10px; }
-        .alert-badge { background: #ff6b6b; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        body { 
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+          line-height: 1.6; 
+          color: #1a1a1a; 
+          background-color: #f5f5f5;
+          margin: 0;
+          padding: 0;
+        }
+        .container { 
+          max-width: 600px; 
+          margin: 20px auto; 
+          background: #ffffff;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .header { 
+          background: #c53030; 
+          color: white; 
+          padding: 40px 30px; 
+          text-align: center;
+        }
+        .content { 
+          padding: 40px 30px;
+        }
+        .error-box { 
+          background: #fff5f5; 
+          padding: 24px; 
+          border-radius: 6px; 
+          margin: 24px 0; 
+          border-left: 4px solid #c53030;
+        }
+        .info-row { 
+          display: flex; 
+          justify-content: space-between; 
+          padding: 12px 0; 
+          border-bottom: 1px solid #fed7d7;
+          font-size: 15px;
+        }
+        .info-row:last-child {
+          border-bottom: none;
+        }
+        .info-label { 
+          font-weight: 600; 
+          color: #4a5568;
+          min-width: 140px;
+        }
+        .info-value { 
+          color: #1a1a1a;
+          text-align: right;
+          word-break: break-all;
+        }
+        .code-block { 
+          background: #2d3748; 
+          color: #e2e8f0; 
+          padding: 16px; 
+          border-radius: 6px; 
+          font-family: 'Courier New', monospace; 
+          font-size: 13px; 
+          overflow-x: auto; 
+          margin-top: 16px;
+        }
+        .footer-text {
+          text-align: center;
+          color: #718096;
+          font-size: 13px;
+          padding: 20px 30px;
+          border-top: 1px solid #e2e8f0;
+        }
+        .error-icon { 
+          font-size: 56px; 
+          margin-bottom: 16px; 
+        }
+        .alert-badge { 
+          background: #c53030; 
+          color: white; 
+          padding: 6px 14px; 
+          border-radius: 4px; 
+          font-size: 13px; 
+          font-weight: 600;
+          display: inline-block;
+          margin-bottom: 16px;
+        }
+        h1 {
+          margin: 0;
+          font-size: 28px;
+          font-weight: 600;
+        }
+        .message-text {
+          font-size: 15px;
+          margin: 0;
+          color: #2d3748;
+        }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
           <div class="error-icon">🚨</div>
-          <h1 style="margin: 0;">System Error Alert</h1>
-          <p style="margin: 10px 0 0 0; opacity: 0.9;">Liturgist Signup System</p>
+          <h1>System Error Alert</h1>
+          <p style="margin: 10px 0 0 0; opacity: 0.9; font-size: 15px;">Liturgist Signup System</p>
         </div>
         <div class="content">
-          <p style="font-size: 16px; margin-top: 0;">
+          <div style="text-align: center;">
             <span class="alert-badge">ERROR</span>
-            An error occurred in the liturgist signup system.
-          </p>
+          </div>
+          <p class="message-text">An error occurred in the liturgist signup system.</p>
           
           <div class="error-box">
             <div class="info-row">
@@ -303,7 +581,7 @@ export function generateErrorEmail(data: {
               <span class="info-value">${serviceDate}</span>
             </div>
             ` : ''}
-            <div class="info-row" style="border-bottom: none;">
+            <div class="info-row">
               <span class="info-label">Timestamp:</span>
               <span class="info-value">${new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })} PT</span>
             </div>
@@ -311,18 +589,18 @@ export function generateErrorEmail(data: {
           
           ${stackTrace ? `
           <div class="code-block">
-            <strong style="color: #ff6b6b;">Stack Trace:</strong><br/><br/>
+            <strong style="color: #fc8181;">Stack Trace:</strong><br/><br/>
             ${stackTrace.replace(/\n/g, '<br/>')}
           </div>
           ` : ''}
           
-          <p style="font-size: 14px; color: #6c757d; margin-top: 20px;">
+          <p style="font-size: 14px; color: #718096; margin-top: 24px; text-align: center;">
             ⚠️ This error was automatically detected and reported. Please investigate and resolve as soon as possible.
           </p>
         </div>
-        <div class="footer">
-          <p>Automated Error Notification<br/>
-          Liturgist Signup System - Ukiah UMC</p>
+        <div class="footer-text">
+          <strong>Automated Error Notification</strong><br/>
+          Liturgist Signup System - Ukiah UMC
         </div>
       </div>
     </body>

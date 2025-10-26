@@ -43,11 +43,11 @@ export default function PasswordGate({ children }: PasswordGateProps) {
           <Image
             src="/logo-for-church-larger.jpg"
             alt="Ukiah United Methodist Church"
-            width={120}
-            height={120}
+            width={200}
+            height={200}
             quality={100}
             priority
-            className="rounded-full shadow-md mx-auto mb-4"
+            className="rounded-lg shadow-md mx-auto mb-4"
           />
           <h1 className="text-2xl font-bold text-gray-800 mb-2">
             Liturgist Schedule

@@ -193,6 +193,21 @@ export async function GET(request: NextRequest) {
       
       // Send cancellation email notifications
       try {
+        // Format display date for subject line
+        let formattedDateForSubject = recordData.record.displayDate as string
+        if (formattedDateForSubject && formattedDateForSubject.includes('T') && formattedDateForSubject.includes('Z')) {
+          try {
+            const date = new Date(formattedDateForSubject)
+            formattedDateForSubject = date.toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })
+          } catch (error) {
+            console.warn('Failed to parse displayDate for subject:', formattedDateForSubject)
+          }
+        }
+        
         const emailHtml = generateCancellationEmail({
           name: recordData.record.name as string,
           role: recordData.record.role as string,
@@ -202,7 +217,7 @@ export async function GET(request: NextRequest) {
         await sendEmail({
           to: recordData.record.email as string,
           cc: 'sam@samuelholley.com',
-          subject: `❌ Your Liturgist Signup Cancelled - ${recordData.record.displayDate}`,
+          subject: `❌ Your Liturgist Signup Cancelled - ${formattedDateForSubject}`,
           html: emailHtml
         })
         
@@ -380,6 +395,21 @@ export async function DELETE(request: NextRequest) {
       // Send cancellation email notifications
       if (recordData.success && recordData.record) {
         try {
+          // Format display date for subject line
+          let formattedDateForSubject = recordData.record.displayDate as string
+          if (formattedDateForSubject && formattedDateForSubject.includes('T') && formattedDateForSubject.includes('Z')) {
+            try {
+              const date = new Date(formattedDateForSubject)
+              formattedDateForSubject = date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })
+            } catch (error) {
+              console.warn('Failed to parse displayDate for subject:', formattedDateForSubject)
+            }
+          }
+          
           const emailHtml = generateCancellationEmail({
             name: recordData.record.name as string,
             role: recordData.record.role as string,
@@ -389,7 +419,7 @@ export async function DELETE(request: NextRequest) {
           await sendEmail({
             to: recordData.record.email as string,
             cc: 'sam@samuelholley.com',
-            subject: `❌ Your Liturgist Signup Cancelled - ${recordData.record.displayDate}`,
+            subject: `❌ Your Liturgist Signup Cancelled - ${formattedDateForSubject}`,
             html: emailHtml
           })
           

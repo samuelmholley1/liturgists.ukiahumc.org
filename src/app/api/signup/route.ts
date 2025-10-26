@@ -238,7 +238,7 @@ export async function GET(request: NextRequest) {
         // Send cancellation email
         // For backup cancellations: ALWAYS CC sam@ (even if Sam cancels himself)
         // For main liturgist: CC sam@ only if others cancel
-        const shouldCCSam = isBackup ? true : !isSamCancelling
+        const shouldCCSam = !isSamCancelling
         
         await sendEmail({
           to: userEmail,

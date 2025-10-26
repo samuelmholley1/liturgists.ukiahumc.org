@@ -84,6 +84,14 @@ export default function Home() {
     return { month: today.getMonth(), year: today.getFullYear() }
   })
   
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean
+    type: 'success' | 'error' | 'warning' | 'confirm'
+    title: string
+    message: string
+    onConfirm?: () => void
+  } | null>(null)
+  
   const liturgists = getAllLiturgists()
   
   // Check if viewing a locked future quarter
@@ -252,7 +260,12 @@ export default function Home() {
     
     // Check if both roles are taken
     if (service?.liturgist && service?.backup) {
-      alert('Both the Main Liturgist and Backup positions are filled for this service. Please choose a different Sunday.')
+      setModalState({
+        isOpen: true,
+        type: 'warning',
+        title: 'Service Full',
+        message: 'Both the Main Liturgist and Backup positions are filled for this service. Please choose a different Sunday.'
+      })
       return
     }
     
@@ -260,28 +273,51 @@ export default function Home() {
     setSelectedSignup({ serviceId })
   }
 
-  const handleCancelSignup = async (recordId: string, displayDate: string, role: string) => {
-    const confirmed = confirm(`Are you sure you want to cancel your ${role} signup for ${displayDate}?`)
-    if (!confirmed) return
+  const handleCancelSignup = async (recordId: string, personName: string, displayDate: string, role: string) => {
+    // Show confirmation modal with person's name
+    setModalState({
+      isOpen: true,
+      type: 'confirm',
+      title: 'Cancel Signup',
+      message: `Are you sure you want to cancel ${personName}'s ${role} signup for ${displayDate}?`,
+      onConfirm: async () => {
+        setModalState(null)
+        
+        try {
+          const response = await fetch(`/api/signup?recordId=${recordId}`, {
+            method: 'DELETE',
+          })
 
-    try {
-      const response = await fetch(`/api/signup?recordId=${recordId}`, {
-        method: 'DELETE',
-      })
+          const data = await response.json()
 
-      const data = await response.json()
-
-      if (response.ok) {
-        alert('Your signup has been cancelled successfully.')
-        // Refresh services to show updated availability
-        await fetchServices()
-      } else {
-        alert(data.error || 'Failed to cancel signup. Please try again.')
+          if (response.ok) {
+            setModalState({
+              isOpen: true,
+              type: 'success',
+              title: 'Cancelled Successfully',
+              message: `${personName}'s signup has been cancelled.`
+            })
+            // Refresh services to show updated availability
+            await fetchServices()
+          } else {
+            setModalState({
+              isOpen: true,
+              type: 'error',
+              title: 'Cancellation Failed',
+              message: data.error || 'Failed to cancel signup. Please try again.'
+            })
+          }
+        } catch (error) {
+          console.error('Error cancelling signup:', error)
+          setModalState({
+            isOpen: true,
+            type: 'error',
+            title: 'Error',
+            message: 'An error occurred while cancelling the signup. Please try again.'
+          })
+        }
       }
-    } catch (error) {
-      console.error('Error cancelling signup:', error)
-      alert('An error occurred while cancelling your signup. Please try again.')
-    }
+    })
   }
   
   // Handle person selection from dropdown
@@ -329,14 +365,24 @@ export default function Home() {
 
     // Validate name is not empty (CRITICAL: prevents spaces-only names)
     if (!fullName || fullName.trim().length === 0) {
-      alert('Please enter a valid name before submitting.')
+      setModalState({
+        isOpen: true,
+        type: 'warning',
+        title: 'Name Required',
+        message: 'Please enter a valid name before submitting.'
+      })
       return
     }
 
     // Enhanced email validation (reject trailing dots, invalid domains)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
     if (!emailRegex.test(signupForm.email) || signupForm.email.endsWith('.')) {
-      alert('Please enter a valid email address before submitting.')
+      setModalState({
+        isOpen: true,
+        type: 'warning',
+        title: 'Invalid Email',
+        message: 'Please enter a valid email address before submitting.'
+      })
       return
     }
 
@@ -344,13 +390,23 @@ export default function Home() {
     if (signupForm.phone && signupForm.phone.trim().length > 0) {
       const phoneRegex = /^[\d\s\-\(\)\+\.]+$/
       if (!phoneRegex.test(signupForm.phone)) {
-        alert('Please enter a valid phone number (digits, spaces, dashes, and parentheses only).')
+        setModalState({
+          isOpen: true,
+          type: 'warning',
+          title: 'Invalid Phone Number',
+          message: 'Please enter a valid phone number (digits, spaces, dashes, and parentheses only).'
+        })
         return
       }
       // Ensure at least 10 digits for US phone numbers
       const digitsOnly = signupForm.phone.replace(/\D/g, '')
       if (digitsOnly.length < 10) {
-        alert('Please enter a complete phone number with at least 10 digits.')
+        setModalState({
+          isOpen: true,
+          type: 'warning',
+          title: 'Incomplete Phone Number',
+          message: 'Please enter a complete phone number with at least 10 digits.'
+        })
         return
       }
     }
@@ -381,8 +437,7 @@ export default function Home() {
       if (data.success) {
         // Success message includes role and date, and any special notes
         const roleLabel = signupForm.role === 'liturgist' ? 'Main Liturgist' : 'Backup'
-        const specialNote = service.notes ? `\n\nNote: ${service.notes}` : ''
-        alert(`✅ Thank you! You are signed up as ${roleLabel} for ${service.displayDate}.${specialNote}`)
+        const specialNote = service.notes ? `\n\n${service.notes}` : ''
         
         // Close modal first
         setSelectedSignup(null)
@@ -395,6 +450,14 @@ export default function Home() {
           role: 'liturgist'
         })
         
+        // Show success modal
+        setModalState({
+          isOpen: true,
+          type: 'success',
+          title: 'Signup Successful!',
+          message: `Thank you! You are signed up as ${roleLabel} for ${service.displayDate}.${specialNote}`
+        })
+        
         // Force immediate refresh to show updated data
         await fetchServices()
         
@@ -404,11 +467,21 @@ export default function Home() {
         }, 1000)
       } else {
         console.error('Signup failed:', data)
-        alert(`There was an error submitting your signup: ${data.error}\n\n${data.details || 'Please try again or contact the church office.'}`)
+        setModalState({
+          isOpen: true,
+          type: 'error',
+          title: 'Signup Failed',
+          message: `${data.error}\n\n${data.details || 'Please try again or contact the church office.'}`
+        })
       }
     } catch (error) {
       console.error('Signup error:', error)
-      alert(`There was an error submitting your signup: ${error}\n\nPlease try again or contact the church office.`)
+      setModalState({
+        isOpen: true,
+        type: 'error',
+        title: 'Signup Error',
+        message: `An error occurred: ${error}\n\nPlease try again or contact the church office.`
+      })
     } finally {
       // Re-enable submit button after request completes
       setIsSubmitting(false)
@@ -432,6 +505,86 @@ export default function Home() {
 
   return (
     <PasswordGate>
+      {/* Custom Modal for Alerts/Confirmations */}
+      {modalState?.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-2xl p-6 max-w-md w-full">
+            {/* Icon */}
+            <div className="flex items-center justify-center mb-4">
+              {modalState.type === 'success' && (
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              )}
+              {modalState.type === 'error' && (
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+              )}
+              {modalState.type === 'warning' && (
+                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center">
+                  <svg className="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+              )}
+              {modalState.type === 'confirm' && (
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                  <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              )}
+            </div>
+            
+            {/* Title */}
+            <h3 className="text-xl font-semibold text-gray-900 text-center mb-3">
+              {modalState.title}
+            </h3>
+            
+            {/* Message */}
+            <p className="text-gray-700 text-center mb-6 whitespace-pre-line">
+              {modalState.message}
+            </p>
+            
+            {/* Buttons */}
+            <div className="flex gap-3 justify-center">
+              {modalState.type === 'confirm' ? (
+                <>
+                  <button
+                    onClick={() => setModalState(null)}
+                    className="px-6 py-2.5 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={modalState.onConfirm}
+                    className="px-6 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+                  >
+                    Confirm
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setModalState(null)}
+                  className={`px-8 py-2.5 rounded-lg font-medium transition-colors ${
+                    modalState.type === 'success' ? 'bg-green-600 hover:bg-green-700 text-white' :
+                    modalState.type === 'error' ? 'bg-red-600 hover:bg-red-700 text-white' :
+                    'bg-blue-600 hover:bg-blue-700 text-white'
+                  }`}
+                >
+                  OK
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      
       <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       
       {/* Live Update Indicator */}
@@ -901,7 +1054,7 @@ export default function Home() {
                       {service.liturgist && (
                         <div className="flex-shrink-0">
                           <button
-                            onClick={() => handleCancelSignup(service.liturgist!.id, service.displayDate, 'Liturgist')}
+                            onClick={() => handleCancelSignup(service.liturgist!.id, service.liturgist!.name, service.displayDate, 'Liturgist')}
                             disabled={isLockedQuarter}
                             className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
@@ -941,7 +1094,7 @@ export default function Home() {
                       {service.backup && (
                         <div className="flex-shrink-0">
                           <button
-                            onClick={() => handleCancelSignup(service.backup!.id, service.displayDate, 'Backup')}
+                            onClick={() => handleCancelSignup(service.backup!.id, service.backup!.name, service.displayDate, 'Backup')}
                             disabled={isLockedQuarter}
                             className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >

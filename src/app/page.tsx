@@ -660,15 +660,6 @@ export default function Home() {
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center space-x-2">
-                <Image
-                  src="/logo-for-church-larger.jpg"
-                  alt="Ukiah United Methodist Church Logo"
-                  width={48}
-                  height={48}
-                  quality={100}
-                  unoptimized
-                  className="rounded-md shadow-sm object-contain"
-                />
                 <div className="flex-1">
                   <h1 className="text-sm font-bold text-gray-800">Liturgist Schedule</h1>
                   <div className="flex items-center gap-2">
@@ -750,6 +741,15 @@ export default function Home() {
       )}
 
       <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Church Logo at Top */}
+        <div className="flex justify-center mb-6">
+          <img 
+            src="/logo-for-church-larger.jpg" 
+            alt="Ukiah United Methodist Church" 
+            className="w-48 h-auto rounded-lg shadow-lg"
+          />
+        </div>
+
         {/* Signup Modal */}
         {selectedSignup && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">

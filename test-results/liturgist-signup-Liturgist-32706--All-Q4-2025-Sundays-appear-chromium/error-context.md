@@ -64,7 +64,7 @@
             - heading "Liturgist Services - Q4 2025" [level=2] [ref=e68]:
               - img [ref=e69]
               - text: Liturgist Services - Q4 2025
-            - paragraph [ref=e71]: "Live updates • Last refreshed: 7:24:04 PM"
+            - paragraph [ref=e71]: "Live updates • Last refreshed: 7:33:45 PM"
           - generic [ref=e72]:
             - button "Previous Quarter" [ref=e73] [cursor=pointer]:
               - img [ref=e74]
@@ -73,201 +73,197 @@
               - text: Next Quarter
               - img [ref=e77]
         - generic [ref=e79]:
-          - generic [ref=e81] [cursor=pointer]:
-            - generic [ref=e82]:
-              - paragraph [ref=e84]: October 5
-              - generic [ref=e85]:
-                - button "Cancel" [ref=e86]
-                - img [ref=e87]
-            - generic [ref=e89]:
-              - generic [ref=e90]:
-                - generic [ref=e91]:
-                  - generic [ref=e92]: "Liturgist:"
-                  - generic "Doug Pratt" [ref=e93]
-                - generic "dmpratt@sbcglobal.net" [ref=e95]
-              - generic [ref=e97]:
-                - generic [ref=e98]: "Backup:"
-                - generic [ref=e99]: none
-          - generic [ref=e101] [cursor=pointer]:
-            - generic [ref=e102]:
-              - paragraph [ref=e104]: October 12
-              - generic [ref=e105]:
-                - button "Cancel" [ref=e106]
-                - img [ref=e107]
-            - generic [ref=e109]:
-              - generic [ref=e110]:
-                - generic [ref=e111]:
-                  - generic [ref=e112]: "Liturgist:"
-                  - generic "Linda Nagel" [ref=e113]
-                - generic "lindab.nagel@gmail.com" [ref=e115]
-              - generic [ref=e117]:
-                - generic [ref=e118]: "Backup:"
-                - generic [ref=e119]: none
-          - generic [ref=e121] [cursor=pointer]:
-            - generic [ref=e122]:
-              - paragraph [ref=e124]: October 19
+          - generic [ref=e80]:
+            - paragraph [ref=e82]: October 5
+            - generic [ref=e83]:
+              - generic [ref=e84]:
+                - generic [ref=e85]:
+                  - generic [ref=e86]: "Liturgist:"
+                  - generic "Doug Pratt" [ref=e87]
+                  - generic "dmpratt@sbcglobal.net" [ref=e88]
+                - button "Cancel" [ref=e90] [cursor=pointer]
+              - generic [ref=e91]:
+                - generic [ref=e92]:
+                  - generic [ref=e93]: "Backup:"
+                  - generic [ref=e94]: optional
+                - button "Sign Up" [ref=e96] [cursor=pointer]
+          - generic [ref=e97]:
+            - paragraph [ref=e99]: October 12
+            - generic [ref=e100]:
+              - generic [ref=e101]:
+                - generic [ref=e102]:
+                  - generic [ref=e103]: "Liturgist:"
+                  - generic "Linda Nagel" [ref=e104]
+                  - generic "lindab.nagel@gmail.com" [ref=e105]
+                - button "Cancel" [ref=e107] [cursor=pointer]
+              - generic [ref=e108]:
+                - generic [ref=e109]:
+                  - generic [ref=e110]: "Backup:"
+                  - generic [ref=e111]: optional
+                - button "Sign Up" [ref=e113] [cursor=pointer]
+          - generic [ref=e114]:
+            - paragraph [ref=e116]: October 19
+            - generic [ref=e117]:
+              - generic [ref=e118]:
+                - generic [ref=e119]:
+                  - generic [ref=e120]: "Liturgist:"
+                  - generic "Kay Lieberknecht" [ref=e121]
+                  - generic "kay.hoofin.it@gmail.com" [ref=e122]
+                - button "Cancel" [ref=e124] [cursor=pointer]
               - generic [ref=e125]:
-                - button "Cancel" [ref=e126]
-                - img [ref=e127]
-            - generic [ref=e129]:
-              - generic [ref=e130]:
-                - generic [ref=e131]:
-                  - generic [ref=e132]: "Liturgist:"
-                  - generic "Kay Lieberknecht" [ref=e133]
-                - generic "kay.hoofin.it@gmail.com" [ref=e135]
-              - generic [ref=e137]:
-                - generic [ref=e138]: "Backup:"
-                - generic [ref=e139]: none
-          - generic [ref=e141] [cursor=pointer]:
-            - generic [ref=e142]:
-              - paragraph [ref=e144]: October 26
-              - generic [ref=e145]:
-                - button "Cancel" [ref=e146]
-                - img [ref=e147]
-            - generic [ref=e149]:
-              - generic [ref=e150]:
-                - generic [ref=e151]:
-                  - generic [ref=e152]: "Liturgist:"
-                  - generic "Lori Bialkowsky" [ref=e153]
-                - generic "lbialkowsky@hotmail.com" [ref=e155]
+                - generic [ref=e126]:
+                  - generic [ref=e127]: "Backup:"
+                  - generic [ref=e128]: optional
+                - button "Sign Up" [ref=e130] [cursor=pointer]
+          - generic [ref=e131]:
+            - paragraph [ref=e133]: October 26
+            - generic [ref=e134]:
+              - generic [ref=e135]:
+                - generic [ref=e136]:
+                  - generic [ref=e137]: "Liturgist:"
+                  - generic "Lori Bialkowsky" [ref=e138]
+                  - generic "lbialkowsky@hotmail.com" [ref=e139]
+                - button "Cancel" [ref=e141] [cursor=pointer]
+              - generic [ref=e142]:
+                - generic [ref=e143]:
+                  - generic [ref=e144]: "Backup:"
+                  - generic [ref=e145]: optional
+                - button "Sign Up" [ref=e147] [cursor=pointer]
+          - generic [ref=e148]:
+            - paragraph [ref=e150]: November 2
+            - generic [ref=e151]:
+              - generic [ref=e152]:
+                - generic [ref=e154]: "Liturgist:"
+                - button "Sign Up" [ref=e156] [cursor=pointer]
               - generic [ref=e157]:
-                - generic [ref=e158]: "Backup:"
-                - generic [ref=e159]: none
-          - generic [ref=e161] [cursor=pointer]:
-            - generic [ref=e162]:
-              - paragraph [ref=e164]: November 2
-              - img [ref=e166]
-            - generic [ref=e168]:
-              - generic [ref=e170]:
-                - generic [ref=e171]: "Liturgist:"
-                - generic [ref=e172]: EMPTY
-              - generic [ref=e174]:
-                - generic [ref=e175]: "Backup:"
-                - generic [ref=e176]: none
-          - generic [ref=e178] [cursor=pointer]:
-            - generic [ref=e179]:
-              - paragraph [ref=e181]: November 9
-              - img [ref=e183]
-            - generic [ref=e185]:
+                - generic [ref=e158]:
+                  - generic [ref=e159]: "Backup:"
+                  - generic [ref=e160]: optional
+                - button "Sign Up" [ref=e162] [cursor=pointer]
+          - generic [ref=e163]:
+            - paragraph [ref=e165]: November 9
+            - generic [ref=e166]:
+              - generic [ref=e167]:
+                - generic [ref=e169]: "Liturgist:"
+                - button "Sign Up" [ref=e171] [cursor=pointer]
+              - generic [ref=e172]:
+                - generic [ref=e173]:
+                  - generic [ref=e174]: "Backup:"
+                  - generic [ref=e175]: optional
+                - button "Sign Up" [ref=e177] [cursor=pointer]
+          - generic [ref=e178]:
+            - paragraph [ref=e180]: November 16
+            - generic [ref=e181]:
+              - generic [ref=e182]:
+                - generic [ref=e184]: "Liturgist:"
+                - button "Sign Up" [ref=e186] [cursor=pointer]
               - generic [ref=e187]:
-                - generic [ref=e188]: "Liturgist:"
-                - generic [ref=e189]: EMPTY
-              - generic [ref=e191]:
-                - generic [ref=e192]: "Backup:"
-                - generic [ref=e193]: none
-          - generic [ref=e195] [cursor=pointer]:
+                - generic [ref=e188]:
+                  - generic [ref=e189]: "Backup:"
+                  - generic [ref=e190]: optional
+                - button "Sign Up" [ref=e192] [cursor=pointer]
+          - generic [ref=e193]:
+            - paragraph [ref=e195]: November 23
             - generic [ref=e196]:
-              - paragraph [ref=e198]: November 16
-              - img [ref=e200]
-            - generic [ref=e202]:
-              - generic [ref=e204]:
-                - generic [ref=e205]: "Liturgist:"
-                - generic [ref=e206]: EMPTY
-              - generic [ref=e208]:
-                - generic [ref=e209]: "Backup:"
-                - generic [ref=e210]: none
-          - generic [ref=e212] [cursor=pointer]:
-            - generic [ref=e213]:
-              - paragraph [ref=e215]: November 23
-              - img [ref=e217]
-            - generic [ref=e219]:
-              - generic [ref=e221]:
-                - generic [ref=e222]: "Liturgist:"
-                - generic [ref=e223]: EMPTY
-              - generic [ref=e225]:
-                - generic [ref=e226]: "Backup:"
-                - generic [ref=e227]: none
-          - generic [ref=e229] [cursor=pointer]:
-            - generic [ref=e230]:
-              - generic [ref=e231]:
-                - paragraph [ref=e232]: November 30
-                - generic [ref=e233]: 🕯️ ADVENT WEEK 1 • Liturgist lights 1 candle
-              - img [ref=e235]
-            - generic [ref=e237]:
-              - generic [ref=e239]:
-                - generic [ref=e240]: "Liturgist:"
-                - generic [ref=e241]: EMPTY
-              - generic [ref=e243]:
-                - generic [ref=e244]: "Backup:"
-                - generic [ref=e245]: none
-          - generic [ref=e247] [cursor=pointer]:
-            - generic [ref=e248]:
-              - generic [ref=e249]:
-                - paragraph [ref=e250]: December 7
-                - generic [ref=e251]: 🕯️ ADVENT WEEK 2 • Liturgist lights 2 candles
-              - img [ref=e253]
-            - generic [ref=e255]:
-              - generic [ref=e257]:
-                - generic [ref=e258]: "Liturgist:"
-                - generic [ref=e259]: EMPTY
+              - generic [ref=e197]:
+                - generic [ref=e199]: "Liturgist:"
+                - button "Sign Up" [ref=e201] [cursor=pointer]
+              - generic [ref=e202]:
+                - generic [ref=e203]:
+                  - generic [ref=e204]: "Backup:"
+                  - generic [ref=e205]: optional
+                - button "Sign Up" [ref=e207] [cursor=pointer]
+          - generic [ref=e208]:
+            - generic [ref=e209]:
+              - paragraph [ref=e210]: November 30
+              - generic [ref=e211]: 🕯️ ADVENT WEEK 1 • Liturgist lights 1 candle
+            - generic [ref=e212]:
+              - generic [ref=e213]:
+                - generic [ref=e215]: "Liturgist:"
+                - button "Sign Up" [ref=e217] [cursor=pointer]
+              - generic [ref=e218]:
+                - generic [ref=e219]:
+                  - generic [ref=e220]: "Backup:"
+                  - generic [ref=e221]: optional
+                - button "Sign Up" [ref=e223] [cursor=pointer]
+          - generic [ref=e224]:
+            - generic [ref=e225]:
+              - paragraph [ref=e226]: December 7
+              - generic [ref=e227]: 🕯️ ADVENT WEEK 2 • Liturgist lights 2 candles
+            - generic [ref=e228]:
+              - generic [ref=e229]:
+                - generic [ref=e231]: "Liturgist:"
+                - button "Sign Up" [ref=e233] [cursor=pointer]
+              - generic [ref=e234]:
+                - generic [ref=e235]:
+                  - generic [ref=e236]: "Backup:"
+                  - generic [ref=e237]: optional
+                - button "Sign Up" [ref=e239] [cursor=pointer]
+          - generic [ref=e240]:
+            - generic [ref=e241]:
+              - paragraph [ref=e242]: December 14
+              - generic [ref=e243]: 🕯️ ADVENT WEEK 3 • Liturgist lights 3 candles
+            - generic [ref=e244]:
+              - generic [ref=e245]:
+                - generic [ref=e247]: "Liturgist:"
+                - button "Sign Up" [ref=e249] [cursor=pointer]
+              - generic [ref=e250]:
+                - generic [ref=e251]:
+                  - generic [ref=e252]: "Backup:"
+                  - generic [ref=e253]: optional
+                - button "Sign Up" [ref=e255] [cursor=pointer]
+          - generic [ref=e256]:
+            - generic [ref=e257]:
+              - paragraph [ref=e258]: December 21
+              - generic [ref=e259]: 🕯️ ADVENT WEEK 4 • Liturgist lights 4 candles
+            - generic [ref=e260]:
               - generic [ref=e261]:
-                - generic [ref=e262]: "Backup:"
-                - generic [ref=e263]: none
-          - generic [ref=e265] [cursor=pointer]:
-            - generic [ref=e266]:
-              - generic [ref=e267]:
-                - paragraph [ref=e268]: December 14
-                - generic [ref=e269]: 🕯️ ADVENT WEEK 3 • Liturgist lights 3 candles
-              - img [ref=e271]
+                - generic [ref=e263]: "Liturgist:"
+                - button "Sign Up" [ref=e265] [cursor=pointer]
+              - generic [ref=e266]:
+                - generic [ref=e267]:
+                  - generic [ref=e268]: "Backup:"
+                  - generic [ref=e269]: optional
+                - button "Sign Up" [ref=e271] [cursor=pointer]
+          - generic [ref=e272]:
             - generic [ref=e273]:
-              - generic [ref=e275]:
-                - generic [ref=e276]: "Liturgist:"
-                - generic [ref=e277]: EMPTY
-              - generic [ref=e279]:
-                - generic [ref=e280]: "Backup:"
-                - generic [ref=e281]: none
-          - generic [ref=e283] [cursor=pointer]:
-            - generic [ref=e284]:
-              - generic [ref=e285]:
-                - paragraph [ref=e286]: December 21
-                - generic [ref=e287]: 🕯️ ADVENT WEEK 4 • Liturgist lights 4 candles
-              - img [ref=e289]
+              - paragraph [ref=e274]: December 24 (Christmas Eve)
+              - generic [ref=e275]: 🕯️ CHRISTMAS EVE • Liturgist lights 5 candles
+            - generic [ref=e276]:
+              - generic [ref=e277]:
+                - generic [ref=e279]: "Liturgist:"
+                - button "Sign Up" [ref=e281] [cursor=pointer]
+              - generic [ref=e282]:
+                - generic [ref=e283]:
+                  - generic [ref=e284]: "Backup:"
+                  - generic [ref=e285]: optional
+                - button "Sign Up" [ref=e287] [cursor=pointer]
+          - generic [ref=e288]:
+            - paragraph [ref=e290]: December 28
             - generic [ref=e291]:
-              - generic [ref=e293]:
+              - generic [ref=e292]:
                 - generic [ref=e294]: "Liturgist:"
-                - generic [ref=e295]: EMPTY
+                - button "Sign Up" [ref=e296] [cursor=pointer]
               - generic [ref=e297]:
-                - generic [ref=e298]: "Backup:"
-                - generic [ref=e299]: none
-          - generic [ref=e301] [cursor=pointer]:
-            - generic [ref=e302]:
-              - generic [ref=e303]:
-                - paragraph [ref=e304]: December 24 (Christmas Eve)
-                - generic [ref=e305]: 🕯️ CHRISTMAS EVE • Liturgist lights 5 candles
-              - img [ref=e307]
-            - generic [ref=e309]:
-              - generic [ref=e311]:
-                - generic [ref=e312]: "Liturgist:"
-                - generic [ref=e313]: EMPTY
-              - generic [ref=e315]:
-                - generic [ref=e316]: "Backup:"
-                - generic [ref=e317]: none
-          - generic [ref=e319] [cursor=pointer]:
-            - generic [ref=e320]:
-              - paragraph [ref=e322]: December 28
-              - img [ref=e324]
-            - generic [ref=e326]:
-              - generic [ref=e328]:
-                - generic [ref=e329]: "Liturgist:"
-                - generic [ref=e330]: EMPTY
-              - generic [ref=e332]:
-                - generic [ref=e333]: "Backup:"
-                - generic [ref=e334]: none
-      - generic [ref=e335]:
-        - heading "What Does a Liturgist Do?" [level=3] [ref=e336]
-        - generic [ref=e337]:
-          - paragraph [ref=e338]: "As a liturgist, you'll help lead our congregation in worship by:"
-          - list [ref=e339]:
-            - listitem [ref=e340]: • Reading the Call to Worship
-            - listitem [ref=e341]: • Leading the Responsive Reading
-            - listitem [ref=e342]: • Reading the Scripture lesson(s)
-            - listitem [ref=e343]: • Assisting with other liturgical elements as needed
-          - paragraph [ref=e344]: The bulletin and readings will be provided to you in advance. If you have any questions, please contact the church office.
-      - generic [ref=e345]:
-        - paragraph [ref=e346]:
-          - strong [ref=e347]: Ukiah United Methodist Church
-        - paragraph [ref=e348]: 270 N. Pine St., Ukiah, CA 95482 | 707.462.3360
-        - paragraph [ref=e349]:
-          - link "ukiahumc.org" [ref=e350] [cursor=pointer]:
+                - generic [ref=e298]:
+                  - generic [ref=e299]: "Backup:"
+                  - generic [ref=e300]: optional
+                - button "Sign Up" [ref=e302] [cursor=pointer]
+      - generic [ref=e303]:
+        - heading "What Does a Liturgist Do?" [level=3] [ref=e304]
+        - generic [ref=e305]:
+          - paragraph [ref=e306]: "As a liturgist, you'll help lead our congregation in worship by:"
+          - list [ref=e307]:
+            - listitem [ref=e308]: • Reading the Call to Worship
+            - listitem [ref=e309]: • Leading the Responsive Reading
+            - listitem [ref=e310]: • Reading the Scripture lesson(s)
+            - listitem [ref=e311]: • Assisting with other liturgical elements as needed
+          - paragraph [ref=e312]: The bulletin and readings will be provided to you in advance. If you have any questions, please contact the church office.
+      - generic [ref=e313]:
+        - paragraph [ref=e314]:
+          - strong [ref=e315]: Ukiah United Methodist Church
+        - paragraph [ref=e316]: 270 N. Pine St., Ukiah, CA 95482 | 707.462.3360
+        - paragraph [ref=e317]:
+          - link "ukiahumc.org" [ref=e318] [cursor=pointer]:
             - /url: https://ukiahumc.org
 ```

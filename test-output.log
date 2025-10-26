@@ -8,30 +8,26 @@ Running 16 tests using 1 worker
 [1A[2K[1/16] [chromium] › e2e/liturgist-signup.spec.ts:22:7 › Liturgist Signup App - E2E Tests › 01 - Password gate works
 [1A[2K  1) [chromium] › e2e/liturgist-signup.spec.ts:22:7 › Liturgist Signup App - E2E Tests › 01 - Password gate works 
 
-    [31mTest timeout of 30000ms exceeded while running "beforeEach" hook.[39m
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
 
-       5 | test.describe('Liturgist Signup App - E2E Tests', () => {
-       6 |   
-    >  7 |   test.beforeEach(async ({ page }) => {
-         |        ^
-       8 |     // Navigate to the app
-       9 |     await page.goto('/')
-      10 |     
-        at /Users/samuelholley/Projects/liturgists.ukiahumc.org/e2e/liturgist-signup.spec.ts:7:8
+    Locator: getByText(/Ukiah United Methodist Church/i)
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
 
-    Error: locator.click: Test timeout of 30000ms exceeded.
     Call log:
-    [2m  - waiting for getByRole('button', { name: /enter/i })[22m
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByText(/Ukiah United Methodist Church/i)[22m
 
 
-      13 |     if (await passwordInput.isVisible({ timeout: 2000 }).catch(() => false)) {
-      14 |       await passwordInput.fill(PASSWORD)
-    > 15 |       await page.getByRole('button', { name: /enter/i }).click()
-         |                                                          ^
-      16 |     }
-      17 |     
-      18 |     // Wait for main page to load
-        at /Users/samuelholley/Projects/liturgists.ukiahumc.org/e2e/liturgist-signup.spec.ts:15:58
+      27 |     
+      28 |     // Should show password gate
+    > 29 |     await expect(page.getByText(/Ukiah United Methodist Church/i)).toBeVisible()
+         |                                                                    ^
+      30 |     
+      31 |     // Wrong password fails
+      32 |     await page.locator('input[type="password"]').fill('wrongpassword')
+        at /Users/samuelholley/Projects/liturgists.ukiahumc.org/e2e/liturgist-signup.spec.ts:29:68
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
     test-results/liturgist-signup-Liturgist-9409c-ts-01---Password-gate-works-chromium/test-failed-1.png
@@ -41,3 +37,67 @@ Running 16 tests using 1 worker
 
 
 [1A[2K[2/16] [chromium] › e2e/liturgist-signup.spec.ts:42:7 › Liturgist Signup App - E2E Tests › 02 - All Q4 2025 Sundays appear
+[1A[2K  2) [chromium] › e2e/liturgist-signup.spec.ts:42:7 › Liturgist Signup App - E2E Tests › 02 - All Q4 2025 Sundays appear 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByText('October 6')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByText('October 6')[22m
+
+
+      52 |     
+      53 |     for (const date of expectedDates) {
+    > 54 |       await expect(page.getByText(date, { exact: false })).toBeVisible()
+         |                                                            ^
+      55 |     }
+      56 |   })
+      57 |
+        at /Users/samuelholley/Projects/liturgists.ukiahumc.org/e2e/liturgist-signup.spec.ts:54:60
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/liturgist-signup-Liturgist-32706--All-Q4-2025-Sundays-appear-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/liturgist-signup-Liturgist-32706--All-Q4-2025-Sundays-appear-chromium/error-context.md
+
+
+[1A[2K[3/16] [chromium] › e2e/liturgist-signup.spec.ts:58:7 › Liturgist Signup App - E2E Tests › 03 - Christmas Eve appears in Q4 2025
+[1A[2K  3) [chromium] › e2e/liturgist-signup.spec.ts:58:7 › Liturgist Signup App - E2E Tests › 03 - Christmas Eve appears in Q4 2025 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByText(/Christmas Eve/i)
+    Expected: visible
+    Error: strict mode violation: getByText(/Christmas Eve/i) resolved to 2 elements:
+        1) <p class="font-semibold text-gray-800 text-sm">December 24 (Christmas Eve)</p> aka getByText('December 24 (Christmas Eve)')
+        2) <span class="text-xs font-semibold text-amber-900 bg-amber-200 px-2 py-0.5 rounded">🕯️ CHRISTMAS EVE • Liturgist lights 5 candles</span> aka getByText('🕯️ CHRISTMAS EVE • Liturgist')
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByText(/Christmas Eve/i)[22m
+
+
+      61 |     // Check for Christmas Eve
+      62 |     await expect(page.getByText('December 24', { exact: false })).toBeVisible()
+    > 63 |     await expect(page.getByText(/Christmas Eve/i)).toBeVisible()
+         |                                                    ^
+      64 |     await expect(page.getByText(/Liturgist lights 5 candles/i)).toBeVisible()
+      65 |   })
+      66 |
+        at /Users/samuelholley/Projects/liturgists.ukiahumc.org/e2e/liturgist-signup.spec.ts:63:52
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/liturgist-signup-Liturgist-082c3-tmas-Eve-appears-in-Q4-2025-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/liturgist-signup-Liturgist-082c3-tmas-Eve-appears-in-Q4-2025-chromium/error-context.md
+
+
+[1A[2K[4/16] [chromium] › e2e/liturgist-signup.spec.ts:67:7 › Liturgist Signup App - E2E Tests › 04 - Advent badges show cumulative candles
+[1A[2K[5/16] [chromium] › e2e/liturgist-signup.spec.ts:77:7 › Liturgist Signup App - E2E Tests › 05 - Signup modal opens and closes

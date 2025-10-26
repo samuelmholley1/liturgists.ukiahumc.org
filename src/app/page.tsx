@@ -20,9 +20,10 @@ interface Service {
 
 // Generate calendar data for a specific month
 const generateCalendarData = (services: Service[], mainServiceDate: string, month: number, year: number) => {
-  // Use current actual date for today check
-  const today = new Date()
-  const todayString = today.toISOString().split('T')[0]
+  // Use Pacific Time for today check
+  const now = new Date()
+  const pacificTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }))
+  const todayString = pacificTime.toISOString().split('T')[0]
   
   const firstDay = new Date(year, month, 1)
   const lastDay = new Date(year, month + 1, 0)
@@ -495,7 +496,6 @@ export default function Home() {
                   className={`text-center py-2 rounded text-xs transition-colors ${
                     !day ? '' :
                     day.isMainService ? 'bg-purple-600 text-white font-bold cursor-pointer hover:bg-purple-700' :
-                    day.serviceData?.notes ? 'bg-amber-200 text-amber-900 font-semibold cursor-pointer' :
                     day.isToday ? 'bg-blue-600 text-white font-bold' :
                     day.isSunday && day.hasService ? (
                       hoveredService === day.serviceData?.id ? 'bg-yellow-300 font-bold border border-yellow-500' : 'bg-green-100 font-medium cursor-pointer hover:bg-green-200'

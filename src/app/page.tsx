@@ -720,10 +720,9 @@ export default function Home() {
                   {calendarData.days.map((day, index) => (
                     <div
                       key={index}
-                      className={`text-center py-2 rounded text-xs transition-colors ${
+                      className={`text-center py-2 rounded text-xs transition-colors relative ${
                         !day ? '' :
                         day.isMainService ? 'bg-purple-600 text-white font-bold cursor-pointer hover:bg-purple-700' :
-                        day.isToday ? 'bg-blue-600 text-white font-bold' :
                         day.isSunday && day.hasService ? (
                           hoveredService === day.serviceData?.id ? 'bg-yellow-300 font-bold border border-yellow-500' : 'bg-green-100 font-medium cursor-pointer hover:bg-green-200'
                         ) :
@@ -738,6 +737,11 @@ export default function Home() {
                       onClick={day?.hasService && isClient ? () => scrollToService(day.serviceData!.id) : undefined}
                     >
                       {day?.day || ''}
+                      {day?.isMainService && (
+                        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 text-[9px] text-purple-200 whitespace-nowrap font-semibold">
+                          NEXT
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

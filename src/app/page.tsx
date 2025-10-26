@@ -85,6 +85,20 @@ export default function Home() {
     return { month: today.getMonth(), year: today.getFullYear() }
   })
   
+  // Calculate current quarter dynamically
+  const getCurrentQuarter = () => {
+    const now = new Date()
+    const month = now.getMonth()
+    const year = now.getFullYear()
+    
+    if (month >= 0 && month <= 2) return `Q1-${year}`
+    if (month >= 3 && month <= 5) return `Q2-${year}`
+    if (month >= 6 && month <= 8) return `Q3-${year}`
+    return `Q4-${year}`
+  }
+  
+  const CURRENT_QUARTER = getCurrentQuarter()
+  
   const [modalState, setModalState] = useState<{
     isOpen: boolean
     type: 'success' | 'error' | 'warning' | 'confirm'
@@ -963,9 +977,9 @@ export default function Home() {
             <div className="flex gap-2">
               <button
                 onClick={() => handleQuarterChange('prev')}
-                disabled={currentQuarter === 'Q3-2025'}
+                disabled={currentQuarter === CURRENT_QUARTER}
                 className={`px-3 py-1 rounded-md text-sm font-medium flex items-center ${
-                  currentQuarter === 'Q3-2025'
+                  currentQuarter === CURRENT_QUARTER
                     ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}

@@ -235,12 +235,15 @@ export async function GET(request: NextRequest) {
         console.log(`DEBUG Cancellation: role="${userRole}", isBackup=${isBackup}, subject="${subjectPrefix}"`)
         
         // Send cancellation email
-        // If Sam cancels: TO sam@ only (no CC)
-        // If others cancel: TO their email, CC sam@
+        // Send cancellation email
+        // For backup cancellations: ALWAYS CC sam@ (even if Sam cancels himself)
+        // For main liturgist: CC sam@ only if others cancel
+        const shouldCCSam = isBackup ? true : !isSamCancelling
+        
         await sendEmail({
           to: userEmail,
-          cc: isSamCancelling ? undefined : 'sam@samuelholley.com',
-          replyTo: 'sam@samuelholley.com',
+          cc: shouldCCSam ? 'sam@samuelholley.com' : undefined,
+          replyTo: 'sam@samuelholley.com',          replyTo: 'sam@samuelholley.com',
           subject: `${subjectPrefix} - ${formattedDateForSubject}`,
           html: emailHtml
         })

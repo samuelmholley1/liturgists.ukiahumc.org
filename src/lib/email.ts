@@ -20,10 +20,10 @@ export async function sendEmail({ to, cc, replyTo, subject, html }: EmailParams)
   })
 
   const mailOptions = {
-    from: '"UUMC Liturgist Scheduling" <sam@samuelholley.com>', // Send from verified alias
+    from: '"UUMC Liturgist Scheduling" <alerts@samuelholley.com>', // Send from verified alias
     to,
     cc,
-    replyTo: replyTo || 'sam@samuelholley.com',
+    replyTo: replyTo || 'alerts@samuelholley.com',
     subject,
     html,
   }

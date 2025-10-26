@@ -92,16 +92,16 @@ export async function POST(request: NextRequest) {
         // Send email to the liturgist who signed up
         await sendEmail({
           to: body.email,
-          replyTo: 'sam@samuelholley.com',
+          replyTo: 'alerts@samuelholley.com',
           subject: `✅ Your Liturgist Signup Confirmed - ${body.displayDate}`,
           html: emailHtml
         })
         
         // Send SEPARATE admin notification email (avoids Gmail duplicate recipient policy)
-        // Skip if admin is the one signing up
+        // Skip if admin is the one signing up (checks for sam@samuelholley.com which is the UI email)
         if (body.email.toLowerCase() !== 'sam@samuelholley.com') {
           await sendEmail({
-            to: 'sam@samuelholley.com',
+            to: 'alerts@samuelholley.com',
             replyTo: body.email,
             subject: `✅ New Liturgist Signup - ${body.name} - ${body.displayDate}`,
             html: emailHtml
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
         })
         
         await sendEmail({
-          to: 'sam@samuelholley.com',
+          to: 'alerts@samuelholley.com',
           subject: '🚨 ERROR: Liturgist Signup Failed',
           html: errorEmailHtml
         })
@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
       })
       
       await sendEmail({
-        to: 'sam@samuelholley.com',
+        to: 'alerts@samuelholley.com',
         subject: '🚨 ERROR: Liturgist Signup System Error',
         html: errorEmailHtml
       })
@@ -236,9 +236,10 @@ export async function GET(request: NextRequest) {
         })
         
         // Send SEPARATE admin notification (avoids Gmail duplicate recipient policy)
+        // Check for sam@samuelholley.com which is the UI email
         if (userEmail.toLowerCase() !== 'sam@samuelholley.com') {
           await sendEmail({
-            to: 'sam@samuelholley.com',
+            to: 'alerts@samuelholley.com',
             subject: `❌ Liturgist Cancellation - ${recordData.record.name} - ${formattedDateForSubject}`,
             html: emailHtml
           })
@@ -298,7 +299,7 @@ export async function GET(request: NextRequest) {
         })
         
         await sendEmail({
-          to: 'sam@samuelholley.com',
+          to: 'alerts@samuelholley.com',
           subject: '🚨 ERROR: Email Link Cancellation Failed',
           html: errorEmailHtml
         })
@@ -351,7 +352,7 @@ export async function GET(request: NextRequest) {
       })
       
       await sendEmail({
-        to: 'sam@samuelholley.com',
+        to: 'alerts@samuelholley.com',
         subject: '🚨 ERROR: Email Link Cancellation System Error',
         html: errorEmailHtml
       })
@@ -449,9 +450,10 @@ export async function DELETE(request: NextRequest) {
           })
           
           // Send SEPARATE admin notification (avoids Gmail duplicate recipient policy)
+          // Check for sam@samuelholley.com which is the UI email
           if (userEmail.toLowerCase() !== 'sam@samuelholley.com') {
             await sendEmail({
-              to: 'sam@samuelholley.com',
+              to: 'alerts@samuelholley.com',
               subject: `❌ Liturgist Cancellation - ${recordData.record.name} - ${formattedDateForSubject}`,
               html: emailHtml
             })
@@ -480,7 +482,7 @@ export async function DELETE(request: NextRequest) {
         })
         
         await sendEmail({
-          to: 'sam@samuelholley.com',
+          to: 'alerts@samuelholley.com',
           subject: '🚨 ERROR: Liturgist Cancellation Failed',
           html: errorEmailHtml
         })
@@ -505,7 +507,7 @@ export async function DELETE(request: NextRequest) {
       })
       
       await sendEmail({
-        to: 'sam@samuelholley.com',
+        to: 'alerts@samuelholley.com',
         subject: '🚨 ERROR: Liturgist Cancellation System Error',
         html: errorEmailHtml
       })

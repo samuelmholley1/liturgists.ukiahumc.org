@@ -742,7 +742,7 @@ export default function Home() {
           <img 
             src="/logo-for-church-larger.jpg" 
             alt="Ukiah United Methodist Church" 
-            className="w-48 h-auto rounded-lg shadow-lg"
+            className="w-64 md:w-80 h-auto rounded-lg shadow-lg"
           />
         </div>
 

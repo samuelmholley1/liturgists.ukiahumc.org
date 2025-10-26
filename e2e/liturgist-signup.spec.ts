@@ -25,8 +25,8 @@ test.describe('Liturgist Signup App - E2E Tests', () => {
     await page.evaluate(() => sessionStorage.clear())
     await page.reload()
     
-    // Should show password gate
-    await expect(page.getByText(/Ukiah United Methodist Church/i)).toBeVisible()
+    // Should show password gate with "Liturgist Schedule" heading
+    await expect(page.getByText(/Liturgist Schedule/i)).toBeVisible()
     
     // Wrong password fails
     await page.locator('input[type="password"]').fill('wrongpassword')
@@ -45,9 +45,9 @@ test.describe('Liturgist Signup App - E2E Tests', () => {
     
     // Expected Sunday dates in Q4 2025
     const expectedDates = [
-      'October 6', 'October 13', 'October 20', 'October 27',
-      'November 3', 'November 10', 'November 17', 'November 24',
-      'December 1', 'December 8', 'December 15', 'December 22', 'December 29'
+      'October 5', 'October 12', 'October 19', 'October 26',
+      'November 2', 'November 9', 'November 16', 'November 23', 'November 30',
+      'December 7', 'December 14', 'December 21', 'December 28'
     ]
     
     for (const date of expectedDates) {
@@ -58,9 +58,9 @@ test.describe('Liturgist Signup App - E2E Tests', () => {
   test('03 - Christmas Eve appears in Q4 2025', async ({ page }) => {
     await page.waitForTimeout(1000)
     
-    // Check for Christmas Eve
+    // Check for Christmas Eve (use .first() since text appears in multiple places)
     await expect(page.getByText('December 24', { exact: false })).toBeVisible()
-    await expect(page.getByText(/Christmas Eve/i)).toBeVisible()
+    await expect(page.getByText(/Christmas Eve/i).first()).toBeVisible()
     await expect(page.getByText(/Liturgist lights 5 candles/i)).toBeVisible()
   })
 
@@ -79,16 +79,16 @@ test.describe('Liturgist Signup App - E2E Tests', () => {
     const signupButton = page.locator('button').filter({ hasText: /sign up/i }).first()
     await signupButton.click()
     
-    // Modal should appear with person selector
-    await expect(page.locator('select').first()).toBeVisible()
+    // Modal should appear with heading
+    await expect(page.getByText(/Sign up for/i)).toBeVisible()
     
-    // Close modal with Cancel button
-    const cancelButton = page.locator('button').filter({ hasText: /cancel/i }).last() // Last cancel is in modal
-    await cancelButton.click()
+    // Close modal with Cancel button (it's inside the modal, so use force click)
+    const cancelButton = page.getByRole('button', { name: /cancel/i }).last()
+    await cancelButton.click({ force: true })
     
     // Modal should disappear
     await page.waitForTimeout(500)
-    await expect(page.locator('select').first()).not.toBeVisible()
+    await expect(page.getByText(/Sign up for/i)).not.toBeVisible()
   })
 
   test('06 - Empty name validation', async ({ page }) => {
@@ -116,12 +116,14 @@ test.describe('Liturgist Signup App - E2E Tests', () => {
     // Open signup modal
     await page.locator('button').filter({ hasText: /sign up/i }).first().click()
     
-    // Select a known liturgist from dropdown (avoids name fields)
+    // Select "Other" so email field becomes editable
     const dropdown = page.locator('select').first()
-    const options = await dropdown.locator('option').allTextContents()
-    if (options.length > 2) {  // Has actual liturgists besides "-- Select --" and "Other"
-      await dropdown.selectOption({ index: 1 })
-    }
+    await dropdown.selectOption('other')
+    
+    // Fill name fields (required when selecting "other")
+    const textInputs = page.locator('input[type="text"]')
+    await textInputs.nth(0).fill('Test')
+    await textInputs.nth(1).fill('User')
     
     // Test invalid email
     await page.locator('input[type="email"]').first().fill('invalid-email')
@@ -136,12 +138,14 @@ test.describe('Liturgist Signup App - E2E Tests', () => {
     // Open signup modal
     await page.locator('button').filter({ hasText: /sign up/i }).first().click()
     
-    // Select a known liturgist from dropdown
+    // Select "Other" so fields become editable
     const dropdown = page.locator('select').first()
-    const options = await dropdown.locator('option').allTextContents()
-    if (options.length > 2) {
-      await dropdown.selectOption({ index: 1 })
-    }
+    await dropdown.selectOption('other')
+    
+    // Fill name fields
+    const textInputs = page.locator('input[type="text"]')
+    await textInputs.nth(0).fill('Test')
+    await textInputs.nth(1).fill('User')
     
     // Valid email
     await page.locator('input[type="email"]').first().fill('test@example.com')
@@ -184,50 +188,49 @@ test.describe('Liturgist Signup App - E2E Tests', () => {
   })
 
   test('11 - Quarterly navigation', async ({ page }) => {
-    const quarterSelect = page.locator('select').first()
+    // Use Previous/Next Quarter buttons
+    const prevButton = page.getByRole('button', { name: /previous quarter/i })
+    const nextButton = page.getByRole('button', { name: /next quarter/i })
     
     // Switch to Q3 2025
-    await quarterSelect.selectOption('Q3-2025')
+    await prevButton.click()
     await page.waitForTimeout(1000)
-    await expect(page.getByText(/July|August|September/i).first()).toBeVisible()
+    await expect(page.getByText('July 6', { exact: false })).toBeVisible()
     
     // Switch to Q4 2025
-    await quarterSelect.selectOption('Q4-2025')
+    await nextButton.click()
     await page.waitForTimeout(1000)
-    await expect(page.getByText(/October|November|December/i).first()).toBeVisible()
+    await expect(page.getByText('October 5', { exact: false })).toBeVisible()
     
     // Q1 2026 should show lock message
-    await quarterSelect.selectOption('Q1-2026')
+    await nextButton.click()
     await page.waitForTimeout(1000)
-    await expect(page.getByText(/locked|December/i)).toBeVisible()
+    await expect(page.getByText(/locked/i)).toBeVisible()
   })
 
   test('12 - Modal state doesn\'t leak between quarters', async ({ page }) => {
-    const quarterSelect = page.locator('select').first()
+    const prevButton = page.getByRole('button', { name: /previous quarter/i })
     
     // Open modal on Q4 service
-    await quarterSelect.selectOption('Q4-2025')
-    await page.waitForTimeout(1000)
     await page.getByRole('button', { name: /sign up/i }).first().click()
-    await expect(page.getByText(/Sign Up as Liturgist/i)).toBeVisible()
+    await expect(page.getByText(/Sign up for/i)).toBeVisible()
     
     // Switch quarter - modal should close
-    await quarterSelect.selectOption('Q3-2025')
+    await prevButton.click()
     await page.waitForTimeout(1000)
-    await expect(page.getByText(/Sign Up as Liturgist/i)).not.toBeVisible()
+    await expect(page.getByText(/Sign up for/i)).not.toBeVisible()
   })
 
   test('13 - Loading state prevents double submission', async ({ page }) => {
     // Open signup modal
     await page.locator('button').filter({ hasText: /sign up/i }).first().click()
     
-    // Select known liturgist
+    // Select "other" to make fields editable
     const dropdown = page.locator('select').first()
-    const options = await dropdown.locator('option').allTextContents()
-    if (options.length > 2) {
-      await dropdown.selectOption({ index: 1 })
-    }
+    await dropdown.selectOption('other')
     
+    // Fill in name first (required for "other")
+    await page.locator('input[placeholder*="name"]').first().fill('Test User')
     await page.locator('input[type="email"]').first().fill('test@example.com')
     await page.locator('input[type="tel"]').first().fill('555-555-5555')
     
@@ -246,8 +249,9 @@ test.describe('Liturgist Signup App - E2E Tests', () => {
     // Page should still be usable
     await expect(page.getByText(/Liturgist Services/i)).toBeVisible()
     
-    // Quarter selector should be visible
-    await expect(page.locator('select').first()).toBeVisible()
+    // Quarter navigation buttons should be visible
+    await expect(page.getByRole('button', { name: /previous quarter/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /next quarter/i })).toBeVisible()
     
     // Services should stack vertically (not overflow)
     const serviceCards = page.locator('div[class*="border"]').filter({ hasText: /October|November|December/i })
@@ -314,8 +318,8 @@ test.describe('Liturgist Signup App - E2E Tests', () => {
     // Verify the name appears in the list
     await expect(page.getByText('E2E TestUser')).toBeVisible({ timeout: 5000 })
     
-    // Find and click the red "Cancel" button (should be visible now)
-    const cancelButtons = page.locator('button').filter({ hasText: /cancel/i })
+    // Find and click the red "Cancel Liturgist" or "Cancel Backup" button (should be visible now)
+    const cancelButtons = page.locator('button').filter({ hasText: /cancel (liturgist|backup)/i })
     const firstCancelButton = cancelButtons.first()
     await expect(firstCancelButton).toBeVisible()
     await firstCancelButton.click()

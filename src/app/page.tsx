@@ -217,7 +217,10 @@ export default function Home() {
     if (dayOfWeek === 1 && hour < 6) {
       const yesterday = new Date(pacificTime)
       yesterday.setDate(yesterday.getDate() - 1)
-      return yesterday.toISOString().split('T')[0]
+      const year = yesterday.getFullYear()
+      const month = String(yesterday.getMonth() + 1).padStart(2, '0')
+      const day = String(yesterday.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
     }
     
     // Otherwise find the next Sunday
@@ -225,7 +228,10 @@ export default function Home() {
     while (nextSunday.getDay() !== 0) {
       nextSunday.setDate(nextSunday.getDate() + 1)
     }
-    return nextSunday.toISOString().split('T')[0]
+    const year = nextSunday.getFullYear()
+    const month = String(nextSunday.getMonth() + 1).padStart(2, '0')
+    const day = String(nextSunday.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
   }
   
   const mainServiceDate = getMainServiceDate()
@@ -880,19 +886,6 @@ export default function Home() {
                               </span>
                             )}
                           </>
-                        ) : null}
-                      </div>
-                      
-                      {/* Action Button - Right Side */}
-                      <div className="flex-shrink-0">
-                        {service.liturgist ? (
-                          <button
-                            onClick={() => handleCancelSignup(service.liturgist!.id, service.displayDate, 'Liturgist')}
-                            disabled={isLockedQuarter}
-                            className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            Cancel
-                          </button>
                         ) : (
                           <button
                             onClick={() => handleSignup(service.id, 'liturgist')}
@@ -903,6 +896,19 @@ export default function Home() {
                           </button>
                         )}
                       </div>
+                      
+                      {/* Cancel Button - Right Side (only if filled) */}
+                      {service.liturgist && (
+                        <div className="flex-shrink-0">
+                          <button
+                            onClick={() => handleCancelSignup(service.liturgist!.id, service.displayDate, 'Liturgist')}
+                            disabled={isLockedQuarter}
+                            className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Cancel Liturgist
+                          </button>
+                        </div>
+                      )}
                     </div>
                     
                     {/* Backup Row */}
@@ -921,21 +927,6 @@ export default function Home() {
                             )}
                           </>
                         ) : (
-                          <span className="text-gray-500 text-xs">optional</span>
-                        )}
-                      </div>
-                      
-                      {/* Action Button - Right Side */}
-                      <div className="flex-shrink-0">
-                        {service.backup ? (
-                          <button
-                            onClick={() => handleCancelSignup(service.backup!.id, service.displayDate, 'Backup')}
-                            disabled={isLockedQuarter}
-                            className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            Cancel
-                          </button>
-                        ) : (
                           <button
                             onClick={() => handleSignup(service.id, 'backup')}
                             disabled={isLockedQuarter}
@@ -945,6 +936,19 @@ export default function Home() {
                           </button>
                         )}
                       </div>
+                      
+                      {/* Cancel Button - Right Side (only if filled) */}
+                      {service.backup && (
+                        <div className="flex-shrink-0">
+                          <button
+                            onClick={() => handleCancelSignup(service.backup!.id, service.displayDate, 'Backup')}
+                            disabled={isLockedQuarter}
+                            className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Cancel Backup
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

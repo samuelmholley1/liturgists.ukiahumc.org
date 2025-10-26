@@ -81,9 +81,16 @@ export default function Home() {
   const [currentQuarter, setCurrentQuarter] = useState('Q4-2025')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [lastErrorTime, setLastErrorTime] = useState<number>(0)
-  const [calendarMonth, setCalendarMonth] = useState(() => {
+  const [calendarQuarter, setCalendarQuarter] = useState(() => {
+    // Start with current quarter
     const today = new Date()
-    return { month: today.getMonth(), year: today.getFullYear() }
+    const month = today.getMonth()
+    const year = today.getFullYear()
+    
+    if (month >= 0 && month <= 2) return { quarter: 1, year }
+    if (month >= 3 && month <= 5) return { quarter: 2, year }
+    if (month >= 6 && month <= 8) return { quarter: 3, year }
+    return { quarter: 4, year }
   })
   
   // Calculate current quarter dynamically
@@ -207,18 +214,18 @@ export default function Home() {
     }
   }
   
-  const handleCalendarMonthChange = (direction: 'prev' | 'next') => {
-    setCalendarMonth(prev => {
+  const handleCalendarQuarterChange = (direction: 'prev' | 'next') => {
+    setCalendarQuarter(prev => {
       if (direction === 'next') {
-        if (prev.month === 11) {
-          return { month: 0, year: prev.year + 1 }
+        if (prev.quarter === 4) {
+          return { quarter: 1, year: prev.year + 1 }
         }
-        return { month: prev.month + 1, year: prev.year }
+        return { quarter: prev.quarter + 1, year: prev.year }
       } else {
-        if (prev.month === 0) {
-          return { month: 11, year: prev.year - 1 }
+        if (prev.quarter === 1) {
+          return { quarter: 4, year: prev.year - 1 }
         }
-        return { month: prev.month - 1, year: prev.year }
+        return { quarter: prev.quarter - 1, year: prev.year }
       }
     })
   }
@@ -239,7 +246,7 @@ export default function Home() {
   const today = new Date().toISOString().split('T')[0]
   
   // Determine the "main" service based on Pacific Time
-  // If before 6am Monday PT, highlight last Sunday. Otherwise, highlight next Sunday.
+  // If it's Sunday before 12pm, highlight this Sunday. After 12pm Sunday, highlight next Sunday.
   const getMainServiceDate = () => {
     const now = new Date()
     // Convert to Pacific Time
@@ -247,18 +254,20 @@ export default function Home() {
     const dayOfWeek = pacificTime.getDay()
     const hour = pacificTime.getHours()
     
-    // If it's Monday (1) and before 6am, use yesterday (Sunday)
-    if (dayOfWeek === 1 && hour < 6) {
-      const yesterday = new Date(pacificTime)
-      yesterday.setDate(yesterday.getDate() - 1)
-      const year = yesterday.getFullYear()
-      const month = String(yesterday.getMonth() + 1).padStart(2, '0')
-      const day = String(yesterday.getDate()).padStart(2, '0')
+    // If it's Sunday (0) and before noon, use today
+    if (dayOfWeek === 0 && hour < 12) {
+      const year = pacificTime.getFullYear()
+      const month = String(pacificTime.getMonth() + 1).padStart(2, '0')
+      const day = String(pacificTime.getDate()).padStart(2, '0')
       return `${year}-${month}-${day}`
     }
     
     // Otherwise find the next Sunday
     let nextSunday = new Date(pacificTime)
+    // If it's Sunday after noon, start from tomorrow
+    if (dayOfWeek === 0 && hour >= 12) {
+      nextSunday.setDate(nextSunday.getDate() + 1)
+    }
     while (nextSunday.getDay() !== 0) {
       nextSunday.setDate(nextSunday.getDate() + 1)
     }
@@ -269,7 +278,17 @@ export default function Home() {
   }
   
   const mainServiceDate = getMainServiceDate()
-  const calendarData = generateCalendarData(services, mainServiceDate, calendarMonth.month, calendarMonth.year)
+  
+  // Generate calendar data for all 3 months in the quarter
+  const getQuarterMonths = (quarter: number, year: number) => {
+    const startMonth = (quarter - 1) * 3
+    return [startMonth, startMonth + 1, startMonth + 2]
+  }
+  
+  const quarterMonths = getQuarterMonths(calendarQuarter.quarter, calendarQuarter.year)
+  const calendarDataForQuarter = quarterMonths.map(month => 
+    generateCalendarData(services, mainServiceDate, month, calendarQuarter.year)
+  )
 
   const handleSignup = (serviceId: string, preferredRole?: 'liturgist' | 'backup') => {
     const service = services.find(s => s.id === serviceId)
@@ -657,27 +676,27 @@ export default function Home() {
       
       {/* Pinned Calendar - Collapsible (Hidden on mobile) */}
       {calendarOpen ? (
-        <div className="hidden md:block fixed top-20 left-4 z-50 bg-white shadow-xl rounded-lg border-2 border-gray-200 w-80">
+        <div className="hidden md:block fixed top-20 left-4 z-50 bg-white shadow-xl rounded-lg border-2 border-gray-200 w-80 max-h-[calc(100vh-6rem)] overflow-y-auto">
           <div className="p-4">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-3 sticky top-0 bg-white z-10 pb-2">
               <div className="flex items-center space-x-2">
                 <div className="flex-1">
                   <h1 className="text-sm font-bold text-gray-800">Liturgist Schedule</h1>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => handleCalendarMonthChange('prev')}
+                      onClick={() => handleCalendarQuarterChange('prev')}
                       className="text-blue-600 hover:text-blue-800 p-0.5"
-                      title="Previous month"
+                      title="Previous quarter"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                       </svg>
                     </button>
-                    <p className="text-xs text-blue-600 font-medium">{calendarData.monthName}</p>
+                    <p className="text-xs text-blue-600 font-medium">Q{calendarQuarter.quarter} {calendarQuarter.year}</p>
                     <button
-                      onClick={() => handleCalendarMonthChange('next')}
+                      onClick={() => handleCalendarQuarterChange('next')}
                       className="text-blue-600 hover:text-blue-800 p-0.5"
-                      title="Next month"
+                      title="Next quarter"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -697,36 +716,42 @@ export default function Home() {
               </button>
             </div>
             
-            <div className="grid grid-cols-7 gap-1 text-xs">
-              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
-                <div key={day} className="text-center font-medium text-gray-600 py-1">
-                  {day}
+            {/* Render all 3 months in the quarter */}
+            {calendarDataForQuarter.map((calendarData, monthIndex) => (
+              <div key={monthIndex} className={monthIndex > 0 ? 'mt-4 pt-4 border-t border-gray-200' : ''}>
+                <h2 className="text-xs font-bold text-gray-700 mb-2">{calendarData.monthName}</h2>
+                <div className="grid grid-cols-7 gap-1 text-xs">
+                  {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
+                    <div key={day} className="text-center font-medium text-gray-600 py-1">
+                      {day}
+                    </div>
+                  ))}
+                  {calendarData.days.map((day, index) => (
+                    <div
+                      key={index}
+                      className={`text-center py-2 rounded text-xs transition-colors ${
+                        !day ? '' :
+                        day.isMainService ? 'bg-purple-600 text-white font-bold cursor-pointer hover:bg-purple-700' :
+                        day.isToday ? 'bg-blue-600 text-white font-bold' :
+                        day.isSunday && day.hasService ? (
+                          hoveredService === day.serviceData?.id ? 'bg-yellow-300 font-bold border border-yellow-500' : 'bg-green-100 font-medium cursor-pointer hover:bg-green-200'
+                        ) :
+                        day.isSunday ? 'bg-orange-100 font-medium' :
+                        'text-gray-600'
+                      }`}
+                      title={
+                        day?.isMainService ? `Next Service: ${day.serviceData?.displayDate}` :
+                        day?.serviceData?.notes ? `${day.serviceData?.notes}` :
+                        day?.isSunday && day?.hasService ? `Service on ${day.serviceData?.displayDate}` : ''
+                      }
+                      onClick={day?.hasService && isClient ? () => scrollToService(day.serviceData!.id) : undefined}
+                    >
+                      {day?.day || ''}
+                    </div>
+                  ))}
                 </div>
-              ))}
-              {calendarData.days.map((day, index) => (
-                <div
-                  key={index}
-                  className={`text-center py-2 rounded text-xs transition-colors ${
-                    !day ? '' :
-                    day.isMainService ? 'bg-purple-600 text-white font-bold cursor-pointer hover:bg-purple-700' :
-                    day.isToday ? 'bg-blue-600 text-white font-bold' :
-                    day.isSunday && day.hasService ? (
-                      hoveredService === day.serviceData?.id ? 'bg-yellow-300 font-bold border border-yellow-500' : 'bg-green-100 font-medium cursor-pointer hover:bg-green-200'
-                    ) :
-                    day.isSunday ? 'bg-orange-100 font-medium' :
-                    'text-gray-600'
-                  }`}
-                  title={
-                    day?.isMainService ? `Next Service: ${day.serviceData?.displayDate}` :
-                    day?.serviceData?.notes ? `${day.serviceData?.notes}` :
-                    day?.isSunday && day?.hasService ? `Service on ${day.serviceData?.displayDate}` : ''
-                  }
-                  onClick={day?.hasService && isClient ? () => scrollToService(day.serviceData!.id) : undefined}
-                >
-                  {day?.day || ''}
-                </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       ) : (

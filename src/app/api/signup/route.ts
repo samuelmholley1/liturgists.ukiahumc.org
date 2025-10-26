@@ -228,6 +228,8 @@ export async function GET(request: NextRequest) {
         const isBackup = userRole.toLowerCase() === 'backup'
         const subjectPrefix = isBackup ? '❌ Backup Liturgist Cancelled' : '❌ Liturgist Signup Cancelled'
         
+        console.log(`DEBUG Cancellation: role="${userRole}", isBackup=${isBackup}, subject="${subjectPrefix}"`)
+        
         // Send cancellation email
         // If Sam cancels: TO sam@ only (no CC)
         // If others cancel: TO their email, CC sam@

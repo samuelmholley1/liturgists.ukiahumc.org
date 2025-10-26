@@ -842,7 +842,7 @@ export default function Home() {
                           if (service.notes.includes('Christmas Eve')) {
                             return (
                               <span className="text-xs font-semibold text-amber-900 bg-amber-200 px-2 py-0.5 rounded">
-                                🕯️ CHRISTMAS EVE
+                                🕯️ CHRISTMAS EVE • Lights 5 candles
                               </span>
                             )
                           }

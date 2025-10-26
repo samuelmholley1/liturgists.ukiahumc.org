@@ -80,6 +80,7 @@ export default function Home() {
   const [calendarOpen, setCalendarOpen] = useState(true)
   const [currentQuarter, setCurrentQuarter] = useState('Q4-2025')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [lastErrorTime, setLastErrorTime] = useState<number>(0)
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const today = new Date()
     return { month: today.getMonth(), year: today.getFullYear() }
@@ -168,11 +169,15 @@ export default function Home() {
     } catch (error) {
       console.error('Error fetching services:', error)
       
-      // Report error to admin
-      await reportError(error, {
-        action: 'Fetch Services',
-        serviceDate: currentQuarter
-      })
+      // Report error to admin (deduplicate within 10 seconds)
+      const now = Date.now()
+      if (now - lastErrorTime > 10000) {
+        setLastErrorTime(now)
+        await reportError(error, {
+          action: 'Fetch Services',
+          serviceDate: currentQuarter
+        })
+      }
     } finally {
       setLoading(false)
       setRefreshing(false)

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { submitSignup, getSignups } from '@/lib/airtable'
+import { submitSignup, getSignups, deleteSignup } from '@/lib/airtable'
 
 // Disable all caching for this API route
 export const dynamic = 'force-dynamic'
@@ -84,6 +84,43 @@ export async function POST(request: NextRequest) {
       console.error('Airtable submission failed:', result.error)
       return NextResponse.json(
         { error: 'Failed to submit signup', details: String(result.error) },
+        { status: 500 }
+      )
+    }
+  } catch (error) {
+    console.error('API Error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error', details: String(error) },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const recordId = searchParams.get('recordId')
+    
+    if (!recordId) {
+      return NextResponse.json(
+        { error: 'Missing recordId parameter' },
+        { status: 400 }
+      )
+    }
+
+    // Delete from Airtable
+    const result = await deleteSignup(recordId)
+
+    if (result.success) {
+      console.log('Signup cancelled successfully:', recordId)
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Signup cancelled successfully'
+      })
+    } else {
+      console.error('Airtable deletion failed:', result.error)
+      return NextResponse.json(
+        { error: 'Failed to cancel signup', details: String(result.error) },
         { status: 500 }
       )
     }

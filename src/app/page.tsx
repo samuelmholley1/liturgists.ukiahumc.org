@@ -249,6 +249,30 @@ export default function Home() {
     setSignupForm(prev => ({ ...prev, role: defaultRole }))
     setSelectedSignup({ serviceId })
   }
+
+  const handleCancelSignup = async (recordId: string, displayDate: string, role: string) => {
+    const confirmed = confirm(`Are you sure you want to cancel your ${role} signup for ${displayDate}?`)
+    if (!confirmed) return
+
+    try {
+      const response = await fetch(`/api/signup?recordId=${recordId}`, {
+        method: 'DELETE',
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        alert('Your signup has been cancelled successfully.')
+        // Refresh services to show updated availability
+        await fetchServices()
+      } else {
+        alert(data.error || 'Failed to cancel signup. Please try again.')
+      }
+    } catch (error) {
+      console.error('Error cancelling signup:', error)
+      alert('An error occurred while cancelling your signup. Please try again.')
+    }
+  }
   
   // Handle person selection from dropdown
   const handlePersonSelect = (personName: string) => {
@@ -861,9 +885,21 @@ export default function Home() {
                         <div className="flex items-center gap-2 min-w-fit">
                           <span className="font-medium text-gray-700">Liturgist:</span>
                           {service.liturgist ? (
-                            <span className="font-semibold text-green-900 px-2 py-0.5 bg-green-100 rounded truncate max-w-[200px]" title={service.liturgist.name}>
-                              {service.liturgist.name}
-                            </span>
+                            <>
+                              <span className="font-semibold text-green-900 px-2 py-0.5 bg-green-100 rounded truncate max-w-[200px]" title={service.liturgist.name}>
+                                {service.liturgist.name}
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleCancelSignup(service.liturgist!.id, service.displayDate, 'Liturgist')
+                                }}
+                                className="text-xs text-red-600 hover:text-red-800 hover:underline"
+                                title="Cancel this signup"
+                              >
+                                (cancel)
+                              </button>
+                            </>
                           ) : (
                             <span className="font-semibold text-red-800 px-2 py-0.5 bg-red-100 rounded">
                               EMPTY
@@ -887,9 +923,21 @@ export default function Home() {
                         <div className="flex items-center gap-2 min-w-fit">
                           <span className="font-medium text-gray-700">Backup:</span>
                           {service.backup ? (
-                            <span className="font-semibold text-orange-900 px-2 py-0.5 bg-orange-100 rounded truncate max-w-[200px]" title={service.backup.name}>
-                              {service.backup.name}
-                            </span>
+                            <>
+                              <span className="font-semibold text-orange-900 px-2 py-0.5 bg-orange-100 rounded truncate max-w-[200px]" title={service.backup.name}>
+                                {service.backup.name}
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleCancelSignup(service.backup!.id, service.displayDate, 'Backup')
+                                }}
+                                className="text-xs text-red-600 hover:text-red-800 hover:underline"
+                                title="Cancel this signup"
+                              >
+                                (cancel)
+                              </button>
+                            </>
                           ) : (
                             <span className="text-gray-500 px-2 py-0.5">
                               none

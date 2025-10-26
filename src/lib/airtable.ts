@@ -72,4 +72,17 @@ export async function getSignups() {
   }
 }
 
+/**
+ * Delete a signup from Airtable by record ID
+ */
+export async function deleteSignup(recordId: string) {
+  try {
+    await table.destroy([recordId])
+    return { success: true }
+  } catch (error) {
+    console.error('Error deleting from Airtable:', error)
+    return { success: false, error }
+  }
+}
+
 export { table }

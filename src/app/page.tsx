@@ -817,8 +817,8 @@ export default function Home() {
                           // Check if it's Christmas Eve
                           if (service.notes.includes('Christmas Eve')) {
                             return (
-                              <span className="text-xs font-semibold text-red-700 bg-red-100 px-2 py-0.5 rounded">
-                                🕯️ CHRISTMAS EVE • Light Christ Candle + all 4 Advent candles
+                              <span className="text-xs font-semibold text-amber-900 bg-amber-200 px-2 py-0.5 rounded">
+                                🕯️ CHRISTMAS EVE
                               </span>
                             )
                           }
@@ -830,17 +830,11 @@ export default function Home() {
                           if (weekMatch && countMatch) {
                             const week = weekMatch[1]
                             const count = countMatch[1]
-                            const candleMap: Record<string, string> = {
-                              '1': 'Hope',
-                              '2': 'Hope + Peace',
-                              '3': 'Hope + Peace + Joy',
-                              '4': 'Hope + Peace + Joy + Love'
-                            }
-                            const candles = candleMap[week] || ''
+                            const candleText = count === '1' ? '1 candle' : `${count} candles`
                             
                             return (
-                              <span className="text-xs font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
-                                🕯️ ADVENT WK {week} • Light {candles} ({count} candle{count !== '1' ? 's' : ''})
+                              <span className="text-xs font-semibold text-amber-900 bg-amber-200 px-2 py-0.5 rounded">
+                                🕯️ ADVENT WEEK {week} • Lights {candleText}
                               </span>
                             )
                           }
@@ -865,19 +859,19 @@ export default function Home() {
                       {/* Liturgist Row */}
                       <div className="flex items-center gap-3 py-1">
                         <div className="flex items-center gap-2 min-w-fit">
-                          <span className="font-medium text-gray-600">Liturgist:</span>
+                          <span className="font-medium text-gray-700">Liturgist:</span>
                           {service.liturgist ? (
-                            <span className="font-semibold text-green-700 px-2 py-0.5 bg-green-50 rounded truncate max-w-[200px]" title={service.liturgist.name}>
+                            <span className="font-semibold text-green-900 px-2 py-0.5 bg-green-100 rounded truncate max-w-[200px]" title={service.liturgist.name}>
                               {service.liturgist.name}
                             </span>
                           ) : (
-                            <span className="font-semibold text-red-600 px-2 py-0.5 bg-red-50 rounded">
+                            <span className="font-semibold text-red-800 px-2 py-0.5 bg-red-100 rounded">
                               EMPTY
                             </span>
                           )}
                         </div>
                         {service.liturgist && (
-                          <div className="flex items-center gap-2 text-green-600 text-xs truncate">
+                          <div className="flex items-center gap-2 text-green-700 text-xs truncate">
                             {service.liturgist.email && (
                               <span className="truncate max-w-[200px]" title={service.liturgist.email}>{service.liturgist.email}</span>
                             )}
@@ -891,19 +885,19 @@ export default function Home() {
                       {/* Backup Row */}
                       <div className="flex items-center gap-3 py-1">
                         <div className="flex items-center gap-2 min-w-fit">
-                          <span className="font-medium text-gray-600">Backup:</span>
+                          <span className="font-medium text-gray-700">Backup:</span>
                           {service.backup ? (
-                            <span className="font-semibold text-orange-700 px-2 py-0.5 bg-orange-50 rounded truncate max-w-[200px]" title={service.backup.name}>
+                            <span className="font-semibold text-orange-900 px-2 py-0.5 bg-orange-100 rounded truncate max-w-[200px]" title={service.backup.name}>
                               {service.backup.name}
                             </span>
                           ) : (
-                            <span className="text-gray-400 px-2 py-0.5">
+                            <span className="text-gray-500 px-2 py-0.5">
                               none
                             </span>
                           )}
                         </div>
                         {service.backup && (
-                          <div className="flex items-center gap-2 text-orange-600 text-xs truncate">
+                          <div className="flex items-center gap-2 text-orange-700 text-xs truncate">
                             {service.backup.email && (
                               <span className="truncate max-w-[200px]" title={service.backup.email}>{service.backup.email}</span>
                             )}

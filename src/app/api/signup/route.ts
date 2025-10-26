@@ -89,24 +89,18 @@ export async function POST(request: NextRequest) {
           recordId: result.record?.id || ''
         })
         
-        // Send email to the liturgist who signed up
+        // Send email confirmation
+        // If liturgist signs up: TO them, CC alerts@samuelholley.com
+        // If sam@samuelholley.com signs up: TO alerts@samuelholley.com only (avoid sending to both)
+        const isSamSigningUp = body.email.toLowerCase() === 'sam@samuelholley.com'
+        
         await sendEmail({
-          to: body.email,
+          to: isSamSigningUp ? 'alerts@samuelholley.com' : body.email,
+          cc: isSamSigningUp ? undefined : 'alerts@samuelholley.com',
           replyTo: 'alerts@samuelholley.com',
           subject: `✅ Your Liturgist Signup Confirmed - ${body.displayDate}`,
           html: emailHtml
         })
-        
-        // Send SEPARATE admin notification email (avoids Gmail duplicate recipient policy)
-        // Skip if admin is the one signing up (checks for sam@samuelholley.com which is the UI email)
-        if (body.email.toLowerCase() !== 'sam@samuelholley.com') {
-          await sendEmail({
-            to: 'alerts@samuelholley.com',
-            replyTo: body.email,
-            subject: `✅ New Liturgist Signup - ${body.name} - ${body.displayDate}`,
-            html: emailHtml
-          })
-        }
         
         console.log('Email notification sent successfully')
       } catch (emailError) {
@@ -227,23 +221,16 @@ export async function GET(request: NextRequest) {
         })
         
         const userEmail = recordData.record.email as string
+        const isSamCancelling = userEmail.toLowerCase() === 'sam@samuelholley.com'
         
-        // Send cancellation email to the liturgist
+        // Send cancellation email with alerts@ CC'd (or to alerts@ if sam@ cancels)
         await sendEmail({
-          to: userEmail,
+          to: isSamCancelling ? 'alerts@samuelholley.com' : userEmail,
+          cc: isSamCancelling ? undefined : 'alerts@samuelholley.com',
+          replyTo: 'alerts@samuelholley.com',
           subject: `❌ Your Liturgist Signup Cancelled - ${formattedDateForSubject}`,
           html: emailHtml
         })
-        
-        // Send SEPARATE admin notification (avoids Gmail duplicate recipient policy)
-        // Check for sam@samuelholley.com which is the UI email
-        if (userEmail.toLowerCase() !== 'sam@samuelholley.com') {
-          await sendEmail({
-            to: 'alerts@samuelholley.com',
-            subject: `❌ Liturgist Cancellation - ${recordData.record.name} - ${formattedDateForSubject}`,
-            html: emailHtml
-          })
-        }
         
         console.log('Cancellation email notification sent successfully')
       } catch (emailError) {

@@ -13,13 +13,13 @@ export async function sendEmail({ to, cc, subject, html }: EmailParams) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.GMAIL_USER,
+      user: 'samuelholleyai@gmail.com', // Authenticate with Gmail account
       pass: process.env.GMAIL_APP_PASSWORD,
     },
   })
 
   const mailOptions = {
-    from: `"UUMC Liturgist Scheduling" <${process.env.GMAIL_USER}>`,
+    from: '"UUMC Liturgist Scheduling" <sam@samuelholley.com>', // Send from verified alias
     to,
     cc,
     subject,

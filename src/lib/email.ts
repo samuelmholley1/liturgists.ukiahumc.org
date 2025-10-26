@@ -1,4 +1,4 @@
-// Email notification service using Gmail API via Nodemailer
+// Email notification service using Zoho SMTP via Nodemailer
 import nodemailer from 'nodemailer'
 
 interface EmailParams {
@@ -10,20 +10,22 @@ interface EmailParams {
 }
 
 export async function sendEmail({ to, cc, replyTo, subject, html }: EmailParams) {
-  // Create transporter using Gmail SMTP with app-specific password
+  // Create transporter using Zoho SMTP
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.zoho.com',
+    port: 465,
+    secure: true,
     auth: {
-      user: 'samuelholleyai@gmail.com', // Authenticate with Gmail account
-      pass: process.env.GMAIL_APP_PASSWORD,
+      user: process.env.ZOHO_USER,
+      pass: process.env.ZOHO_APP_PASSWORD,
     },
   })
 
   const mailOptions = {
-    from: '"UUMC Liturgist Scheduling" <alerts@samuelholley.com>', // Send from verified alias
+    from: '"UUMC Liturgist Scheduling" <alerts@samuelholley.com>',
     to,
     cc,
-    replyTo: replyTo || 'alerts@samuelholley.com',
+    replyTo: replyTo || 'sam@samuelholley.com',
     subject,
     html,
   }

@@ -90,13 +90,13 @@ export async function POST(request: NextRequest) {
         })
         
         // Send email confirmation
-        // If Sam signs up: TO alerts@, Reply-To sam@
-        // If others sign up: TO their email, Reply-To sam@, CC alerts@
+        // If Sam signs up: TO sam@ only (no CC)
+        // If others sign up: TO their email, CC sam@
         const isSamSigningUp = body.email.toLowerCase() === 'sam@samuelholley.com'
         
         await sendEmail({
-          to: isSamSigningUp ? 'alerts@samuelholley.com' : body.email,
-          cc: isSamSigningUp ? undefined : 'alerts@samuelholley.com',
+          to: body.email,
+          cc: isSamSigningUp ? undefined : 'sam@samuelholley.com',
           replyTo: 'sam@samuelholley.com',
           subject: `✅ Your Liturgist Signup Confirmed - ${body.displayDate}`,
           html: emailHtml
@@ -224,11 +224,11 @@ export async function GET(request: NextRequest) {
         const isSamCancelling = userEmail.toLowerCase() === 'sam@samuelholley.com'
         
         // Send cancellation email
-        // If Sam cancels: TO alerts@, Reply-To sam@
-        // If others cancel: TO their email, Reply-To sam@, CC alerts@
+        // If Sam cancels: TO sam@ only (no CC)
+        // If others cancel: TO their email, CC sam@
         await sendEmail({
-          to: isSamCancelling ? 'alerts@samuelholley.com' : userEmail,
-          cc: isSamCancelling ? undefined : 'alerts@samuelholley.com',
+          to: userEmail,
+          cc: isSamCancelling ? undefined : 'sam@samuelholley.com',
           replyTo: 'sam@samuelholley.com',
           subject: `❌ Your Liturgist Signup Cancelled - ${formattedDateForSubject}`,
           html: emailHtml

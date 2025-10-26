@@ -458,8 +458,9 @@ export function generateErrorEmail(data: {
   userName?: string
   serviceDate?: string
   stackTrace?: string
+  explanation?: string
 }) {
-  const { errorType, errorMessage, userEmail, userName, serviceDate, stackTrace } = data
+  const { errorType, errorMessage, userEmail, userName, serviceDate, stackTrace, explanation } = data
   
   return `
     <!DOCTYPE html>
@@ -573,6 +574,18 @@ export function generateErrorEmail(data: {
           <div style="text-align: center;">
             <span class="alert-badge">ERROR</span>
           </div>
+          
+          ${explanation ? `
+          <div style="background: #edf2f7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4299e1;">
+            <p style="margin: 0; font-size: 16px; font-weight: 600; color: #2d3748; margin-bottom: 8px;">
+              💡 What Happened (Plain English):
+            </p>
+            <p style="margin: 0; font-size: 15px; color: #1a202c; line-height: 1.6;">
+              ${explanation}
+            </p>
+          </div>
+          ` : ''}
+          
           <p class="message-text">An error occurred in the liturgist signup system.</p>
           
           <div class="error-box">

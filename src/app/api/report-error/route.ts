@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
         userName: context.userName,
         userEmail: context.userEmail,
         serviceDate: context.serviceDate,
+        explanation: context.explanation,
         stackTrace: error.stack || `Browser: ${context.userAgent}\nURL: ${context.url}\nTimestamp: ${context.timestamp}`
       })
       

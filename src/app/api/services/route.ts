@@ -46,6 +46,14 @@ export async function GET(request: NextRequest) {
           phone: signup.phone,
           preferredContact: 'email' as const
         }
+      } else if (signup.role === 'liturgist2') {
+        service.liturgist2 = {
+          id: signup.id,
+          name: signup.name,
+          email: signup.email,
+          phone: signup.phone,
+          preferredContact: 'email' as const
+        }
       } else if (signup.role === 'Backup') {
         service.backup = {
           id: signup.id,
@@ -193,6 +201,7 @@ function generateSundaysForQuarter(quarterString: string) {
       date: dateString,
       displayDate,
       liturgist: null,
+      liturgist2: null,
       backup: null,
       attendance: [],
       notes
@@ -216,6 +225,7 @@ function generateSundaysForQuarter(quarterString: string) {
       date: christmasEveDate,
       displayDate: christmasEveDisplay + ' (Christmas Eve)',
       liturgist: null,
+      liturgist2: null,
       backup: null,
       attendance: [],
       notes: 'Christmas Eve Service — Light the Christ Candle (white center candle) + all 4 Advent candles'

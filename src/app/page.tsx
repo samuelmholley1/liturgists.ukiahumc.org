@@ -14,6 +14,7 @@ interface Service {
   date: string
   displayDate: string
   liturgist: any | null
+  liturgist2?: any | null  // Second liturgist for special services like Christmas Eve
   backup: any | null
   attendance: any[]
   notes?: string
@@ -70,7 +71,7 @@ export default function Home() {
     lastName: '',
     email: '',
     phone: '',
-    role: 'liturgist' as 'liturgist' | 'backup'
+    role: 'liturgist' as 'liturgist' | 'liturgist2' | 'backup'
   })
   const [isClient, setIsClient] = useState(false)
   const [services, setServices] = useState<Service[]>([])
@@ -281,28 +282,65 @@ export default function Home() {
     generateCalendarData(services, mainServiceDate, month, calendarQuarter.year)
   )
 
-  const handleSignup = (serviceId: string, preferredRole?: 'liturgist' | 'backup') => {
+  const handleSignup = (serviceId: string, preferredRole?: 'liturgist' | 'liturgist2' | 'backup') => {
     const service = services.find(s => s.id === serviceId)
     
     // Determine which role to sign up for
-    let roleToSignup: 'liturgist' | 'backup' = preferredRole || 'liturgist'
+    let roleToSignup: 'liturgist' | 'liturgist2' | 'backup' = preferredRole || 'liturgist'
     
-    // If preferred role is already taken, switch to the other
-    if (roleToSignup === 'liturgist' && service?.liturgist) {
-      roleToSignup = 'backup'
-    } else if (roleToSignup === 'backup' && service?.backup) {
-      roleToSignup = 'liturgist'
-    }
+    // For Christmas Eve, handle all three roles
+    const isChristmasEve = service?.displayDate?.includes('Christmas Eve')
     
-    // Check if both roles are taken
-    if (service?.liturgist && service?.backup) {
-      setModalState({
-        isOpen: true,
-        type: 'warning',
-        title: 'Service Full',
-        message: 'Both the Main Liturgist and Backup positions are filled for this service. Please choose a different Sunday.'
-      })
-      return
+    if (isChristmasEve) {
+      // If preferred role is already taken, find first available role
+      if (roleToSignup === 'liturgist' && service?.liturgist) {
+        if (!service?.liturgist2) {
+          roleToSignup = 'liturgist2'
+        } else if (!service?.backup) {
+          roleToSignup = 'backup'
+        }
+      } else if (roleToSignup === 'liturgist2' && service?.liturgist2) {
+        if (!service?.liturgist) {
+          roleToSignup = 'liturgist'
+        } else if (!service?.backup) {
+          roleToSignup = 'backup'
+        }
+      } else if (roleToSignup === 'backup' && service?.backup) {
+        if (!service?.liturgist) {
+          roleToSignup = 'liturgist'
+        } else if (!service?.liturgist2) {
+          roleToSignup = 'liturgist2'
+        }
+      }
+      
+      // Check if all three roles are taken for Christmas Eve
+      if (service?.liturgist && service?.liturgist2 && service?.backup) {
+        setModalState({
+          isOpen: true,
+          type: 'warning',
+          title: 'Service Full',
+          message: 'All positions (Main Liturgist, Second Liturgist, and Backup) are filled for Christmas Eve. Please choose a different Sunday.'
+        })
+        return
+      }
+    } else {
+      // Regular service logic (liturgist and backup only)
+      if (roleToSignup === 'liturgist' && service?.liturgist) {
+        roleToSignup = 'backup'
+      } else if (roleToSignup === 'backup' && service?.backup) {
+        roleToSignup = 'liturgist'
+      }
+      
+      // Check if both roles are taken for regular services
+      if (service?.liturgist && service?.backup) {
+        setModalState({
+          isOpen: true,
+          type: 'warning',
+          title: 'Service Full',
+          message: 'Both the Main Liturgist and Backup positions are filled for this service. Please choose a different Sunday.'
+        })
+        return
+      }
     }
     
     setSignupForm(prev => ({ ...prev, role: roleToSignup }))
@@ -889,6 +927,39 @@ export default function Home() {
                           )}
                         </div>
                       </label>
+                      
+                      {/* Second Liturgist - Only show for Christmas Eve */}
+                      {selectedService?.displayDate?.includes('Christmas Eve') && (
+                        <label className={`flex items-center p-3 border-2 rounded-lg transition-all ${
+                          signupForm.role === 'liturgist2' 
+                            ? 'bg-blue-50 border-blue-500 shadow-sm' 
+                            : 'border-gray-200 hover:border-gray-300'
+                        } ${selectedService?.liturgist2 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+                          <input
+                            type="radio"
+                            name="role"
+                            value="liturgist2"
+                            checked={signupForm.role === 'liturgist2'}
+                            onChange={(e) => setSignupForm({ ...signupForm, role: 'liturgist2' })}
+                            disabled={!!selectedService?.liturgist2}
+                            className="mr-3 w-4 h-4 text-blue-600"
+                          />
+                          <div className="flex-1">
+                            <span className={`text-sm font-medium ${signupForm.role === 'liturgist2' ? 'text-blue-900' : 'text-gray-700'}`}>
+                              Second Liturgist (Christmas Eve)
+                              {signupForm.role === 'liturgist2' && (
+                                <span className="ml-2 px-2 py-0.5 bg-blue-600 text-white text-xs rounded-full">Selected</span>
+                              )}
+                            </span>
+                            {selectedService?.liturgist2 && (
+                              <span className="ml-2 text-xs text-red-600 font-medium">
+                                (Taken by {selectedService.liturgist2.name})
+                              </span>
+                            )}
+                          </div>
+                        </label>
+                      )}
+                      
                       <label className={`flex items-center p-3 border-2 rounded-lg transition-all ${
                         signupForm.role === 'backup' 
                           ? 'bg-blue-50 border-blue-500 shadow-sm' 
@@ -924,11 +995,19 @@ export default function Home() {
                       <strong>Note:</strong> Positions update every 5 seconds. Grayed out options have already been filled. If your preferred role is unavailable, choose a different Sunday or select the available role.
                     </div>
                     
-                    {selectedService?.liturgist && selectedService?.backup && (
-                      <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
-                        <strong>⚠️ Both positions are filled.</strong> Please choose a different Sunday.
-                      </div>
-                    )}
+                    {/* Check if all positions are filled */}
+                    {(() => {
+                      const isChristmasEve = selectedService?.displayDate?.includes('Christmas Eve')
+                      const allPositionsFilled = isChristmasEve 
+                        ? selectedService?.liturgist && selectedService?.liturgist2 && selectedService?.backup
+                        : selectedService?.liturgist && selectedService?.backup
+                      
+                      return allPositionsFilled && (
+                        <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
+                          <strong>⚠️ All positions are filled.</strong> Please choose a different Sunday.
+                        </div>
+                      )
+                    })()}
                   </div>
                 )}
 
@@ -1165,6 +1244,48 @@ export default function Home() {
                         </div>
                       )}
                     </div>
+                    
+                    {/* Second Liturgist Row - Only for Christmas Eve */}
+                    {service.displayDate?.includes('Christmas Eve') && (
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <span className="font-medium text-gray-700 whitespace-nowrap">Second:</span>
+                          {service.liturgist2 ? (
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 min-w-0 flex-1">
+                              <span className="font-semibold text-green-900 truncate" title={service.liturgist2.name}>
+                                {service.liturgist2.name}
+                              </span>
+                              {service.liturgist2.email && (
+                                <span className="text-green-700 text-xs truncate" title={service.liturgist2.email}>
+                                  {service.liturgist2.email}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleSignup(service.id, 'liturgist2')}
+                              disabled={isLockedQuarter}
+                              className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-full hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                            >
+                              Sign Up
+                            </button>
+                          )}
+                        </div>
+                        
+                        {/* Cancel Button - Right Side (only if filled) */}
+                        {service.liturgist2 && (
+                          <div className="flex-shrink-0 sm:ml-2">
+                            <button
+                              onClick={() => handleCancelSignup(service.liturgist2!.id, service.liturgist2!.name, service.displayDate, 'Second Liturgist')}
+                              disabled={isLockedQuarter}
+                              className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap w-full sm:w-auto"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                     
                     {/* Backup Row */}
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">

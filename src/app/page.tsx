@@ -842,7 +842,7 @@ export default function Home() {
                           if (service.notes.includes('Christmas Eve')) {
                             return (
                               <span className="text-xs font-semibold text-amber-900 bg-amber-200 px-2 py-0.5 rounded">
-                                🕯️ CHRISTMAS EVE • Lights 5 candles
+                                🕯️ CHRISTMAS EVE • Liturgist lights 5 candles
                               </span>
                             )
                           }
@@ -858,7 +858,7 @@ export default function Home() {
                             
                             return (
                               <span className="text-xs font-semibold text-amber-900 bg-amber-200 px-2 py-0.5 rounded">
-                                🕯️ ADVENT WEEK {week} • Lights {candleText}
+                                🕯️ ADVENT WEEK {week} • Liturgist lights {candleText}
                               </span>
                             )
                           }
@@ -867,15 +867,46 @@ export default function Home() {
                         })()}
                       </div>
                       
-                      {/* Expand Icon */}
-                      <svg 
-                        className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                      {/* Cancel Buttons and Expand Icon */}
+                      <div className="flex items-center gap-2">
+                        {/* Cancel button for Liturgist if filled */}
+                        {service.liturgist && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleCancelSignup(service.liturgist!.id, service.displayDate, 'Liturgist')
+                            }}
+                            className="px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors"
+                            title="Cancel Liturgist signup"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                        
+                        {/* Cancel button for Backup if filled */}
+                        {service.backup && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleCancelSignup(service.backup!.id, service.displayDate, 'Backup')
+                            }}
+                            className="px-2 py-1 text-xs font-medium text-orange-700 bg-orange-100 rounded-full hover:bg-orange-200 transition-colors"
+                            title="Cancel Backup signup"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                        
+                        {/* Expand Icon */}
+                        <svg 
+                          className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
                     </div>
                     
                     {/* Two Rows: Liturgist and Backup */}
@@ -885,21 +916,9 @@ export default function Home() {
                         <div className="flex items-center gap-2 min-w-fit">
                           <span className="font-medium text-gray-700">Liturgist:</span>
                           {service.liturgist ? (
-                            <>
-                              <span className="font-semibold text-green-900 px-2 py-0.5 bg-green-100 rounded truncate max-w-[200px]" title={service.liturgist.name}>
-                                {service.liturgist.name}
-                              </span>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleCancelSignup(service.liturgist!.id, service.displayDate, 'Liturgist')
-                                }}
-                                className="text-xs text-red-600 hover:text-red-800 hover:underline"
-                                title="Cancel this signup"
-                              >
-                                (cancel)
-                              </button>
-                            </>
+                            <span className="font-semibold text-green-900 px-2 py-0.5 bg-green-100 rounded truncate max-w-[200px]" title={service.liturgist.name}>
+                              {service.liturgist.name}
+                            </span>
                           ) : (
                             <span className="font-semibold text-red-800 px-2 py-0.5 bg-red-100 rounded">
                               EMPTY
@@ -923,21 +942,9 @@ export default function Home() {
                         <div className="flex items-center gap-2 min-w-fit">
                           <span className="font-medium text-gray-700">Backup:</span>
                           {service.backup ? (
-                            <>
-                              <span className="font-semibold text-orange-900 px-2 py-0.5 bg-orange-100 rounded truncate max-w-[200px]" title={service.backup.name}>
-                                {service.backup.name}
-                              </span>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleCancelSignup(service.backup!.id, service.displayDate, 'Backup')
-                                }}
-                                className="text-xs text-red-600 hover:text-red-800 hover:underline"
-                                title="Cancel this signup"
-                              >
-                                (cancel)
-                              </button>
-                            </>
+                            <span className="font-semibold text-orange-900 px-2 py-0.5 bg-orange-100 rounded truncate max-w-[200px]" title={service.backup.name}>
+                              {service.backup.name}
+                            </span>
                           ) : (
                             <span className="text-gray-500 px-2 py-0.5">
                               none

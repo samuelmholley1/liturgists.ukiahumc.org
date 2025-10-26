@@ -40,10 +40,6 @@ test.describe('Liturgist Signup App - E2E Tests', () => {
   })
 
   test('02 - All Q4 2025 Sundays appear', async ({ page }) => {
-    // Switch to Q4 2025
-    const quarterSelect = page.locator('select').first()
-    await quarterSelect.selectOption('Q4-2025')
-    
     // Wait for services to load
     await page.waitForTimeout(1000)
     
@@ -60,28 +56,22 @@ test.describe('Liturgist Signup App - E2E Tests', () => {
   })
 
   test('03 - Christmas Eve appears in Q4 2025', async ({ page }) => {
-    const quarterSelect = page.locator('select').first()
-    await quarterSelect.selectOption('Q4-2025')
     await page.waitForTimeout(1000)
     
     // Check for Christmas Eve
     await expect(page.getByText('December 24', { exact: false })).toBeVisible()
     await expect(page.getByText(/Christmas Eve/i)).toBeVisible()
-    await expect(page.getByText(/Christ Candle/i)).toBeVisible()
+    await expect(page.getByText(/Liturgist lights 5 candles/i)).toBeVisible()
   })
 
   test('04 - Advent badges show cumulative candles', async ({ page }) => {
-    const quarterSelect = page.locator('select').first()
-    await quarterSelect.selectOption('Q4-2025')
     await page.waitForTimeout(1000)
     
-    // Check Advent Week 1 (Nov 30)
-    await expect(page.getByText(/Hope/i).first()).toBeVisible()
-    
-    // Check for cumulative indicators (should see "2 candles", "3 candles", "4 candles")
-    await expect(page.getByText(/2 candles/i)).toBeVisible()
-    await expect(page.getByText(/3 candles/i)).toBeVisible()
-    await expect(page.getByText(/4 candles/i)).toBeVisible()
+    // Check for cumulative candle indicators with new "Liturgist lights" wording
+    await expect(page.getByText(/Liturgist lights 1 candle/i)).toBeVisible()
+    await expect(page.getByText(/Liturgist lights 2 candles/i)).toBeVisible()
+    await expect(page.getByText(/Liturgist lights 3 candles/i)).toBeVisible()
+    await expect(page.getByText(/Liturgist lights 4 candles/i)).toBeVisible()
   })
 
   test('05 - Signup modal opens and closes', async ({ page }) => {
@@ -279,35 +269,65 @@ test.describe('Liturgist Signup App - E2E Tests', () => {
     console.log('Service worker registered:', swRegistrations)
   })
 
-  test('16 - Cancel signup feature works', async ({ page }) => {
-    // This test will mock a filled position to test cancellation UI
-    // We won't actually create/delete records to avoid polluting Airtable
+  test('16 - Full signup and cancellation flow (E2E)', async ({ page }) => {
+    // Find the FIRST November service with an EMPTY liturgist position
+    await page.waitForTimeout(1000)
     
-    // Find a service that has a filled position
-    const filledServiceCard = page.locator('text=EMPTY').first().locator('xpath=ancestor::div[contains(@class, "border")]')
+    // Expand first November service
+    const novemberServices = page.locator('div').filter({ hasText: /^November \d+$/ })
+    const firstNovService = novemberServices.first()
+    await firstNovService.click()
     
-    if (await filledServiceCard.isVisible({ timeout: 2000 }).catch(() => false)) {
-      // Look for any filled position with a (cancel) link
-      const cancelLink = page.locator('button:has-text("(cancel)")').first()
-      
-      if (await cancelLink.isVisible({ timeout: 2000 }).catch(() => false)) {
-        // Click cancel button
-        await cancelLink.click()
-        
-        // Should show confirmation dialog
-        page.on('dialog', async dialog => {
-          expect(dialog.message()).toContain('Are you sure')
-          await dialog.dismiss() // Dismiss to avoid actually cancelling
-        })
-        
-        // Verify cancel button exists and is clickable
-        await expect(cancelLink).toBeVisible()
-      }
-    }
+    // Wait for expansion
+    await page.waitForTimeout(500)
     
-    // Even if no filled positions, verify the cancel link would appear
-    // by checking the code structure (UI test only)
-    const serviceCards = page.locator('div[class*="border rounded-lg"]').filter({ hasText: /Liturgist:|Backup:/ })
-    await expect(serviceCards.first()).toBeVisible()
+    // Click "Sign Up for This Service" button
+    await page.getByRole('button', { name: /Sign Up for This Service/i }).first().click()
+    
+    // Fill out the signup form
+    await page.waitForTimeout(500)
+    
+    // Select "Other (not listed)"
+    await page.locator('select').first().selectOption('other')
+    
+    // Fill in test user details
+    await page.locator('input[placeholder*="First"]').first().fill('E2E')
+    await page.locator('input[placeholder*="Last"]').first().fill('TestUser')
+    await page.locator('input[type="email"]').first().fill('e2e-test@example.com')
+    await page.locator('input[type="tel"]').first().fill('555-123-4567')
+    
+    // Select "Main Liturgist" role
+    await page.locator('input[type="radio"][value="liturgist"]').check()
+    
+    // Submit the form
+    await page.getByRole('button', { name: /^Submit$/i }).click()
+    
+    // Wait for success alert and dismiss it
+    page.once('dialog', dialog => {
+      expect(dialog.message()).toContain('Thank you')
+      dialog.accept()
+    })
+    
+    await page.waitForTimeout(2000) // Wait for Airtable sync and page refresh
+    
+    // Verify the name appears in the list
+    await expect(page.getByText('E2E TestUser')).toBeVisible()
+    
+    // Find and click the red "Cancel" pill button
+    const cancelButton = page.locator('button').filter({ hasText: /^Cancel$/i }).first()
+    await expect(cancelButton).toBeVisible()
+    await cancelButton.click()
+    
+    // Confirm the cancellation dialog
+    page.once('dialog', dialog => {
+      expect(dialog.message()).toContain('Are you sure')
+      dialog.accept()
+    })
+    
+    await page.waitForTimeout(2000) // Wait for deletion and refresh
+    
+    // Verify the position is now EMPTY again
+    await expect(page.getByText('E2E TestUser')).not.toBeVisible()
+    await expect(page.getByText('EMPTY').first()).toBeVisible()
   })
 })

@@ -1,5 +1,4 @@
-Force deployment at 2025-10-26T22:45:00Z
-CRITICAL DEBUG VERSION 2
-The email fix is not working - old subject line still being sent.
-Added aggressive logging to DELETE endpoint.
-This file will trigger a fresh Vercel deployment.
+EXTREME DEBUG DEPLOY - 2025-10-26T22:05:00Z
+Testing if DELETE handler is being called at all.
+Added impossible-to-miss logging.
+If logs don't appear, DELETE handler is not running!

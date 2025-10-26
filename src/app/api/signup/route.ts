@@ -243,7 +243,7 @@ export async function GET(request: NextRequest) {
         await sendEmail({
           to: userEmail,
           cc: shouldCCSam ? 'sam@samuelholley.com' : undefined,
-          replyTo: 'sam@samuelholley.com',          replyTo: 'sam@samuelholley.com',
+          replyTo: 'sam@samuelholley.com',
           subject: `${subjectPrefix} - ${formattedDateForSubject}`,
           html: emailHtml
         })

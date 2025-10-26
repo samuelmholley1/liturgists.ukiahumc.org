@@ -80,7 +80,6 @@ export default function Home() {
   const [calendarOpen, setCalendarOpen] = useState(true)
   const [currentQuarter, setCurrentQuarter] = useState('Q4-2025')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [lastErrorTime, setLastErrorTime] = useState<number>(0)
   const [calendarQuarter, setCalendarQuarter] = useState(() => {
     // Start with current quarter
     const today = new Date()
@@ -175,16 +174,8 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Error fetching services:', error)
-      
-      // Report error to admin (deduplicate within 10 seconds)
-      const now = Date.now()
-      if (now - lastErrorTime > 10000) {
-        setLastErrorTime(now)
-        await reportError(error, {
-          action: 'Fetch Services',
-          serviceDate: currentQuarter
-        })
-      }
+      // Don't report background refresh errors - they auto-retry every 5 seconds
+      // Only report errors from user-triggered actions (signup, cancel)
     } finally {
       setLoading(false)
       setRefreshing(false)

@@ -90,14 +90,14 @@ export async function POST(request: NextRequest) {
         })
         
         // Send email confirmation
-        // If liturgist signs up: TO them, CC alerts@samuelholley.com
-        // If sam@samuelholley.com signs up: TO alerts@samuelholley.com only (avoid sending to both)
+        // If Sam signs up: TO alerts@, Reply-To sam@
+        // If others sign up: TO their email, Reply-To sam@, CC alerts@
         const isSamSigningUp = body.email.toLowerCase() === 'sam@samuelholley.com'
         
         await sendEmail({
           to: isSamSigningUp ? 'alerts@samuelholley.com' : body.email,
           cc: isSamSigningUp ? undefined : 'alerts@samuelholley.com',
-          replyTo: 'alerts@samuelholley.com',
+          replyTo: 'sam@samuelholley.com',
           subject: `✅ Your Liturgist Signup Confirmed - ${body.displayDate}`,
           html: emailHtml
         })
@@ -223,14 +223,18 @@ export async function GET(request: NextRequest) {
         const userEmail = recordData.record.email as string
         const isSamCancelling = userEmail.toLowerCase() === 'sam@samuelholley.com'
         
-        // Send cancellation email with alerts@ CC'd (or to alerts@ if sam@ cancels)
+        // Send cancellation email
+        // If Sam cancels: TO alerts@, Reply-To sam@
+        // If others cancel: TO their email, Reply-To sam@, CC alerts@
         await sendEmail({
           to: isSamCancelling ? 'alerts@samuelholley.com' : userEmail,
           cc: isSamCancelling ? undefined : 'alerts@samuelholley.com',
-          replyTo: 'alerts@samuelholley.com',
+          replyTo: 'sam@samuelholley.com',
           subject: `❌ Your Liturgist Signup Cancelled - ${formattedDateForSubject}`,
           html: emailHtml
         })
+        
+        console.log(`Cancellation email: userEmail="${userEmail}", isSamCancelling=${isSamCancelling}, to=${isSamCancelling ? 'alerts@' : userEmail}`)
         
         console.log('Cancellation email notification sent successfully')
       } catch (emailError) {

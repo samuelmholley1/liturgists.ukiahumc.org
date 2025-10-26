@@ -51,6 +51,11 @@ export function generateSignupEmail(data: {
 }) {
   const { name, email, phone, role, displayDate, notes, recordId } = data
   
+  // Check if this is a backup role
+  const isBackup = role.toLowerCase() === 'backup'
+  const roleLabel = isBackup ? '🔄 BACKUP Liturgist' : 'Main Liturgist'
+  const headerColor = isBackup ? '#805ad5' : '#2c5282'  // Purple for backup, blue for main
+  
   // Format the display date if it looks like an ISO timestamp
   let formattedDate = displayDate
   if (displayDate && displayDate.includes('T') && displayDate.includes('Z')) {
@@ -90,7 +95,7 @@ export function generateSignupEmail(data: {
           box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         .header { 
-          background: #2c5282; 
+          background: ${headerColor}; 
           color: white; 
           padding: 40px 30px; 
           text-align: center;
@@ -200,10 +205,10 @@ export function generateSignupEmail(data: {
             </a>
           </div>
           <div class="success-icon">✅</div>
-          <h1>Signup Confirmed</h1>
+          <h1>${isBackup ? '🔄 BACKUP ' : ''}Signup Confirmed</h1>
         </div>
         <div class="content">
-          <p class="message-text">You signed up for liturgist service!</p>
+          <p class="message-text">${isBackup ? 'You signed up as BACKUP liturgist!' : 'You signed up for liturgist service!'}</p>
           
           <div class="info-box">
             <div class="info-row">
@@ -220,7 +225,7 @@ export function generateSignupEmail(data: {
             </div>
             <div class="info-row">
               <span class="info-label">Your Role:</span>
-              <span class="info-value">${role}</span>
+              <span class="info-value" style="${isBackup ? 'font-weight: 700; color: #805ad5; font-size: 16px;' : ''}">${roleLabel}</span>
             </div>
             <div class="info-row">
               <span class="info-label">Service Date:</span>
@@ -260,6 +265,10 @@ export function generateCancellationEmail(data: {
   displayDate: string
 }) {
   const { name, role, displayDate } = data
+  
+  // Check if this is a backup role
+  const isBackup = role.toLowerCase() === 'backup'
+  const roleLabel = isBackup ? '🔄 BACKUP Liturgist' : 'Main Liturgist'
   
   // Format the display date if it looks like an ISO timestamp
   let formattedDate = displayDate
@@ -403,10 +412,10 @@ export function generateCancellationEmail(data: {
             </a>
           </div>
           <div class="cancel-icon">❌</div>
-          <h1>Signup Cancelled</h1>
+          <h1>${isBackup ? '🔄 BACKUP ' : ''}Signup Cancelled</h1>
         </div>
         <div class="content">
-          <p class="message-text">You cancelled your liturgist signup.</p>
+          <p class="message-text">${isBackup ? 'You cancelled your BACKUP liturgist signup.' : 'You cancelled your liturgist signup.'}</p>
           
           <div class="info-box">
             <div class="info-row">
@@ -415,7 +424,7 @@ export function generateCancellationEmail(data: {
             </div>
             <div class="info-row">
               <span class="info-label">Your Role:</span>
-              <span class="info-value">${role}</span>
+              <span class="info-value" style="${isBackup ? 'font-weight: 700; color: #805ad5; font-size: 16px;' : ''}">${roleLabel}</span>
             </div>
             <div class="info-row">
               <span class="info-label">Service Date:</span>

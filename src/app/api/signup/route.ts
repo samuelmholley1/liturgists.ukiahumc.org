@@ -93,12 +93,14 @@ export async function POST(request: NextRequest) {
         // If Sam signs up: TO sam@ only (no CC)
         // If others sign up: TO their email, CC sam@
         const isSamSigningUp = body.email.toLowerCase() === 'sam@samuelholley.com'
+        const isBackup = body.role.toLowerCase() === 'backup'
+        const roleLabel = isBackup ? '🔄 BACKUP Liturgist' : 'Main Liturgist'
         
         await sendEmail({
           to: body.email,
           cc: isSamSigningUp ? undefined : 'sam@samuelholley.com',
           replyTo: 'sam@samuelholley.com',
-          subject: `✅ Your Liturgist Signup Confirmed - ${body.displayDate}`,
+          subject: `✅ Your ${roleLabel} Signup Confirmed - ${body.displayDate}`,
           html: emailHtml
         })
         
@@ -221,7 +223,10 @@ export async function GET(request: NextRequest) {
         })
         
         const userEmail = recordData.record.email as string
+        const userRole = recordData.record.role as string
         const isSamCancelling = userEmail.toLowerCase() === 'sam@samuelholley.com'
+        const isBackup = userRole.toLowerCase() === 'backup'
+        const roleLabel = isBackup ? '🔄 BACKUP Liturgist' : 'Main Liturgist'
         
         // Send cancellation email
         // If Sam cancels: TO sam@ only (no CC)
@@ -230,7 +235,7 @@ export async function GET(request: NextRequest) {
           to: userEmail,
           cc: isSamCancelling ? undefined : 'sam@samuelholley.com',
           replyTo: 'sam@samuelholley.com',
-          subject: `❌ Your Liturgist Signup Cancelled - ${formattedDateForSubject}`,
+          subject: `❌ Your ${roleLabel} Signup Cancelled - ${formattedDateForSubject}`,
           html: emailHtml
         })
         

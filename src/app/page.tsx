@@ -564,6 +564,7 @@ export default function Home() {
                 width={180} 
                 height={180} 
                 quality={100}
+                unoptimized
                 className="rounded-lg shadow-lg object-contain"
               />
             </div>
@@ -665,6 +666,7 @@ export default function Home() {
                   width={48}
                   height={48}
                   quality={100}
+                  unoptimized
                   className="rounded-md shadow-sm object-contain"
                 />
                 <div className="flex-1">

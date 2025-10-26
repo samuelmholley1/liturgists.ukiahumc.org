@@ -47,6 +47,7 @@ export default function PasswordGate({ children }: PasswordGateProps) {
             height={240}
             quality={100}
             priority
+            unoptimized
             className="rounded-lg shadow-md mx-auto mb-4 object-contain"
           />
           <h1 className="text-2xl font-bold text-gray-800 mb-2">

@@ -43,8 +43,25 @@ export function generateSignupEmail(data: {
   role: string
   displayDate: string
   notes?: string
+  recordId: string
 }) {
-  const { name, email, phone, role, displayDate, notes } = data
+  const { name, email, phone, role, displayDate, notes, recordId } = data
+  
+  // Format the display date if it looks like an ISO timestamp
+  let formattedDate = displayDate
+  if (displayDate && displayDate.includes('T') && displayDate.includes('Z')) {
+    try {
+      const date = new Date(displayDate)
+      formattedDate = date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      })
+    } catch (error) {
+      // If parsing fails, use the original
+      console.warn('Failed to parse displayDate:', displayDate)
+    }
+  }
   
   return `
     <!DOCTYPE html>
@@ -55,62 +72,72 @@ export function generateSignupEmail(data: {
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
         .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
         .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+        .logo { text-align: center; margin-bottom: 20px; }
+        .logo img { max-width: 120px; height: auto; border-radius: 8px; }
         .info-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea; }
         .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e9ecef; }
         .info-label { font-weight: bold; color: #495057; }
         .info-value { color: #212529; }
         .footer { text-align: center; color: #6c757d; font-size: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #dee2e6; }
         .success-icon { font-size: 48px; margin-bottom: 10px; }
-        .button { display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; margin-top: 20px; }
+        .button { display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; margin: 10px 5px; }
+        .cancel-button { background: #dc3545; }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
+          <div class="logo">
+            <img src="https://liturgists.ukiahumc.org/logo-for-church-larger.jpg" alt="Ukiah United Methodist Church" />
+          </div>
           <div class="success-icon">✅</div>
-          <h1 style="margin: 0;">Liturgist Signup Confirmed</h1>
+          <h1 style="margin: 0;">Signup Confirmed</h1>
         </div>
         <div class="content">
-          <p style="font-size: 16px; margin-top: 0;">A new liturgist has signed up for service!</p>
+          <p style="font-size: 18px; margin-top: 0; text-align: center;"><strong>You signed up for liturgist service!</strong></p>
           
           <div class="info-box">
             <div class="info-row">
-              <span class="info-label">Name:</span>
+              <span class="info-label">Your Name:</span>
               <span class="info-value">${name}</span>
             </div>
             <div class="info-row">
-              <span class="info-label">Email:</span>
+              <span class="info-label">Your Email:</span>
               <span class="info-value">${email}</span>
             </div>
             <div class="info-row">
-              <span class="info-label">Phone:</span>
+              <span class="info-label">Your Phone:</span>
               <span class="info-value">${phone || 'Not provided'}</span>
             </div>
             <div class="info-row">
-              <span class="info-label">Role:</span>
+              <span class="info-label">Your Role:</span>
               <span class="info-value">${role}</span>
             </div>
-            <div class="info-row">
+            <div class="info-row" style="border-bottom: none;">
               <span class="info-label">Service Date:</span>
-              <span class="info-value">${displayDate}</span>
+              <span class="info-value">${formattedDate}</span>
             </div>
             ${notes ? `
-            <div class="info-row" style="border-bottom: none;">
-              <span class="info-label">Notes:</span>
+            <div class="info-row" style="border-bottom: none; border-top: 1px solid #e9ecef;">
+              <span class="info-label">Your Notes:</span>
               <span class="info-value">${notes}</span>
             </div>
             ` : ''}
           </div>
           
-          <p style="font-size: 14px; color: #6c757d; margin-bottom: 0;">
-            Timestamp: ${new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })} PT
+          <p style="text-align: center; margin: 20px 0;">
+            <a href="https://liturgists.ukiahumc.org" class="button">View Full Schedule</a>
+            <a href="https://liturgists.ukiahumc.org/api/signup?recordId=${recordId}&action=cancel" class="button cancel-button">Cancel This Signup</a>
           </p>
           
-          <a href="https://liturgists.ukiahumc.org" class="button">View Full Schedule</a>
+          <p style="font-size: 14px; color: #6c757d; margin-bottom: 0; text-align: center;">
+            Need to cancel? Click the button above or contact the church office.<br/>
+            Timestamp: ${new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })} PT
+          </p>
         </div>
         <div class="footer">
-          <p>This is an automated notification from the Liturgist Signup System<br/>
-          Ukiah United Methodist Church</p>
+          <p>Ukiah United Methodist Church<br/>
+          Liturgist Signup System</p>
         </div>
       </div>
     </body>
@@ -125,6 +152,22 @@ export function generateCancellationEmail(data: {
 }) {
   const { name, role, displayDate } = data
   
+  // Format the display date if it looks like an ISO timestamp
+  let formattedDate = displayDate
+  if (displayDate && displayDate.includes('T') && displayDate.includes('Z')) {
+    try {
+      const date = new Date(displayDate)
+      formattedDate = date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      })
+    } catch (error) {
+      // If parsing fails, use the original
+      console.warn('Failed to parse displayDate:', displayDate)
+    }
+  }
+  
   return `
     <!DOCTYPE html>
     <html>
@@ -134,6 +177,8 @@ export function generateCancellationEmail(data: {
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
         .header { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
         .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+        .logo { text-align: center; margin-bottom: 20px; }
+        .logo img { max-width: 120px; height: auto; border-radius: 8px; }
         .info-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f5576c; }
         .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e9ecef; }
         .info-label { font-weight: bold; color: #495057; }
@@ -146,36 +191,42 @@ export function generateCancellationEmail(data: {
     <body>
       <div class="container">
         <div class="header">
+          <div class="logo">
+            <img src="https://liturgists.ukiahumc.org/logo-for-church-larger.jpg" alt="Ukiah United Methodist Church" />
+          </div>
           <div class="cancel-icon">❌</div>
-          <h1 style="margin: 0;">Liturgist Signup Cancelled</h1>
+          <h1 style="margin: 0;">Signup Cancelled</h1>
         </div>
         <div class="content">
-          <p style="font-size: 16px; margin-top: 0;">A liturgist signup has been cancelled.</p>
+          <p style="font-size: 18px; margin-top: 0; text-align: center;"><strong>You cancelled your liturgist signup.</strong></p>
           
           <div class="info-box">
             <div class="info-row">
-              <span class="info-label">Name:</span>
+              <span class="info-label">Your Name:</span>
               <span class="info-value">${name}</span>
             </div>
             <div class="info-row">
-              <span class="info-label">Role:</span>
+              <span class="info-label">Your Role:</span>
               <span class="info-value">${role}</span>
             </div>
             <div class="info-row" style="border-bottom: none;">
               <span class="info-label">Service Date:</span>
-              <span class="info-value">${displayDate}</span>
+              <span class="info-value">${formattedDate}</span>
             </div>
           </div>
           
-          <p style="font-size: 14px; color: #6c757d; margin-bottom: 0;">
-            Timestamp: ${new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })} PT
+          <p style="text-align: center; margin: 20px 0;">
+            <a href="https://liturgists.ukiahumc.org" class="button">Sign Up for Another Service</a>
           </p>
           
-          <a href="https://liturgists.ukiahumc.org" class="button">View Full Schedule</a>
+          <p style="font-size: 14px; color: #6c757d; margin-bottom: 0; text-align: center;">
+            Thank you for letting us know. We appreciate your service to the church.<br/>
+            Timestamp: ${new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })} PT
+          </p>
         </div>
         <div class="footer">
-          <p>This is an automated notification from the Liturgist Signup System<br/>
-          Ukiah United Methodist Church</p>
+          <p>Ukiah United Methodist Church<br/>
+          Liturgist Signup System</p>
         </div>
       </div>
     </body>

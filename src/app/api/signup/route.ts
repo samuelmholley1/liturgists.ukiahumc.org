@@ -85,13 +85,14 @@ export async function POST(request: NextRequest) {
           phone: body.phone || '',
           role: body.role,
           displayDate: body.displayDate,
-          notes: body.notes
+          notes: body.notes,
+          recordId: result.record?.id || ''
         })
         
         await sendEmail({
-          to: 'sam@samuelholley.com',
-          cc: body.email,
-          subject: `✅ Liturgist Signup: ${body.name} - ${body.displayDate}`,
+          to: body.email,
+          cc: 'sam@samuelholley.com',
+          subject: `✅ Your Liturgist Signup Confirmed - ${body.displayDate}`,
           html: emailHtml
         })
         
@@ -161,6 +162,200 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const recordId = searchParams.get('recordId')
+    const action = searchParams.get('action')
+    
+    if (!recordId || action !== 'cancel') {
+      return NextResponse.json(
+        { error: 'Invalid request parameters' },
+        { status: 400 }
+      )
+    }
+
+    // Get record info before deleting (for email notification)
+    const recordData = await getSignupById(recordId)
+    
+    if (!recordData.success || !recordData.record) {
+      return NextResponse.json(
+        { error: 'Signup not found' },
+        { status: 404 }
+      )
+    }
+
+    // Delete from Airtable
+    const result = await deleteSignup(recordId)
+
+    if (result.success) {
+      console.log('Signup cancelled via email link:', recordId)
+      
+      // Send cancellation email notifications
+      try {
+        const emailHtml = generateCancellationEmail({
+          name: recordData.record.name as string,
+          role: recordData.record.role as string,
+          displayDate: recordData.record.displayDate as string
+        })
+        
+        await sendEmail({
+          to: recordData.record.email as string,
+          cc: 'sam@samuelholley.com',
+          subject: `❌ Your Liturgist Signup Cancelled - ${recordData.record.displayDate}`,
+          html: emailHtml
+        })
+        
+        console.log('Cancellation email notification sent successfully')
+      } catch (emailError) {
+        console.error('Failed to send cancellation email:', emailError)
+        // Don't fail the cancellation if email fails
+      }
+      
+      // Return a simple HTML page confirming the cancellation
+      return new Response(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Signup Cancelled</title>
+          <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f8f9fa; }
+            .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .logo { margin-bottom: 20px; }
+            .logo img { max-width: 120px; height: auto; border-radius: 8px; }
+            .success { color: #28a745; font-size: 48px; margin: 20px 0; }
+            h1 { color: #333; margin-bottom: 20px; }
+            p { color: #666; line-height: 1.6; }
+            .button { display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="logo">
+              <img src="/logo-for-church-larger.jpg" alt="Ukiah United Methodist Church" />
+            </div>
+            <div class="success">✅</div>
+            <h1>Signup Cancelled Successfully</h1>
+            <p>Your liturgist signup for <strong>${recordData.record.displayDate}</strong> has been cancelled.</p>
+            <p>Thank you for letting us know. We appreciate your communication.</p>
+            <a href="https://liturgists.ukiahumc.org" class="button">Return to Signup Page</a>
+          </div>
+        </body>
+        </html>
+      `, {
+        headers: { 'Content-Type': 'text/html' }
+      })
+    } else {
+      console.error('Airtable deletion failed:', result.error)
+      
+      // Send error notification email
+      try {
+        const errorEmailHtml = generateErrorEmail({
+          errorType: 'Email Link Cancellation Failed',
+          errorMessage: String(result.error),
+          userName: recordData.record.name as string,
+          userEmail: recordData.record.email as string,
+          serviceDate: recordData.record.displayDate as string,
+          stackTrace: result.error instanceof Error ? result.error.stack : undefined
+        })
+        
+        await sendEmail({
+          to: 'sam@samuelholley.com',
+          subject: '🚨 ERROR: Email Link Cancellation Failed',
+          html: errorEmailHtml
+        })
+      } catch (emailError) {
+        console.error('Failed to send error notification email:', emailError)
+      }
+      
+      return new Response(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Cancellation Failed</title>
+          <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f8f9fa; }
+            .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .logo { margin-bottom: 20px; }
+            .logo img { max-width: 120px; height: auto; border-radius: 8px; }
+            .error { color: #dc3545; font-size: 48px; margin: 20px 0; }
+            h1 { color: #333; margin-bottom: 20px; }
+            p { color: #666; line-height: 1.6; }
+            .button { display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="logo">
+              <img src="/logo-for-church-larger.jpg" alt="Ukiah United Methodist Church" />
+            </div>
+            <div class="error">❌</div>
+            <h1>Cancellation Failed</h1>
+            <p>We encountered an error while trying to cancel your signup.</p>
+            <p>Please try again or contact the church office for assistance.</p>
+            <a href="https://liturgists.ukiahumc.org" class="button">Return to Signup Page</a>
+          </div>
+        </body>
+        </html>
+      `, {
+        headers: { 'Content-Type': 'text/html' }
+      })
+    }
+  } catch (error) {
+    console.error('API Error:', error)
+    
+    // Send error notification email
+    try {
+      const errorEmailHtml = generateErrorEmail({
+        errorType: 'Email Link Cancellation API Error',
+        errorMessage: String(error),
+        stackTrace: error instanceof Error ? error.stack : undefined
+      })
+      
+      await sendEmail({
+        to: 'sam@samuelholley.com',
+        subject: '🚨 ERROR: Email Link Cancellation System Error',
+        html: errorEmailHtml
+      })
+    } catch (emailError) {
+      console.error('Failed to send error notification email:', emailError)
+    }
+    
+    return new Response(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>System Error</title>
+        <style>
+          body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f8f9fa; }
+          .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+          .logo { margin-bottom: 20px; }
+          .logo img { max-width: 120px; height: auto; border-radius: 8px; }
+          .error { color: #dc3545; font-size: 48px; margin: 20px 0; }
+          h1 { color: #333; margin-bottom: 20px; }
+          p { color: #666; line-height: 1.6; }
+          .button { display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="logo">
+            <img src="/logo-for-church-larger.jpg" alt="Ukiah United Methodist Church" />
+          </div>
+          <div class="error">🚨</div>
+          <h1>System Error</h1>
+          <p>We encountered a system error while processing your request.</p>
+          <p>Please try again later or contact the church office for assistance.</p>
+          <a href="https://liturgists.ukiahumc.org" class="button">Return to Signup Page</a>
+        </div>
+      </body>
+      </html>
+    `, {
+      headers: { 'Content-Type': 'text/html' }
+    })
+  }
+}
+
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -192,9 +387,9 @@ export async function DELETE(request: NextRequest) {
           })
           
           await sendEmail({
-            to: 'sam@samuelholley.com',
-            cc: recordData.record.email as string,
-            subject: `❌ Liturgist Cancellation: ${recordData.record.name} - ${recordData.record.displayDate}`,
+            to: recordData.record.email as string,
+            cc: 'sam@samuelholley.com',
+            subject: `❌ Your Liturgist Signup Cancelled - ${recordData.record.displayDate}`,
             html: emailHtml
           })
           

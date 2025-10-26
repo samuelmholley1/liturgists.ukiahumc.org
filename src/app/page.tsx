@@ -514,9 +514,9 @@ export default function Home() {
               <Image 
                 src="/logo-for-church-larger.jpg" 
                 alt="Church Logo" 
-                width={60} 
-                height={60} 
-                className="rounded-full"
+                width={80} 
+                height={80} 
+                className="rounded-full shadow-lg"
               />
             </div>
             

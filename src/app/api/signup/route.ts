@@ -89,9 +89,15 @@ export async function POST(request: NextRequest) {
           recordId: result.record?.id || ''
         })
         
+        // Don't CC admin if the signup is from admin's personal account
+        // This prevents Gmail "duplicate recipient" policy violation (554 5.7.7)
+        // Instead, use Reply-To so responses come back to admin
+        const shouldCcAdmin = body.email.toLowerCase() !== 'samuelmholley@gmail.com'
+        
         await sendEmail({
           to: body.email,
-          cc: 'sam@samuelholley.com',
+          cc: shouldCcAdmin ? 'sam@samuelholley.com' : undefined,
+          replyTo: 'sam@samuelholley.com',
           subject: `✅ Your Liturgist Signup Confirmed - ${body.displayDate}`,
           html: emailHtml
         })
@@ -214,9 +220,12 @@ export async function GET(request: NextRequest) {
           displayDate: recordData.record.displayDate as string
         })
         
+        // Don't CC admin if cancellation is from admin's personal account
+        const shouldCcAdmin = (recordData.record.email as string).toLowerCase() !== 'samuelmholley@gmail.com'
+        
         await sendEmail({
           to: recordData.record.email as string,
-          cc: 'sam@samuelholley.com',
+          cc: shouldCcAdmin ? 'sam@samuelholley.com' : undefined,
           subject: `❌ Your Liturgist Signup Cancelled - ${formattedDateForSubject}`,
           html: emailHtml
         })

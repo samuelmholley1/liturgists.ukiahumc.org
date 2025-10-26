@@ -4,11 +4,12 @@ import nodemailer from 'nodemailer'
 interface EmailParams {
   to: string
   cc?: string
+  replyTo?: string
   subject: string
   html: string
 }
 
-export async function sendEmail({ to, cc, subject, html }: EmailParams) {
+export async function sendEmail({ to, cc, replyTo, subject, html }: EmailParams) {
   // Create transporter using Gmail SMTP with app-specific password
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -22,6 +23,7 @@ export async function sendEmail({ to, cc, subject, html }: EmailParams) {
     from: '"UUMC Liturgist Scheduling" <sam@samuelholley.com>', // Send from verified alias
     to,
     cc,
+    replyTo: replyTo || 'sam@samuelholley.com',
     subject,
     html,
   }

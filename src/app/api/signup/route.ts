@@ -89,14 +89,15 @@ export async function POST(request: NextRequest) {
           recordId: result.record?.id || ''
         })
         
-        // Don't CC admin if the signup is from admin's personal account
-        // This prevents Gmail "duplicate recipient" policy violation (554 5.7.7)
-        // Instead, use Reply-To so responses come back to admin
-        const shouldCcAdmin = body.email.toLowerCase() !== 'samuelmholley@gmail.com'
+        // Try putting both recipients in TO field instead of using CC
+        // This may avoid Gmail's "duplicate recipient" policy violation (554 5.7.7)
+        // Skip admin email if they're the one signing up to avoid actual duplicate
+        const toAddresses = body.email.toLowerCase() !== 'samuelmholley@gmail.com'
+          ? `${body.email}, sam@samuelholley.com`
+          : body.email
         
         await sendEmail({
-          to: body.email,
-          cc: shouldCcAdmin ? 'sam@samuelholley.com' : undefined,
+          to: toAddresses,
           replyTo: 'sam@samuelholley.com',
           subject: `✅ Your Liturgist Signup Confirmed - ${body.displayDate}`,
           html: emailHtml
@@ -220,12 +221,15 @@ export async function GET(request: NextRequest) {
           displayDate: recordData.record.displayDate as string
         })
         
-        // Don't CC admin if cancellation is from admin's personal account
-        const shouldCcAdmin = (recordData.record.email as string).toLowerCase() !== 'samuelmholley@gmail.com'
+        // Try putting both recipients in TO field instead of using CC
+        // Skip admin email if they're the one cancelling to avoid actual duplicate
+        const userEmail = recordData.record.email as string
+        const toAddresses = userEmail.toLowerCase() !== 'samuelmholley@gmail.com'
+          ? `${userEmail}, sam@samuelholley.com`
+          : userEmail
         
         await sendEmail({
-          to: recordData.record.email as string,
-          cc: shouldCcAdmin ? 'sam@samuelholley.com' : undefined,
+          to: toAddresses,
           subject: `❌ Your Liturgist Signup Cancelled - ${formattedDateForSubject}`,
           html: emailHtml
         })
@@ -425,9 +429,14 @@ export async function DELETE(request: NextRequest) {
             displayDate: recordData.record.displayDate as string
           })
           
+          // Try putting both recipients in TO field instead of using CC
+          const userEmail = recordData.record.email as string
+          const toAddresses = userEmail.toLowerCase() !== 'samuelmholley@gmail.com'
+            ? `${userEmail}, sam@samuelholley.com`
+            : userEmail
+          
           await sendEmail({
-            to: recordData.record.email as string,
-            cc: 'sam@samuelholley.com',
+            to: toAddresses,
             subject: `❌ Your Liturgist Signup Cancelled - ${formattedDateForSubject}`,
             html: emailHtml
           })

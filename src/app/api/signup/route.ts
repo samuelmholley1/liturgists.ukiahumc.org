@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
         // If others sign up: TO their email, CC sam@
         const isSamSigningUp = body.email.toLowerCase() === 'sam@samuelholley.com'
         const isBackup = body.role.toLowerCase() === 'backup'
-        const roleLabel = isBackup ? '🔄 BACKUP Liturgist' : 'Main Liturgist'
+        const roleLabel = isBackup ? 'Backup Liturgist' : 'Liturgist'
         
         await sendEmail({
           to: body.email,
@@ -226,7 +226,7 @@ export async function GET(request: NextRequest) {
         const userRole = recordData.record.role as string
         const isSamCancelling = userEmail.toLowerCase() === 'sam@samuelholley.com'
         const isBackup = userRole.toLowerCase() === 'backup'
-        const roleLabel = isBackup ? '🔄 BACKUP Liturgist' : 'Main Liturgist'
+        const roleLabel = isBackup ? 'Backup Liturgist' : 'Liturgist'
         
         // Send cancellation email
         // If Sam cancels: TO sam@ only (no CC)

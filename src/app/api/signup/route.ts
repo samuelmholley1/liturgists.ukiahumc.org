@@ -89,19 +89,24 @@ export async function POST(request: NextRequest) {
           recordId: result.record?.id || ''
         })
         
-        // Try putting both recipients in TO field instead of using CC
-        // This may avoid Gmail's "duplicate recipient" policy violation (554 5.7.7)
-        // Skip admin email if they're the one signing up to avoid actual duplicate
-        const toAddresses = body.email.toLowerCase() !== 'samuelmholley@gmail.com'
-          ? `${body.email}, sam@samuelholley.com`
-          : body.email
-        
+        // Send email to the liturgist who signed up
         await sendEmail({
-          to: toAddresses,
+          to: body.email,
           replyTo: 'sam@samuelholley.com',
           subject: `✅ Your Liturgist Signup Confirmed - ${body.displayDate}`,
           html: emailHtml
         })
+        
+        // Send SEPARATE admin notification email (avoids Gmail duplicate recipient policy)
+        // Skip if admin is the one signing up
+        if (body.email.toLowerCase() !== 'sam@samuelholley.com') {
+          await sendEmail({
+            to: 'sam@samuelholley.com',
+            replyTo: body.email,
+            subject: `✅ New Liturgist Signup - ${body.name} - ${body.displayDate}`,
+            html: emailHtml
+          })
+        }
         
         console.log('Email notification sent successfully')
       } catch (emailError) {
@@ -221,18 +226,23 @@ export async function GET(request: NextRequest) {
           displayDate: recordData.record.displayDate as string
         })
         
-        // Try putting both recipients in TO field instead of using CC
-        // Skip admin email if they're the one cancelling to avoid actual duplicate
         const userEmail = recordData.record.email as string
-        const toAddresses = userEmail.toLowerCase() !== 'samuelmholley@gmail.com'
-          ? `${userEmail}, sam@samuelholley.com`
-          : userEmail
         
+        // Send cancellation email to the liturgist
         await sendEmail({
-          to: toAddresses,
+          to: userEmail,
           subject: `❌ Your Liturgist Signup Cancelled - ${formattedDateForSubject}`,
           html: emailHtml
         })
+        
+        // Send SEPARATE admin notification (avoids Gmail duplicate recipient policy)
+        if (userEmail.toLowerCase() !== 'sam@samuelholley.com') {
+          await sendEmail({
+            to: 'sam@samuelholley.com',
+            subject: `❌ Liturgist Cancellation - ${recordData.record.name} - ${formattedDateForSubject}`,
+            html: emailHtml
+          })
+        }
         
         console.log('Cancellation email notification sent successfully')
       } catch (emailError) {
@@ -429,17 +439,23 @@ export async function DELETE(request: NextRequest) {
             displayDate: recordData.record.displayDate as string
           })
           
-          // Try putting both recipients in TO field instead of using CC
           const userEmail = recordData.record.email as string
-          const toAddresses = userEmail.toLowerCase() !== 'samuelmholley@gmail.com'
-            ? `${userEmail}, sam@samuelholley.com`
-            : userEmail
           
+          // Send cancellation email to the liturgist
           await sendEmail({
-            to: toAddresses,
+            to: userEmail,
             subject: `❌ Your Liturgist Signup Cancelled - ${formattedDateForSubject}`,
             html: emailHtml
           })
+          
+          // Send SEPARATE admin notification (avoids Gmail duplicate recipient policy)
+          if (userEmail.toLowerCase() !== 'sam@samuelholley.com') {
+            await sendEmail({
+              to: 'sam@samuelholley.com',
+              subject: `❌ Liturgist Cancellation - ${recordData.record.name} - ${formattedDateForSubject}`,
+              html: emailHtml
+            })
+          }
           
           console.log('Cancellation email notification sent successfully')
         } catch (emailError) {

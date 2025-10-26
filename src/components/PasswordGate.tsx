@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
 
 interface PasswordGateProps {
   children: React.ReactNode
@@ -40,15 +39,10 @@ export default function PasswordGate({ children }: PasswordGateProps) {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
         <div className="text-center mb-6">
-          <Image
+          <img
             src="/logo-for-church-larger.jpg"
             alt="Ukiah United Methodist Church"
-            width={240}
-            height={240}
-            quality={100}
-            priority
-            unoptimized
-            className="rounded-lg shadow-md mx-auto mb-4 object-contain"
+            className="w-60 h-auto rounded-lg shadow-md mx-auto mb-4"
           />
           <h1 className="text-2xl font-bold text-gray-800 mb-2">
             Liturgist Schedule

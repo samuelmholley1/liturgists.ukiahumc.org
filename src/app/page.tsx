@@ -558,14 +558,10 @@ export default function Home() {
           <div className="bg-white rounded-lg shadow-2xl p-6 max-w-md w-full">
             {/* Church Logo */}
             <div className="flex justify-center mb-3">
-              <Image 
+              <img 
                 src="/logo-for-church-larger.jpg" 
                 alt="Church Logo" 
-                width={180} 
-                height={180} 
-                quality={100}
-                unoptimized
-                className="rounded-lg shadow-lg object-contain"
+                className="w-44 h-auto rounded-lg shadow-lg"
               />
             </div>
             

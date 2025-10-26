@@ -73,6 +73,33 @@ export async function getSignups() {
 }
 
 /**
+ * Get a single signup record by ID
+ */
+export async function getSignupById(recordId: string) {
+  try {
+    const record = await table.find(recordId)
+    return {
+      success: true,
+      record: {
+        id: record.id,
+        serviceDate: record.get('Service Date'),
+        displayDate: record.get('Display Date'),
+        name: record.get('Name'),
+        email: record.get('Email'),
+        phone: record.get('Phone'),
+        role: record.get('Role'),
+        attendanceStatus: record.get('Attendance Status'),
+        notes: record.get('Notes'),
+        submittedAt: record.get('Submitted At'),
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching record from Airtable:', error)
+    return { success: false, error }
+  }
+}
+
+/**
  * Delete a signup from Airtable by record ID
  */
 export async function deleteSignup(recordId: string) {

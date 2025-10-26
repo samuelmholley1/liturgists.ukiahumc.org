@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { submitSignup, getSignups, deleteSignup } from '@/lib/airtable'
+import { submitSignup, getSignups, deleteSignup, getSignupById } from '@/lib/airtable'
+import { sendEmail, generateSignupEmail, generateCancellationEmail, generateErrorEmail } from '@/lib/email'
 
 // Disable all caching for this API route
 export const dynamic = 'force-dynamic'
@@ -75,6 +76,31 @@ export async function POST(request: NextRequest) {
 
     if (result.success) {
       console.log('Signup successful:', result.record?.id)
+      
+      // Send email notifications
+      try {
+        const emailHtml = generateSignupEmail({
+          name: body.name,
+          email: body.email,
+          phone: body.phone || '',
+          role: body.role,
+          displayDate: body.displayDate,
+          notes: body.notes
+        })
+        
+        await sendEmail({
+          to: 'sam@samuelholley.com',
+          cc: body.email,
+          subject: `✅ Liturgist Signup: ${body.name} - ${body.displayDate}`,
+          html: emailHtml
+        })
+        
+        console.log('Email notification sent successfully')
+      } catch (emailError) {
+        console.error('Failed to send email notification:', emailError)
+        // Don't fail the signup if email fails
+      }
+      
       return NextResponse.json({ 
         success: true, 
         message: 'Signup submitted successfully!',
@@ -82,6 +108,27 @@ export async function POST(request: NextRequest) {
       })
     } else {
       console.error('Airtable submission failed:', result.error)
+      
+      // Send error notification email
+      try {
+        const errorEmailHtml = generateErrorEmail({
+          errorType: 'Airtable Submission Failed',
+          errorMessage: String(result.error),
+          userName: body.name,
+          userEmail: body.email,
+          serviceDate: body.displayDate,
+          stackTrace: result.error instanceof Error ? result.error.stack : undefined
+        })
+        
+        await sendEmail({
+          to: 'sam@samuelholley.com',
+          subject: '🚨 ERROR: Liturgist Signup Failed',
+          html: errorEmailHtml
+        })
+      } catch (emailError) {
+        console.error('Failed to send error notification email:', emailError)
+      }
+      
       return NextResponse.json(
         { error: 'Failed to submit signup', details: String(result.error) },
         { status: 500 }
@@ -89,6 +136,24 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error('API Error:', error)
+    
+    // Send error notification email
+    try {
+      const errorEmailHtml = generateErrorEmail({
+        errorType: 'API Internal Server Error',
+        errorMessage: String(error),
+        stackTrace: error instanceof Error ? error.stack : undefined
+      })
+      
+      await sendEmail({
+        to: 'sam@samuelholley.com',
+        subject: '🚨 ERROR: Liturgist Signup System Error',
+        html: errorEmailHtml
+      })
+    } catch (emailError) {
+      console.error('Failed to send error notification email:', emailError)
+    }
+    
     return NextResponse.json(
       { error: 'Internal server error', details: String(error) },
       { status: 500 }
@@ -108,17 +173,62 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
+    // Get record info before deleting (for email notification)
+    const recordData = await getSignupById(recordId)
+    
     // Delete from Airtable
     const result = await deleteSignup(recordId)
 
     if (result.success) {
       console.log('Signup cancelled successfully:', recordId)
+      
+      // Send cancellation email notifications
+      if (recordData.success && recordData.record) {
+        try {
+          const emailHtml = generateCancellationEmail({
+            name: recordData.record.name as string,
+            role: recordData.record.role as string,
+            displayDate: recordData.record.displayDate as string
+          })
+          
+          await sendEmail({
+            to: 'sam@samuelholley.com',
+            cc: recordData.record.email as string,
+            subject: `❌ Liturgist Cancellation: ${recordData.record.name} - ${recordData.record.displayDate}`,
+            html: emailHtml
+          })
+          
+          console.log('Cancellation email notification sent successfully')
+        } catch (emailError) {
+          console.error('Failed to send cancellation email:', emailError)
+          // Don't fail the cancellation if email fails
+        }
+      }
+      
       return NextResponse.json({ 
         success: true, 
         message: 'Signup cancelled successfully'
       })
     } else {
       console.error('Airtable deletion failed:', result.error)
+      
+      // Send error notification email
+      try {
+        const errorEmailHtml = generateErrorEmail({
+          errorType: 'Cancellation Failed',
+          errorMessage: String(result.error),
+          stackTrace: result.error instanceof Error ? result.error.stack : undefined
+        })
+        
+        await sendEmail({
+          to: 'sam@samuelholley.com',
+          subject: '🚨 ERROR: Liturgist Cancellation Failed',
+          html: errorEmailHtml
+        })
+      } catch (emailError) {
+        console.error('Failed to send error notification email:', emailError)
+      }
+      
       return NextResponse.json(
         { error: 'Failed to cancel signup', details: String(result.error) },
         { status: 500 }
@@ -126,6 +236,24 @@ export async function DELETE(request: NextRequest) {
     }
   } catch (error) {
     console.error('API Error:', error)
+    
+    // Send error notification email
+    try {
+      const errorEmailHtml = generateErrorEmail({
+        errorType: 'Cancellation API Error',
+        errorMessage: String(error),
+        stackTrace: error instanceof Error ? error.stack : undefined
+      })
+      
+      await sendEmail({
+        to: 'sam@samuelholley.com',
+        subject: '🚨 ERROR: Liturgist Cancellation System Error',
+        html: errorEmailHtml
+      })
+    } catch (emailError) {
+      console.error('Failed to send error notification email:', emailError)
+    }
+    
     return NextResponse.json(
       { error: 'Internal server error', details: String(error) },
       { status: 500 }

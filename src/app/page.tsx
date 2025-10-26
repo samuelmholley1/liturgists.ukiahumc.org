@@ -652,7 +652,7 @@ export default function Home() {
       
       {/* Pinned Calendar - Collapsible (Hidden on mobile) */}
       {calendarOpen ? (
-        <div className="hidden md:block fixed top-4 left-4 z-50 bg-white shadow-xl rounded-lg border-2 border-gray-200 w-80">
+        <div className="hidden md:block fixed top-20 left-4 z-50 bg-white shadow-xl rounded-lg border-2 border-gray-200 w-80">
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center space-x-2">
@@ -727,7 +727,7 @@ export default function Home() {
       ) : (
         <button
           onClick={() => setCalendarOpen(true)}
-          className="hidden md:block fixed top-4 left-4 z-50 bg-blue-600 text-white rounded-full p-3 shadow-lg hover:bg-blue-700 transition-colors"
+          className="hidden md:block fixed top-20 left-4 z-50 bg-blue-600 text-white rounded-full p-3 shadow-lg hover:bg-blue-700 transition-colors"
           title="Open calendar"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

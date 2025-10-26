@@ -14,18 +14,12 @@ export default function Header() {
             <h1 className="text-xl font-bold">UUMC Liturgist Signup</h1>
           </div>
           <nav className="flex items-center space-x-6">
-            <a href="/" className="hidden md:inline hover:text-blue-200 transition-colors">
+            <a href="/" className="hover:text-blue-200 transition-colors">
               Home
-            </a>
-            <a href="/signup" className="hidden md:inline hover:text-blue-200 transition-colors">
-              Sign Up
-            </a>
-            <a href="/schedule" className="hidden md:inline hover:text-blue-200 transition-colors">
-              Schedule
             </a>
             <button
               onClick={handleSignOut}
-              className="flex items-center gap-1 hover:text-blue-200 transition-colors text-sm md:text-base"
+              className="flex items-center gap-1 hover:text-blue-200 transition-colors"
               title="Sign out and return to password page"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

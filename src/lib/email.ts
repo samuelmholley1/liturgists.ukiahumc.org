@@ -20,7 +20,6 @@ export async function sendEmail({ to, cc, replyTo, subject, html }: EmailParams)
     importUrl: typeof import.meta !== 'undefined' ? (import.meta as any).url : 'no-import-meta',
   };
   const sha = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? 'dev';
-  const debugSubject = `${subject} [debug ${sha}]`;
   const stampedHtml = `${html}<pre style="font-size:10px;opacity:.6;margin-top:40px;border-top:1px solid #ccc;padding-top:10px;">MAIL-STAMP ${JSON.stringify(mailStamp, null, 2)}</pre>`;
   
   console.log('🔍 MAIL-STAMP', mailStamp, { subject, to, cc });
@@ -41,7 +40,7 @@ export async function sendEmail({ to, cc, replyTo, subject, html }: EmailParams)
     to,
     cc,
     replyTo: replyTo || 'sam@samuelholley.com',
-    subject: debugSubject,  // Use debug subject with stamp
+    subject: subject,  // Use original subject
     html: stampedHtml,      // Use stamped HTML
     headers: {
       'X-Mail-Stamp': JSON.stringify(mailStamp)

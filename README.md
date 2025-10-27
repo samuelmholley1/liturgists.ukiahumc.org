@@ -1,5 +1,7 @@
 # Liturgist Signup - Ukiah United Methodist Church
 
+<!-- Force redeploy marker -->
+
 A modern Next.js web application for managing liturgist signups for worship services at Ukiah United Methodist Church. Features a beautiful calendar interface, multiple signup roles, and real-time Airtable integration.
 
 ## 🌟 Features

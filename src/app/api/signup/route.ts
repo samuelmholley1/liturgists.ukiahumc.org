@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
           to: body.email,
           cc: isSamSigningUp ? undefined : 'sam@samuelholley.com',
           replyTo: 'sam@samuelholley.com',
-          subject: `✅ ${roleLabel} Sign-up Confirmed: ${firstName} ${body.displayDate}`,
+          subject: `✅ ${roleLabel} Sign-up Confirmed: ${firstName} | ${body.displayDate}`,
           html: emailHtml
         })
         
@@ -257,7 +257,7 @@ export async function GET(request: NextRequest) {
           // CC logic: always CC sam@ except when sam@ is TO recipient
           const shouldCCSam = !isSamCancelling
           
-          const finalSubject = `❌ ${roleLabel} Sign-up Cancelled: ${firstName} ${formattedDateForSubject}`
+          const finalSubject = `❌ ${roleLabel} Sign-up Cancelled: ${firstName} | ${formattedDateForSubject}`
           const finalCC = shouldCCSam ? 'sam@samuelholley.com' : undefined
         console.log(`Cancellation email: userEmail="${userEmail}", isSamCancelling=${isSamCancelling}, to=${isSamCancelling ? 'alerts@' : userEmail}`)
         
@@ -474,7 +474,7 @@ export async function DELETE(request: NextRequest) {
           // CC logic: always CC sam@ except when sam@ is TO recipient
           const shouldCCSam = !isSamCancelling
           
-          const finalSubject = `❌ ${roleLabel} Sign-up Cancelled: ${firstName} ${formattedDateForSubject}`
+          const finalSubject = `❌ ${roleLabel} Sign-up Cancelled: ${firstName} | ${formattedDateForSubject}`
           const finalCC = shouldCCSam ? 'sam@samuelholley.com' : undefined
           
           await sendEmail({

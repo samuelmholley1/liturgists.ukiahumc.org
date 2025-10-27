@@ -240,6 +240,22 @@ export async function GET(request: NextRequest) {
         })
         
         const userEmail = recordData.record.email as string
+          const userRole = recordData.record.role as string
+          const userName = recordData.record.name as string
+          const isSamCancelling = userEmail.toLowerCase() === 'sam@samuelholley.com'
+          
+          // Determine role label and name
+          const role = userRole.toLowerCase().trim()
+          const isBackup = role === 'backup'
+          const isSecondLiturgist = role === 'liturgist2'
+          const roleLabel = isBackup ? 'Backup' : (isSecondLiturgist ? 'Second Liturgist' : 'Liturgist')
+          const firstName = userName.split(' ' )[0]
+          
+          // CC logic: always CC sam@ except when sam@ is TO recipient
+          const shouldCCSam = !isSamCancelling
+          
+          const finalSubject = `❌ ${roleLabel} Cancelled: ${firstName} - ${formattedDateForSubject}`
+          const finalCC = shouldCCSam ? 'sam@samuelholley.com' : undefined
         const userRole = recordData.record.role as string
         const isSamCancelling = userEmail.toLowerCase() === 'sam@samuelholley.com'
         
@@ -259,6 +275,8 @@ export async function GET(request: NextRequest) {
         
         await sendEmail({
           to: userEmail,
+            cc: finalCC,
+            replyTo: 'sam@samuelholley.com',
           cc: shouldCCSam ? 'sam@samuelholley.com' : undefined,
           replyTo: 'sam@samuelholley.com',
           subject: `${subjectPrefix} - ${formattedDateForSubject}`,
@@ -466,23 +484,30 @@ export async function DELETE(request: NextRequest) {
           })
           
           const userEmail = recordData.record.email as string
+          const userRole = recordData.record.role as string
+          const userName = recordData.record.name as string
+          const isSamCancelling = userEmail.toLowerCase() === 'sam@samuelholley.com'
           
-          // Send cancellation email to the liturgist
+          // Determine role label and name
+          const role = userRole.toLowerCase().trim()
+          const isBackup = role === 'backup'
+          const isSecondLiturgist = role === 'liturgist2'
+          const roleLabel = isBackup ? 'Backup' : (isSecondLiturgist ? 'Second Liturgist' : 'Liturgist')
+          const firstName = userName.split(' ' )[0]
+          
+          // CC logic: always CC sam@ except when sam@ is TO recipient
+          const shouldCCSam = !isSamCancelling
+          
+          const finalSubject = `❌ ${roleLabel} Cancelled: ${firstName} - ${formattedDateForSubject}`
+          const finalCC = shouldCCSam ? 'sam@samuelholley.com' : undefined
+          
           await sendEmail({
             to: userEmail,
-            subject: `❌ Your Liturgist Signup Cancelled - ${formattedDateForSubject}`,
+            cc: finalCC,
+            replyTo: 'sam@samuelholley.com',
+            subject: finalSubject,
             html: emailHtml
           })
-          
-          // Send SEPARATE admin notification (avoids Gmail duplicate recipient policy)
-          // Check for sam@samuelholley.com which is the UI email
-          if (userEmail.toLowerCase() !== 'sam@samuelholley.com') {
-            await sendEmail({
-              to: 'alerts@samuelholley.com',
-              subject: `❌ Liturgist Cancellation - ${recordData.record.name} - ${formattedDateForSubject}`,
-              html: emailHtml
-            })
-          }
           
           console.log('Cancellation email notification sent successfully')
         } catch (emailError) {

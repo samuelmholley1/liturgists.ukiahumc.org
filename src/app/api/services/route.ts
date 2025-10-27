@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
           phone: signup.phone,
           preferredContact: 'email' as const
         }
-      } else if (signup.role === 'liturgist2') {
+      } else if (signup.role === 'Second Liturgist' || signup.role === 'liturgist2') {
         service.liturgist2 = {
           id: signup.id,
           name: signup.name,
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
           phone: signup.phone,
           preferredContact: 'email' as const
         }
-      } else if (signup.role === 'Backup') {
+      } else if (signup.role === 'Backup Liturgist' || signup.role === 'Backup') {
         service.backup = {
           id: signup.id,
           name: signup.name,

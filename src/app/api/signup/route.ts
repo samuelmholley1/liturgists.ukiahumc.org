@@ -248,8 +248,8 @@ export async function GET(request: NextRequest) {
           const role = userRole.toLowerCase().trim()
           const isBackup = role === 'backup'
           const isSecondLiturgist = role === 'liturgist2'
-          const roleLabel = isBackup ? 'Backup' : (isSecondLiturgist ? 'Second Liturgist' : 'Liturgist')
-          const firstName = userName.split(' ' )[0]
+          const roleLabel = isBackup ? 'Backup Liturgist' : (isSecondLiturgist ? 'Second Liturgist' : 'Liturgist')
+          const firstName = userName.split(' ' )[0] || userName || 'Unknown'
           
           // CC logic: always CC sam@ except when sam@ is TO recipient
           const shouldCCSam = !isSamCancelling
@@ -465,8 +465,8 @@ export async function DELETE(request: NextRequest) {
           const role = userRole.toLowerCase().trim()
           const isBackup = role === 'backup'
           const isSecondLiturgist = role === 'liturgist2'
-          const roleLabel = isBackup ? 'Backup' : (isSecondLiturgist ? 'Second Liturgist' : 'Liturgist')
-          const firstName = userName.split(' ' )[0]
+          const roleLabel = isBackup ? 'Backup Liturgist' : (isSecondLiturgist ? 'Second Liturgist' : 'Liturgist')
+          const firstName = userName.split(' ' )[0] || userName || 'Unknown'
           
           // CC logic: always CC sam@ except when sam@ is TO recipient
           const shouldCCSam = !isSamCancelling

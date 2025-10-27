@@ -191,7 +191,7 @@ export async function GET(request: NextRequest) {
   console.log('🚨🚨�� GET HANDLER CALLED - IS THIS HANDLING DELETES?? 🚨🚨🚨');
   console.log('🔍 HANDLER STAMP:', handlerStamp);
   
-    const { searchParams } = new URL(request.url)
+  try {    const { searchParams } = new URL(request.url)
     const recordId = searchParams.get('recordId')
     const action = searchParams.get('action')
     

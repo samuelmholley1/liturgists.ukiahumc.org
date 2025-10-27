@@ -110,14 +110,17 @@ export async function POST(request: NextRequest) {
         // If Sam signs up: TO sam@ only (no CC)
         // If others sign up: TO their email, CC sam@
         const isSamSigningUp = body.email.toLowerCase() === 'sam@samuelholley.com'
-        const isBackup = body.role.toLowerCase().trim() === 'backup'
-        const subjectPrefix = isBackup ? '✅ Backup Liturgist Confirmed' : '✅ Liturgist Signup Confirmed'
+        const role = body.role.toLowerCase().trim()
+        const isBackup = role === 'backup'
+        const isSecondLiturgist = role === 'liturgist2'
+        const roleLabel = isBackup ? 'Backup Liturgist' : (isSecondLiturgist ? 'Second Liturgist' : 'Liturgist')
+        const firstName = body.name.split(' ')[0] || body.name || 'Unknown'
         
         await sendEmail({
           to: body.email,
           cc: isSamSigningUp ? undefined : 'sam@samuelholley.com',
           replyTo: 'sam@samuelholley.com',
-          subject: `${subjectPrefix} - ${body.displayDate}`,
+          subject: `✅ ${roleLabel} Sign-up Confirmed: ${firstName} ${body.displayDate}`,
           html: emailHtml
         })
         
@@ -254,7 +257,7 @@ export async function GET(request: NextRequest) {
           // CC logic: always CC sam@ except when sam@ is TO recipient
           const shouldCCSam = !isSamCancelling
           
-          const finalSubject = `❌ ${roleLabel} Cancelled: ${firstName} - ${formattedDateForSubject}`
+          const finalSubject = `❌ ${roleLabel} Sign-up Cancelled: ${firstName} ${formattedDateForSubject}`
           const finalCC = shouldCCSam ? 'sam@samuelholley.com' : undefined
         console.log(`Cancellation email: userEmail="${userEmail}", isSamCancelling=${isSamCancelling}, to=${isSamCancelling ? 'alerts@' : userEmail}`)
         
@@ -471,7 +474,7 @@ export async function DELETE(request: NextRequest) {
           // CC logic: always CC sam@ except when sam@ is TO recipient
           const shouldCCSam = !isSamCancelling
           
-          const finalSubject = `❌ ${roleLabel} Cancelled: ${firstName} - ${formattedDateForSubject}`
+          const finalSubject = `❌ ${roleLabel} Sign-up Cancelled: ${firstName} ${formattedDateForSubject}`
           const finalCC = shouldCCSam ? 'sam@samuelholley.com' : undefined
           
           await sendEmail({

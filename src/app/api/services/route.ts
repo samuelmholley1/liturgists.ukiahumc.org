@@ -37,8 +37,11 @@ export async function GET(request: NextRequest) {
 
       const service = serviceMap.get(serviceDate)
 
-      // Organize by role
-      if (signup.role === 'Liturgist') {
+      // Normalize role for comparison (handle both capitalized and lowercase variants)
+      const normalizedRole = signup.role?.toLowerCase().trim()
+
+      // Organize by role - check for all variants (old, new, and lowercase)
+      if (signup.role === 'Liturgist' || normalizedRole === 'liturgist') {
         service.liturgist = {
           id: signup.id,
           name: signup.name,
@@ -46,7 +49,7 @@ export async function GET(request: NextRequest) {
           phone: signup.phone,
           preferredContact: 'email' as const
         }
-      } else if (signup.role === 'Second Liturgist' || signup.role === 'liturgist2') {
+      } else if (signup.role === 'Second Liturgist' || signup.role === 'liturgist2' || normalizedRole === 'liturgist2' || normalizedRole === 'second liturgist') {
         service.liturgist2 = {
           id: signup.id,
           name: signup.name,
@@ -54,7 +57,7 @@ export async function GET(request: NextRequest) {
           phone: signup.phone,
           preferredContact: 'email' as const
         }
-      } else if (signup.role === 'Backup Liturgist' || signup.role === 'Backup') {
+      } else if (signup.role === 'Backup Liturgist' || signup.role === 'Backup' || normalizedRole === 'backup' || normalizedRole === 'backup liturgist') {
         service.backup = {
           id: signup.id,
           name: signup.name,

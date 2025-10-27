@@ -509,7 +509,7 @@ export default function Home() {
           name: fullName,
           email: signupForm.email,
           phone: signupForm.phone || '',
-          role: signupForm.role === 'liturgist' ? 'Liturgist' : 'Backup',
+          role: signupForm.role === 'liturgist' ? 'Liturgist' : 'Backup Liturgist',
           attendanceStatus: '', // No longer used
         }),
       })
@@ -518,7 +518,7 @@ export default function Home() {
 
       if (data.success) {
         // Success message includes role and date, and any special notes
-        const roleLabel = signupForm.role === 'liturgist' ? 'Main Liturgist' : 'Backup'
+        const roleLabel = signupForm.role === 'liturgist' ? 'Main Liturgist' : 'Backup Liturgist'
         const specialNote = service.notes ? `\n\n${service.notes}` : ''
         
         // Close modal first
@@ -829,7 +829,7 @@ export default function Home() {
                     )}
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-gray-700">Backup:</span>
+                    <span className="font-medium text-gray-700">Backup Liturgist:</span>
                     {selectedService?.backup ? (
                       <span className="text-orange-700 font-semibold">✓ Filled by {selectedService.backup.name}</span>
                     ) : (

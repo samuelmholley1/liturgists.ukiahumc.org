@@ -14,7 +14,7 @@ export interface SignupData {
   name: string
   email: string
   phone?: string
-  role: 'Liturgist' | 'Backup' | 'Attendance'
+  role: 'Liturgist' | 'Backup Liturgist' | 'Attendance'
   attendanceStatus?: 'Yes' | 'No' | 'Maybe'
   notes?: string
 }

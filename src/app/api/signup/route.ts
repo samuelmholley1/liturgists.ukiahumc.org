@@ -256,33 +256,6 @@ export async function GET(request: NextRequest) {
           
           const finalSubject = `❌ ${roleLabel} Cancelled: ${firstName} - ${formattedDateForSubject}`
           const finalCC = shouldCCSam ? 'sam@samuelholley.com' : undefined
-        const userRole = recordData.record.role as string
-        const isSamCancelling = userEmail.toLowerCase() === 'sam@samuelholley.com'
-        
-        // DEBUG: Log the raw role value from Airtable
-        console.log(`DEBUG RAW AIRTABLE DATA: role="${userRole}" (type: ${typeof userRole}, length: ${userRole.length})`)
-        
-        const isBackup = userRole.toLowerCase().trim() === 'backup'
-        const subjectPrefix = isBackup ? '❌ Backup Liturgist Cancelled' : '❌ Liturgist Signup Cancelled'
-        
-        console.log(`DEBUG Cancellation: role="${userRole}", isBackup=${isBackup}, subject="${subjectPrefix}"`)
-        
-        // Send cancellation email
-        // Send cancellation email
-        // For backup cancellations: ALWAYS CC sam@ (even if Sam cancels himself)
-        // For main liturgist: CC sam@ only if others cancel
-        const shouldCCSam = !isSamCancelling
-        
-        await sendEmail({
-          to: userEmail,
-            cc: finalCC,
-            replyTo: 'sam@samuelholley.com',
-          cc: shouldCCSam ? 'sam@samuelholley.com' : undefined,
-          replyTo: 'sam@samuelholley.com',
-          subject: `${subjectPrefix} - ${formattedDateForSubject}`,
-          html: emailHtml
-        })
-        
         console.log(`Cancellation email: userEmail="${userEmail}", isSamCancelling=${isSamCancelling}, to=${isSamCancelling ? 'alerts@' : userEmail}`)
         
         console.log('Cancellation email notification sent successfully')

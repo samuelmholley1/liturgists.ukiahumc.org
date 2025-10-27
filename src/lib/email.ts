@@ -11,20 +11,6 @@ interface EmailParams {
 }
 
 export async function sendEmail({ to, cc, replyTo, subject, html }: EmailParams) {
-  // Add irrefutable forensic stamp
-  const mailStamp = {
-    sender: 'sendEmail',
-    sha: process.env.VERCEL_GIT_COMMIT_SHA ?? 'dev',
-    region: process.env.VERCEL_REGION ?? 'unknown',
-    url: process.env.VERCEL_URL ?? 'local',
-    at: new Date().toISOString(),
-    importUrl: typeof import.meta !== 'undefined' ? (import.meta as any).url : 'no-import-meta',
-  };
-  const sha = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? 'dev';
-  const stampedHtml = `${html}<pre style="font-size:10px;opacity:.6;margin-top:40px;border-top:1px solid #ccc;padding-top:10px;">MAIL-STAMP ${JSON.stringify(mailStamp, null, 2)}</pre>`;
-  
-  console.log('🔍 MAIL-STAMP', mailStamp, { subject, to, cc });
-  
   // Create transporter using Zoho SMTP
   const transporter = nodemailer.createTransport({
     host: 'smtp.zoho.com',
@@ -41,11 +27,8 @@ export async function sendEmail({ to, cc, replyTo, subject, html }: EmailParams)
     to,
     cc,
     replyTo: replyTo || 'sam@samuelholley.com',
-    subject: subject,  // Use original subject
-    html: stampedHtml,      // Use stamped HTML
-    headers: {
-      'X-Mail-Stamp': JSON.stringify(mailStamp)
-    }
+    subject: subject,
+    html: html
   }
 
   try {

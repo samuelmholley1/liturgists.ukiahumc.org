@@ -259,7 +259,7 @@ export function generateSignupEmail(data: {
           
           <div class="button-container">
             <a href="https://liturgists.ukiahumc.org" class="button">View Full Schedule</a>
-            <a href="https://liturgists.ukiahumc.org/api/signup?recordId=${recordId}&action=cancel" class="button cancel-button">Cancel This Signup</a>
+            <!-- <a href="https://liturgists.ukiahumc.org/api/signup?recordId=${recordId}&action=cancel" class="button cancel-button">Cancel This Signup</a> -->
           </div>
           
           <p class="timestamp">

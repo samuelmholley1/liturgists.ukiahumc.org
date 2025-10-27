@@ -509,7 +509,7 @@ export default function Home() {
           name: fullName,
           email: signupForm.email,
           phone: signupForm.phone || '',
-          role: signupForm.role === 'liturgist' ? 'Liturgist' : 'Backup Liturgist',
+          role: signupForm.role, // Send internal role value: 'liturgist', 'liturgist2', or 'backup'
           attendanceStatus: '', // No longer used
         }),
       })

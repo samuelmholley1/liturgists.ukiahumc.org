@@ -705,8 +705,8 @@ export default function Home() {
       
       {/* Pinned Calendar - Collapsible (Hidden on mobile) */}
       {calendarOpen ? (
-        <div className="hidden md:block fixed top-20 left-4 z-50 bg-white shadow-xl rounded-lg border-2 border-gray-200 w-80 max-h-[calc(100vh-6rem)] overflow-y-auto">
-          <div className="p-4">
+        <div className="hidden md:block fixed top-20 left-4 z-50 bg-white shadow-xl rounded-lg border-2 border-gray-200 w-72 lg:w-80 max-h-[calc(100vh-6rem)] overflow-y-auto">
+          <div className="p-3 lg:p-4">
             <div className="flex items-center justify-between mb-3 sticky top-0 bg-white z-10 pb-2">
               <div className="flex items-center space-x-2">
                 <div className="flex-1">
@@ -736,8 +736,9 @@ export default function Home() {
               </div>
               <button
                 onClick={() => setCalendarOpen(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                className="bg-red-100 hover:bg-red-200 text-red-700 rounded-full p-2 transition-colors shadow-sm border border-red-200"
                 title="Close calendar"
+                aria-label="Close calendar"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -800,7 +801,7 @@ export default function Home() {
         </button>
       )}
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className={`container mx-auto px-4 py-8 max-w-4xl transition-all duration-300 ${calendarOpen ? 'md:ml-72 lg:ml-80' : ''}`}>
         {/* Church Logo at Top */}
         <div className="flex justify-center mb-6">
           <img 

@@ -43,17 +43,29 @@ export default function ScheduleSummary() {
     }
   }
 
+  // Group services by month
+  const groupServicesByMonth = (services: Service[]) => {
+    const months: { [key: string]: Service[] } = {}
+    services.forEach(service => {
+      const date = new Date(service.date)
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+      if (!months[monthKey]) months[monthKey] = []
+      months[monthKey].push(service)
+    })
+    return months
+  }
+
   const handleQuarterChange = (direction: 'prev' | 'next') => {
-    if (direction === 'next' && currentQuarter === 'Q4-2025') {
-      setCurrentQuarter('Q1-2026')
-    } else if (direction === 'prev' && currentQuarter === 'Q1-2026') {
-      setCurrentQuarter('Q4-2025')
-    } else if (direction === 'prev' && currentQuarter === 'Q4-2025') {
-      setCurrentQuarter('Q3-2025')
-    } else if (direction === 'next' && currentQuarter === 'Q3-2025') {
-      setCurrentQuarter('Q4-2025')
+    const quarters = ['Q3-2025', 'Q4-2025', 'Q1-2026']
+    const currentIndex = quarters.indexOf(currentQuarter)
+    if (direction === 'prev' && currentIndex > 0) {
+      setCurrentQuarter(quarters[currentIndex - 1])
+    } else if (direction === 'next' && currentIndex < quarters.length - 1) {
+      setCurrentQuarter(quarters[currentIndex + 1])
     }
   }
+
+  const servicesByMonth = groupServicesByMonth(services)
 
   if (loading) {
     return (
@@ -70,160 +82,201 @@ export default function ScheduleSummary() {
 
   return (
     <PasswordGate>
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-          {/* Church Logo at Top */}
-          <div className="flex justify-center mb-6">
+      <main className="min-h-screen bg-white">
+        <div className="container mx-auto px-4 py-6 max-w-7xl">
+          {/* Header - Compact */}
+          <div className="text-center mb-6">
             <img
               src="/logo-for-church-larger.jpg"
               alt="Ukiah United Methodist Church"
-              className="w-64 md:w-80 h-auto rounded-lg shadow-lg"
+              className="w-48 mx-auto mb-4 rounded-lg shadow-sm"
             />
+            <h1 className="text-2xl font-bold text-gray-800 mb-1">Liturgist Schedule Summary</h1>
+            <p className="text-lg text-blue-600 font-medium">{currentQuarter.replace('-', ' ')}</p>
+          </div>          {/* Navigation - Compact */}
+          <div className="flex justify-center gap-3 mb-6">
+            <button
+              onClick={() => handleQuarterChange('prev')}
+              disabled={currentQuarter === 'Q3-2025'}
+              className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors ${
+                currentQuarter === 'Q3-2025'
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
+              }`}
+              aria-label="Previous quarter"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Previous
+            </button>
+            <button
+              onClick={() => handleQuarterChange('next')}
+              disabled={currentQuarter === 'Q1-2026'}
+              className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors ${
+                currentQuarter === 'Q1-2026'
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
+              }`}
+              aria-label="Next quarter"
+            >
+              Next
+              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
 
-          {/* Header */}
-          <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">Liturgist Schedule Summary</h1>
-                <p className="text-gray-600 mt-1">Overview of liturgist positions for {currentQuarter.replace('-', ' ')}</p>
+          {/* Summary Stats - Compact */}
+          <div className="grid grid-cols-3 gap-4 mb-6 max-w-md mx-auto">
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-3 text-center">
+              <div className="text-xl font-bold text-blue-700" aria-label={`${services.length} total services`}>
+                {services.length}
               </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleQuarterChange('prev')}
-                  disabled={currentQuarter === 'Q3-2025'}
-                  className={`px-3 py-2 rounded-md text-sm font-medium flex items-center ${
-                    currentQuarter === 'Q3-2025'
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                >
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  Previous
-                </button>
-                <button
-                  onClick={() => handleQuarterChange('next')}
-                  disabled={currentQuarter === 'Q1-2026'}
-                  className={`px-3 py-2 rounded-md text-sm font-medium flex items-center ${
-                    currentQuarter === 'Q1-2026'
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                >
-                  Next
-                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
+              <div className="text-xs text-blue-600 font-medium">Services</div>
             </div>
-
-            {/* Summary Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="text-2xl font-bold text-blue-600">{services.length}</div>
-                <div className="text-sm text-blue-800">Total Services</div>
+            <div className="bg-green-50 border-2 border-green-200 rounded-lg p-3 text-center">
+              <div className="text-xl font-bold text-green-700" aria-label={`${services.filter(s => s.liturgist).length} liturgists filled`}>
+                {services.filter(s => s.liturgist).length}
               </div>
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <div className="text-2xl font-bold text-green-600">
-                  {services.filter(s => s.liturgist).length}
-                </div>
-                <div className="text-sm text-green-800">Liturgists Filled</div>
+              <div className="text-xs text-green-600 font-medium">Filled</div>
+            </div>
+            <div className="bg-red-50 border-2 border-red-200 rounded-lg p-3 text-center">
+              <div className="text-xl font-bold text-red-700" aria-label={`${services.filter(s => !s.liturgist).length} liturgists needed`}>
+                {services.filter(s => !s.liturgist).length}
               </div>
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <div className="text-2xl font-bold text-red-600">
-                  {services.filter(s => !s.liturgist).length}
-                </div>
-                <div className="text-sm text-red-800">Liturgists Needed</div>
-              </div>
+              <div className="text-xs text-red-600 font-medium">Needed</div>
             </div>
           </div>
 
-          {/* Schedule List */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Service Schedule</h2>
+          {/* Monthly Grid Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {Object.entries(servicesByMonth).map(([monthKey, monthServices]) => {
+              const monthDate = new Date(monthKey + '-01')
+              const monthName = monthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 
-            <div className="space-y-3">
-              {services.map((service: Service) => (
-                <div
-                  key={service.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                >
-                  {/* Date */}
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-semibold text-gray-800">
-                      {service.displayDate}
-                    </h3>
-                    {service.notes && (
-                      <span className="text-xs font-medium text-amber-700 bg-amber-100 px-2 py-1 rounded">
-                        {service.notes.includes('Christmas Eve') ? '🎄 Christmas Eve' :
-                         service.notes.includes('Advent') ? '🕯️ Advent' : 'Special Service'}
-                      </span>
-                    )}
-                  </div>
+              return (
+                <div key={monthKey} className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+                  <h2 className="text-lg font-bold text-gray-800 mb-4 text-center border-b-2 border-gray-300 pb-2">
+                    {monthName}
+                  </h2>
 
-                  {/* Liturgist Positions */}
                   <div className="space-y-2">
-                    {/* Main Liturgist */}
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-gray-700">Main Liturgist:</span>
-                      {service.liturgist ? (
-                        <span className="text-green-700 font-semibold">
-                          ✅ {service.liturgist.name}
-                        </span>
-                      ) : (
-                        <span className="text-red-600 font-semibold">
-                          ❌ OPEN
-                        </span>
-                      )}
-                    </div>
+                    {monthServices.map((service: Service) => (
+                      <div
+                        key={service.id}
+                        className="bg-white rounded-md p-3 border border-gray-300 shadow-sm"
+                        role="article"
+                        aria-label={`Service on ${service.displayDate}`}
+                      >
+                        {/* Date */}
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-semibold text-gray-800 text-sm">
+                            {new Date(service.date).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </span>
+                          {service.notes && (
+                            <span
+                              className="text-xs px-2 py-1 rounded-full font-medium bg-amber-100 text-amber-800"
+                              aria-label={service.notes}
+                            >
+                              {service.notes.includes('Christmas Eve') ? '🎄' :
+                               service.notes.includes('Advent') ? '🕯️' : '⭐'}
+                            </span>
+                          )}
+                        </div>
 
-                    {/* Second Liturgist (Christmas Eve only) */}
-                    {service.displayDate?.includes('Christmas Eve') && (
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium text-gray-700">Second Liturgist:</span>
-                        {service.liturgist2 ? (
-                          <span className="text-green-700 font-semibold">
-                            ✅ {service.liturgist2.name}
-                          </span>
-                        ) : (
-                          <span className="text-red-600 font-semibold">
-                            ❌ OPEN
-                          </span>
-                        )}
+                        {/* Liturgist Status */}
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium text-gray-600">Liturgist:</span>
+                            {service.liturgist ? (
+                              <span
+                                className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-1 rounded"
+                                aria-label={`Filled by ${service.liturgist.name}`}
+                              >
+                                ✅ {service.liturgist.name.split(' ')[0]}
+                              </span>
+                            ) : (
+                              <span
+                                className="text-xs font-semibold text-red-700 bg-red-100 px-2 py-1 rounded"
+                                aria-label="Position available"
+                              >
+                                ❌ OPEN
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Second Liturgist for Christmas Eve */}
+                          {service.displayDate?.includes('Christmas Eve') && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-medium text-gray-600">Second:</span>
+                              {service.liturgist2 ? (
+                                <span
+                                  className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-1 rounded"
+                                  aria-label={`Second liturgist: ${service.liturgist2.name}`}
+                                >
+                                  ✅ {service.liturgist2.name.split(' ')[0]}
+                                </span>
+                              ) : (
+                                <span
+                                  className="text-xs font-semibold text-red-700 bg-red-100 px-2 py-1 rounded"
+                                  aria-label="Second liturgist position available"
+                                >
+                                  ❌ OPEN
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    )}
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
-
-            {services.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <p>No services found for this quarter.</p>
-              </div>
-            )}
+              )
+            })}
           </div>
 
-          {/* Footer */}
-          <footer className="text-center text-gray-600 mt-8 text-sm">
+          {/* Legend */}
+          <div className="mt-6 bg-gray-100 rounded-lg p-4 max-w-md mx-auto">
+            <h3 className="text-sm font-bold text-gray-800 mb-2 text-center">Legend</h3>
+            <div className="flex justify-center gap-6 text-xs">
+              <div className="flex items-center gap-1">
+                <span className="text-green-700">✅</span>
+                <span className="text-gray-700">Filled</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-red-700">❌</span>
+                <span className="text-gray-700">Available</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-amber-700">🕯️</span>
+                <span className="text-gray-700">Advent</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-amber-700">🎄</span>
+                <span className="text-gray-700">Christmas</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer - Compact */}
+          <footer className="text-center text-gray-600 mt-6 text-xs">
             <p className="mb-1">
               <strong>Ukiah United Methodist Church</strong>
             </p>
             <p className="mb-1">
               270 N. Pine St., Ukiah, CA 95482 | 707.462.3360
             </p>
-            <p className="text-xs">
+            <p>
               <a
                 href="https://ukiahumc.org"
                 className="text-blue-600 hover:underline"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Visit church website"
               >
                 ukiahumc.org
               </a>

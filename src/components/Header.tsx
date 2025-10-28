@@ -17,6 +17,9 @@ export default function Header() {
             <a href="/" className="hover:text-blue-200 transition-colors">
               Home
             </a>
+            <a href="/schedule-summary" className="hover:text-blue-200 transition-colors">
+              Schedule Summary
+            </a>
             <button
               onClick={handleSignOut}
               className="flex items-center gap-1 hover:text-blue-200 transition-colors"

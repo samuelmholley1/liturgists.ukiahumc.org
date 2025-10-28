@@ -149,88 +149,107 @@ export default function ScheduleSummary() {
             </div>
           </div>
 
-          {/* Monthly Grid Layout */}
+          {/* Monthly Grid Layout - Spreadsheet Style */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {Object.entries(servicesByMonth).map(([monthKey, monthServices]) => {
               const monthDate = new Date(monthKey + '-01')
               const monthName = monthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 
               return (
-                <div key={monthKey} className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
-                  <h2 className="text-lg font-bold text-gray-800 mb-4 text-center border-b-2 border-gray-300 pb-2">
-                    {monthName}
-                  </h2>
+                <div key={monthKey} className="bg-white rounded-lg border-2 border-gray-300 overflow-hidden">
+                  {/* Month Header */}
+                  <div className="bg-gray-200 border-b-2 border-gray-300 px-4 py-3">
+                    <h2 className="text-lg font-bold text-gray-800 text-center">
+                      {monthName}
+                    </h2>
+                  </div>
 
-                  <div className="space-y-2">
-                    {monthServices.map((service: Service) => (
-                      <div
-                        key={service.id}
-                        className="bg-white rounded-md p-3 border border-gray-300 shadow-sm"
-                        role="article"
-                        aria-label={`Service on ${service.displayDate}`}
-                      >
-                        {/* Date */}
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-semibold text-gray-800 text-sm">
-                            {new Date(service.date).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric'
-                            })}
-                          </span>
-                          {service.notes && (
-                            <span
-                              className="text-xs px-2 py-1 rounded-full font-medium bg-amber-100 text-amber-800"
-                              aria-label={service.notes}
-                            >
-                              {service.notes.includes('Christmas Eve') ? '🎄' :
-                               service.notes.includes('Advent') ? '🕯️' : '⭐'}
+                  {/* Table Header */}
+                  <div className="bg-gray-100 border-b border-gray-300 px-4 py-2 grid grid-cols-2 gap-4">
+                    <div className="text-xs font-bold text-gray-700">Date</div>
+                    <div className="text-xs font-bold text-gray-700">Liturgist</div>
+                  </div>
+
+                  {/* Service Rows */}
+                  <div className="divide-y divide-gray-200">
+                    {monthServices.map((service: Service, index: number) => (
+                      <div key={service.id}>
+                        {/* Main Liturgist Row */}
+                        <div
+                          className={`px-4 py-3 grid grid-cols-2 gap-4 items-center ${
+                            index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                          }`}
+                          role="row"
+                          aria-label={`Service on ${service.displayDate}`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-gray-800 text-sm">
+                              {new Date(service.date).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric'
+                              })}
                             </span>
-                          )}
-                        </div>
-
-                        {/* Liturgist Status */}
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-gray-600">Liturgist:</span>
-                            {service.liturgist ? (
+                            {service.notes && (
                               <span
-                                className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-1 rounded"
-                                aria-label={`Filled by ${service.liturgist.name}`}
+                                className="text-xs"
+                                aria-label={service.notes}
+                                title={service.notes}
                               >
-                                ✅ {service.liturgist.name.split(' ')[0]}
-                              </span>
-                            ) : (
-                              <span
-                                className="text-xs font-semibold text-red-700 bg-red-100 px-2 py-1 rounded"
-                                aria-label="Position available"
-                              >
-                                ❌ OPEN
+                                {service.notes.includes('Christmas Eve') ? '🎄' :
+                                 service.notes.includes('Advent') ? '🕯️' : '⭐'}
                               </span>
                             )}
                           </div>
+                          <div className="text-sm">
+                            {service.liturgist ? (
+                              <span
+                                className="text-gray-700"
+                                aria-label={`Filled by ${service.liturgist.name}`}
+                              >
+                                {service.liturgist.name.split(' ')[0]} {service.liturgist.name.split(' ').slice(-1)[0]}
+                              </span>
+                            ) : (
+                              <span
+                                className="text-gray-400 italic"
+                                aria-label="Position available"
+                              >
+                                {/* Empty cell for vacant position */}
+                              </span>
+                            )}
+                          </div>
+                        </div>
 
-                          {/* Second Liturgist for Christmas Eve */}
-                          {service.displayDate?.includes('Christmas Eve') && (
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-medium text-gray-600">Second:</span>
+                        {/* Second Liturgist Row for Christmas Eve */}
+                        {service.displayDate?.includes('Christmas Eve') && (
+                          <div
+                            className={`px-4 py-2 grid grid-cols-2 gap-4 items-center border-l-4 border-amber-400 ${
+                              index % 2 === 0 ? 'bg-amber-25' : 'bg-amber-50'
+                            }`}
+                            role="row"
+                            aria-label="Second liturgist position"
+                          >
+                            <div className="text-xs text-gray-600 pl-4">
+                              Second Liturgist
+                            </div>
+                            <div className="text-sm">
                               {service.liturgist2 ? (
                                 <span
-                                  className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-1 rounded"
+                                  className="text-gray-700"
                                   aria-label={`Second liturgist: ${service.liturgist2.name}`}
                                 >
-                                  ✅ {service.liturgist2.name.split(' ')[0]}
+                                  {service.liturgist2.name.split(' ')[0]} {service.liturgist2.name.split(' ').slice(-1)[0]}
                                 </span>
                               ) : (
                                 <span
-                                  className="text-xs font-semibold text-red-700 bg-red-100 px-2 py-1 rounded"
+                                  className="text-gray-400 italic"
                                   aria-label="Second liturgist position available"
                                 >
-                                  ❌ OPEN
+                                  {/* Empty cell for vacant second position */}
                                 </span>
                               )}
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -239,17 +258,17 @@ export default function ScheduleSummary() {
             })}
           </div>
 
-          {/* Legend */}
+          {/* Legend - Updated for Spreadsheet Style */}
           <div className="mt-6 bg-gray-100 rounded-lg p-4 max-w-md mx-auto">
             <h3 className="text-sm font-bold text-gray-800 mb-2 text-center">Legend</h3>
             <div className="flex justify-center gap-6 text-xs">
               <div className="flex items-center gap-1">
-                <span className="text-green-700">✅</span>
+                <div className="w-3 h-3 bg-white border border-gray-300"></div>
                 <span className="text-gray-700">Filled</span>
               </div>
               <div className="flex items-center gap-1">
-                <span className="text-red-700">❌</span>
-                <span className="text-gray-700">Available</span>
+                <div className="w-3 h-3 bg-gray-50 border border-gray-300"></div>
+                <span className="text-gray-700">Empty = Needed</span>
               </div>
               <div className="flex items-center gap-1">
                 <span className="text-amber-700">🕯️</span>

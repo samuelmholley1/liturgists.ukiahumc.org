@@ -10,6 +10,7 @@ interface Service {
   liturgist: any | null
   liturgist2?: any | null
   backup: any | null
+  backup2?: any | null
 }
 
 export default function ScheduleSummary() {
@@ -258,7 +259,7 @@ export default function ScheduleSummary() {
                             {service.liturgist2 ? service.liturgist2.name : ''}
                           </td>
                           <td className="border border-gray-400 px-3 py-1 text-gray-900 whitespace-nowrap">
-                            {service.backup ? service.backup.name : ''}
+                            {service.backup2 ? service.backup2.name : ''}
                           </td>
                         </tr>
                       </React.Fragment>

@@ -84,6 +84,15 @@ export async function GET(request: NextRequest) {
           phone: signup.phone,
           preferredContact: 'email' as const
         }
+      } else if (signup.role === 'Second Backup' || signup.role === 'backup2' || normalizedRole === 'backup2' || normalizedRole === 'second backup') {
+        console.log(`🔍 API DEBUG: Assigning as backup2: ${signup.name}`)
+        service.backup2 = {
+          id: signup.id,
+          name: signup.name,
+          email: signup.email,
+          phone: signup.phone,
+          preferredContact: 'email' as const
+        }
       } else if (signup.role === 'Attendance') {
         console.log(`🔍 API DEBUG: Adding attendance: ${signup.name}`)
         service.attendance.push({
@@ -252,6 +261,7 @@ function generateSundaysForQuarter(quarterString: string) {
       liturgist: null,
       liturgist2: null,
       backup: null,
+      backup2: null,
       attendance: [],
       notes
     })
@@ -276,6 +286,7 @@ function generateSundaysForQuarter(quarterString: string) {
       liturgist: null,
       liturgist2: null,
       backup: null,
+      backup2: null,
       attendance: [],
       notes: 'Christmas Eve Service — Light the Christ Candle (white center candle) + all 4 Advent candles'
     })

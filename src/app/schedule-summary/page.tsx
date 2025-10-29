@@ -216,8 +216,8 @@ export default function ScheduleSummary() {
                           {service.liturgist ? service.liturgist.name : ''}
                         </td>
                       </tr>
-                      {/* Second liturgist row */}
-                      <tr className={index % 2 === 0 ? 'bg-white' : 'bg-gray-200'}>
+                      {/* Second liturgist row - alternate color */}
+                      <tr className={index % 2 === 0 ? 'bg-gray-200' : 'bg-white'}>
                         <td className="border border-gray-400 px-4 py-2 text-gray-900 font-semibold">
                           Christmas Eve Liturgist #2
                         </td>

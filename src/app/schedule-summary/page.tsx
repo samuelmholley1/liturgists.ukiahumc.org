@@ -107,7 +107,7 @@ export default function ScheduleSummary() {
             </thead>
             <tbody>
               {services.map((service, index) => (
-                <tr key={service.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                <tr key={service.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-200'}>
                   <td className="border border-gray-400 px-4 py-2 text-gray-900">
                     {service.displayDate}
                   </td>

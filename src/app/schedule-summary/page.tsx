@@ -23,6 +23,15 @@ export default function ScheduleSummary() {
     // Clear any cached version
     if (typeof window !== 'undefined') {
       console.log('🔍 SCHEDULE SUMMARY DEBUG: Running in browser environment')
+
+      // Check if service worker is controlling this page
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        console.log('🔍 SCHEDULE SUMMARY DEBUG: Service worker is active and controlling this page')
+        console.log('🔍 SCHEDULE SUMMARY DEBUG: Service worker state:', navigator.serviceWorker.controller.state)
+      } else {
+        console.log('🔍 SCHEDULE SUMMARY DEBUG: No active service worker controlling this page')
+      }
+
       console.log('Schedule Summary Page Loaded - Version 1.1.0')
       // Force reload if this is a cached version
       const lastUpdate = localStorage.getItem('schedule-summary-version')
@@ -73,6 +82,27 @@ export default function ScheduleSummary() {
     }
   }
 
+  const clearCacheAndReload = () => {
+    console.log('🔍 SCHEDULE SUMMARY DEBUG: Manual cache clear requested')
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        console.log('🔍 SCHEDULE SUMMARY DEBUG: Found', registrations.length, 'service worker registrations')
+        registrations.forEach((registration, index) => {
+          console.log('🔍 SCHEDULE SUMMARY DEBUG: Unregistering service worker', index + 1)
+          registration.unregister()
+        })
+        // Clear localStorage version
+        localStorage.removeItem('schedule-summary-version')
+        console.log('🔍 SCHEDULE SUMMARY DEBUG: Cleared localStorage version, reloading page')
+        window.location.reload()
+      })
+    } else {
+      console.log('🔍 SCHEDULE SUMMARY DEBUG: Service worker not supported, just reloading')
+      localStorage.removeItem('schedule-summary-version')
+      window.location.reload()
+    }
+  }
+
   const handleQuarterChange = (direction: 'prev' | 'next') => {
     const quarters = ['Q3-2025', 'Q4-2025', 'Q1-2026']
     const currentIndex = quarters.indexOf(currentQuarter)
@@ -113,6 +143,13 @@ export default function ScheduleSummary() {
               <p className="text-sm text-gray-600 mt-1">Version 1.1.0 - Last updated: {new Date().toLocaleString()}</p>
             </div>
             <div className="flex gap-2">
+              <button
+                onClick={clearCacheAndReload}
+                className="px-3 py-1 text-sm rounded bg-red-600 text-white hover:bg-red-700"
+                title="Clear cache and reload"
+              >
+                🔄 Clear Cache
+              </button>
               <button
                 onClick={() => handleQuarterChange('prev')}
                 disabled={currentQuarter === 'Q3-2025'}

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'uumc-liturgist-v2';
+const CACHE_NAME = 'uumc-liturgist-v3';
 const urlsToCache = [
   '/android-chrome-192x192.png',
   '/android-chrome-512x512.png',
@@ -23,8 +23,8 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
   
-  // Never cache API routes or the main page - always fetch fresh
-  if (url.pathname.startsWith('/api/') || url.pathname === '/' || url.pathname === '') {
+  // Never cache API routes, main page, or schedule-summary page - always fetch fresh
+  if (url.pathname.startsWith('/api/') || url.pathname === '/' || url.pathname === '' || url.pathname === '/schedule-summary') {
     event.respondWith(
       fetch(request)
         .catch(() => {

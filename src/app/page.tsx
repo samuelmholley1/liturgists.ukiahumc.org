@@ -816,7 +816,7 @@ export default function Home() {
         </button>
       )}
 
-      <div className={`container mx-auto px-4 py-8 max-w-4xl transition-all duration-300 ${calendarOpen ? 'md:ml-72 lg:ml-80' : ''}`}>
+      <div className={`container mx-auto px-4 py-8 max-w-4xl transition-all duration-300 ${calendarOpen ? 'md:ml-80 lg:ml-96 md:pl-8 lg:pl-12' : ''}`}>
         {/* Church Logo at Top */}
         <div className="flex justify-center mb-6">
           <img 

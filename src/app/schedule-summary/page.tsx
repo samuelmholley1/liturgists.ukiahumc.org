@@ -187,9 +187,11 @@ export default function ScheduleSummary() {
             <tbody>
               {services.map((service, index) => {
                 const isChristmasEve = service.displayDate?.includes('Christmas Eve')
+                console.log(`🔍 SCHEDULE SUMMARY DEBUG: Processing service: displayDate="${service.displayDate}", isChristmasEve=${isChristmasEve}, hasLiturgist=${!!service.liturgist}, hasLiturgist2=${!!service.liturgist2}`)
                 
                 // For Christmas Eve, create two rows if both liturgists exist
                 if (isChristmasEve && service.liturgist2) {
+                  console.log('🔍 SCHEDULE SUMMARY DEBUG: Rendering Christmas Eve with 2 liturgists')
                   return (
                     <React.Fragment key={service.id}>
                       {/* First liturgist row */}
@@ -216,6 +218,7 @@ export default function ScheduleSummary() {
                 
                 // For Christmas Eve with only one liturgist
                 if (isChristmasEve && service.liturgist && !service.liturgist2) {
+                  console.log('🔍 SCHEDULE SUMMARY DEBUG: Rendering Christmas Eve with 1 liturgist')
                   return (
                     <tr key={service.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-200'}>
                       <td className="border border-gray-400 px-4 py-2 text-gray-900 font-semibold">
@@ -230,6 +233,7 @@ export default function ScheduleSummary() {
                 
                 // For regular services
                 const dateLabel = service.displayDate.replace(/, \d{4}$/, '') + ' Liturgist'
+                console.log(`🔍 SCHEDULE SUMMARY DEBUG: Rendering regular service: dateLabel="${dateLabel}"`)
                 return (
                   <tr key={service.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-200'}>
                     <td className="border border-gray-400 px-4 py-2 text-gray-900 font-semibold">

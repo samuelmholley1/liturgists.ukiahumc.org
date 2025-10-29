@@ -193,56 +193,59 @@ export default function ScheduleSummary() {
           <table className="w-full border-collapse border border-gray-400">
             <thead>
               <tr className="bg-gray-200">
-                <th className="border border-gray-400 px-4 py-2 text-left font-semibold text-gray-900">Service</th>
-                <th className="border border-gray-400 px-4 py-2 text-left font-semibold text-gray-900">Liturgist</th>
+                <th className="border border-gray-400 px-3 py-1 text-left font-semibold text-gray-900">Service</th>
+                <th className="border border-gray-400 px-3 py-1 text-left font-semibold text-gray-900">Liturgist</th>
               </tr>
             </thead>
             <tbody>
-              {services.map((service, index) => {
-                const isChristmasEve = service.displayDate?.includes('Christmas Eve')
-                console.log(`🔍 SCHEDULE SUMMARY DEBUG: Processing service: displayDate="${service.displayDate}", isChristmasEve=${isChristmasEve}, hasLiturgist=${!!service.liturgist}, hasLiturgist2=${!!service.liturgist2}`)
-                
-                // For Christmas Eve, always show two separate liturgist lines
-                if (isChristmasEve) {
-                  console.log('🔍 SCHEDULE SUMMARY DEBUG: Rendering Christmas Eve with 2 liturgists')
+              {(() => {
+                let rowIndex = 0
+                return services.map((service) => {
+                  const isChristmasEve = service.displayDate?.includes('Christmas Eve')
+                  console.log(`🔍 SCHEDULE SUMMARY DEBUG: Processing service: displayDate="${service.displayDate}", isChristmasEve=${isChristmasEve}, hasLiturgist=${!!service.liturgist}, hasLiturgist2=${!!service.liturgist2}`)
+                  
+                  // For Christmas Eve, always show two separate liturgist lines
+                  if (isChristmasEve) {
+                    console.log('🔍 SCHEDULE SUMMARY DEBUG: Rendering Christmas Eve with 2 liturgists')
+                    return (
+                      <React.Fragment key={service.id}>
+                        {/* First liturgist row */}
+                        <tr className={rowIndex++ % 2 === 0 ? 'bg-white' : 'bg-gray-200'}>
+                          <td className="border border-gray-400 px-3 py-1 text-gray-900 font-semibold">
+                            Christmas Eve Liturgist #1
+                          </td>
+                          <td className="border border-gray-400 px-3 py-1 text-gray-900">
+                            {service.liturgist ? service.liturgist.name : ''}
+                          </td>
+                        </tr>
+                        {/* Second liturgist row */}
+                        <tr className={rowIndex++ % 2 === 0 ? 'bg-white' : 'bg-gray-200'}>
+                          <td className="border border-gray-400 px-3 py-1 text-gray-900 font-semibold">
+                            Christmas Eve Liturgist #2
+                          </td>
+                          <td className="border border-gray-400 px-3 py-1 text-gray-900">
+                            {service.liturgist2 ? service.liturgist2.name : ''}
+                          </td>
+                        </tr>
+                      </React.Fragment>
+                    )
+                  }
+                  
+                  // For regular services
+                  const dateLabel = service.displayDate.replace(/, \d{4}$/, '') + ' Liturgist'
+                  console.log(`🔍 SCHEDULE SUMMARY DEBUG: Rendering regular service: dateLabel="${dateLabel}"`)
                   return (
-                    <React.Fragment key={service.id}>
-                      {/* First liturgist row */}
-                      <tr className={index % 2 === 0 ? 'bg-white' : 'bg-gray-200'}>
-                        <td className="border border-gray-400 px-4 py-2 text-gray-900 font-semibold">
-                          Christmas Eve Liturgist #1
-                        </td>
-                        <td className="border border-gray-400 px-4 py-2 text-gray-900">
-                          {service.liturgist ? service.liturgist.name : ''}
-                        </td>
-                      </tr>
-                      {/* Second liturgist row - alternate color */}
-                      <tr className={index % 2 === 0 ? 'bg-gray-200' : 'bg-white'}>
-                        <td className="border border-gray-400 px-4 py-2 text-gray-900 font-semibold">
-                          Christmas Eve Liturgist #2
-                        </td>
-                        <td className="border border-gray-400 px-4 py-2 text-gray-900">
-                          {service.liturgist2 ? service.liturgist2.name : ''}
-                        </td>
-                      </tr>
-                    </React.Fragment>
+                    <tr key={service.id} className={rowIndex++ % 2 === 0 ? 'bg-white' : 'bg-gray-200'}>
+                      <td className="border border-gray-400 px-3 py-1 text-gray-900 font-semibold">
+                        {dateLabel}
+                      </td>
+                      <td className="border border-gray-400 px-3 py-1 text-gray-900">
+                        {service.liturgist ? service.liturgist.name : ''}
+                      </td>
+                    </tr>
                   )
-                }
-                
-                // For regular services
-                const dateLabel = service.displayDate.replace(/, \d{4}$/, '') + ' Liturgist'
-                console.log(`🔍 SCHEDULE SUMMARY DEBUG: Rendering regular service: dateLabel="${dateLabel}"`)
-                return (
-                  <tr key={service.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-200'}>
-                    <td className="border border-gray-400 px-4 py-2 text-gray-900 font-semibold">
-                      {dateLabel}
-                    </td>
-                    <td className="border border-gray-400 px-4 py-2 text-gray-900">
-                      {service.liturgist ? service.liturgist.name : ''}
-                    </td>
-                  </tr>
-                )
-              })}
+                })
+              })()}
             </tbody>
           </table>
         </div>

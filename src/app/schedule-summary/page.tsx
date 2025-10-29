@@ -9,12 +9,14 @@ interface Service {
   displayDate: string
   liturgist: any | null
   liturgist2?: any | null
+  backup: any | null
 }
 
 export default function ScheduleSummary() {
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
   const [currentQuarter, setCurrentQuarter] = useState('Q4-2025')
+  const [selectedMonth, setSelectedMonth] = useState<string>('all')
 
   console.log('🔍 SCHEDULE SUMMARY DEBUG: Component initialized with quarter:', currentQuarter)
 
@@ -146,6 +148,16 @@ export default function ScheduleSummary() {
   console.log('🔍 SCHEDULE SUMMARY DEBUG: Services data:', services)
   console.log('🔍 SCHEDULE SUMMARY DEBUG: Rendering table rows for', services.length, 'services')
 
+  // Filter services by selected month
+  const filteredServices = selectedMonth === 'all' 
+    ? services 
+    : services.filter(service => {
+        const monthName = service.displayDate.split(' ')[0] // Get first word (month)
+        return monthName === selectedMonth
+      })
+
+  console.log('🔍 SCHEDULE SUMMARY DEBUG: Filtered services:', filteredServices.length, 'services for month:', selectedMonth)
+
   return (
     <PasswordGate>
       <main className="min-h-screen bg-white p-6">
@@ -189,18 +201,34 @@ export default function ScheduleSummary() {
             </div>
           </div>
 
+          {/* Month Filter */}
+          <div className="mb-4 flex items-center gap-4">
+            <label className="text-sm font-medium text-gray-700">Filter by month:</label>
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Months</option>
+              <option value="October">October</option>
+              <option value="November">November</option>
+              <option value="December">December</option>
+            </select>
+          </div>
+
           {/* Simple Spreadsheet Table */}
           <table className="w-auto border-collapse border border-gray-400 table-auto">
             <thead>
               <tr className="bg-gray-200">
                 <th className="border border-gray-400 px-3 py-1 text-left font-semibold text-gray-900 whitespace-nowrap">Service</th>
                 <th className="border border-gray-400 px-3 py-1 text-left font-semibold text-gray-900 whitespace-nowrap">Liturgist</th>
+                <th className="border border-gray-400 px-3 py-1 text-left font-semibold text-gray-900 whitespace-nowrap">Backup</th>
               </tr>
             </thead>
             <tbody>
               {(() => {
                 let rowIndex = 0
-                return services.map((service) => {
+                return filteredServices.map((service) => {
                   const isChristmasEve = service.displayDate?.includes('Christmas Eve')
                   console.log(`🔍 SCHEDULE SUMMARY DEBUG: Processing service: displayDate="${service.displayDate}", isChristmasEve=${isChristmasEve}, hasLiturgist=${!!service.liturgist}, hasLiturgist2=${!!service.liturgist2}`)
                   
@@ -217,6 +245,9 @@ export default function ScheduleSummary() {
                           <td className="border border-gray-400 px-3 py-1 text-gray-900 whitespace-nowrap">
                             {service.liturgist ? service.liturgist.name : ''}
                           </td>
+                          <td className="border border-gray-400 px-3 py-1 text-gray-900 whitespace-nowrap">
+                            {service.backup ? service.backup.name : ''}
+                          </td>
                         </tr>
                         {/* Second liturgist row */}
                         <tr className={rowIndex++ % 2 === 0 ? 'bg-white' : 'bg-gray-200'}>
@@ -225,6 +256,9 @@ export default function ScheduleSummary() {
                           </td>
                           <td className="border border-gray-400 px-3 py-1 text-gray-900 whitespace-nowrap">
                             {service.liturgist2 ? service.liturgist2.name : ''}
+                          </td>
+                          <td className="border border-gray-400 px-3 py-1 text-gray-900 whitespace-nowrap">
+                            {service.backup ? service.backup.name : ''}
                           </td>
                         </tr>
                       </React.Fragment>
@@ -241,6 +275,9 @@ export default function ScheduleSummary() {
                       </td>
                       <td className="border border-gray-400 px-3 py-1 text-gray-900 whitespace-nowrap">
                         {service.liturgist ? service.liturgist.name : ''}
+                      </td>
+                      <td className="border border-gray-400 px-3 py-1 text-gray-900 whitespace-nowrap">
+                        {service.backup ? service.backup.name : ''}
                       </td>
                     </tr>
                   )

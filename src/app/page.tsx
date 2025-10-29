@@ -719,7 +719,7 @@ export default function Home() {
           </button>
           
           {/* Calendar */}
-          <div className="bg-white shadow-xl rounded-b-lg border-2 border-gray-200 w-72 lg:w-80 max-h-[calc(100vh-12rem)] overflow-y-auto">
+          <div className="bg-white shadow-xl rounded-b-lg border-2 border-gray-200 w-72 lg:w-80">
             <div className="p-3 lg:p-4">
               <div className="flex items-center justify-between mb-3 sticky top-0 bg-white z-10 pb-2">
                 <div className="flex items-center space-x-2">
@@ -773,7 +773,7 @@ export default function Home() {
                   {calendarData.days.map((day, index) => (
                     <div
                       key={index}
-                      className={`text-center py-2 rounded text-xs transition-colors relative ${
+                      className={`text-center py-1 rounded text-xs transition-colors relative ${
                         !day ? '' :
                         day.isMainService ? 'bg-purple-600 text-white font-bold cursor-pointer hover:bg-purple-700' :
                         day.isSunday && day.hasService ? (

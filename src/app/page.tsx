@@ -705,46 +705,60 @@ export default function Home() {
       
       {/* Pinned Calendar - Collapsible (Hidden on mobile) */}
       {calendarOpen ? (
-        <div className="hidden md:block fixed top-20 left-4 z-50 bg-white shadow-xl rounded-lg border-2 border-gray-200 w-72 lg:w-80 max-h-[calc(100vh-6rem)] overflow-y-auto">
-          <div className="p-3 lg:p-4">
-            <div className="flex items-center justify-between mb-3 sticky top-0 bg-white z-10 pb-2">
-              <div className="flex items-center space-x-2">
-                <div className="flex-1">
-                  <h1 className="text-sm font-bold text-gray-800">Liturgist Schedule</h1>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleCalendarQuarterChange('prev')}
-                      className="text-blue-600 hover:text-blue-800 p-0.5"
-                      title="Previous quarter"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
-                    </button>
-                    <p className="text-xs text-blue-600 font-medium">Q{calendarQuarter.quarter} {calendarQuarter.year}</p>
-                    <button
-                      onClick={() => handleCalendarQuarterChange('next')}
-                      className="text-blue-600 hover:text-blue-800 p-0.5"
-                      title="Next quarter"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
+        <div className="hidden md:block fixed top-20 left-4 z-50">
+          {/* Close Button - Above Calendar */}
+          <button
+            onClick={() => setCalendarOpen(false)}
+            className="w-full bg-blue-600 text-white rounded-t-lg px-4 py-3 shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-semibold text-sm"
+            title="Close calendar"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Close Calendar
+          </button>
+          
+          {/* Calendar */}
+          <div className="bg-white shadow-xl rounded-b-lg border-2 border-gray-200 w-72 lg:w-80 max-h-[calc(100vh-12rem)] overflow-y-auto">
+            <div className="p-3 lg:p-4">
+              <div className="flex items-center justify-between mb-3 sticky top-0 bg-white z-10 pb-2">
+                <div className="flex items-center space-x-2">
+                  <div className="flex-1">
+                    <h1 className="text-sm font-bold text-gray-800">Liturgist Schedule</h1>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleCalendarQuarterChange('prev')}
+                        className="text-blue-600 hover:text-blue-800 p-0.5"
+                        title="Previous quarter"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <p className="text-xs text-blue-600 font-medium">Q{calendarQuarter.quarter} {calendarQuarter.year}</p>
+                      <button
+                        onClick={() => handleCalendarQuarterChange('next')}
+                        className="text-blue-600 hover:text-blue-800 p-0.5"
+                        title="Next quarter"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
+                <button
+                  onClick={() => setCalendarOpen(false)}
+                  className="bg-red-100 hover:bg-red-200 text-red-700 rounded-full p-2 transition-colors shadow-sm border border-red-200"
+                  title="Close calendar"
+                  aria-label="Close calendar"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
-              <button
-                onClick={() => setCalendarOpen(false)}
-                className="bg-red-100 hover:bg-red-200 text-red-700 rounded-full p-2 transition-colors shadow-sm border border-red-200"
-                title="Close calendar"
-                aria-label="Close calendar"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
             
             {/* Render all 3 months in the quarter */}
             {calendarDataForQuarter.map((calendarData, monthIndex) => (
@@ -787,6 +801,7 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
         </div>
       ) : (
         <button

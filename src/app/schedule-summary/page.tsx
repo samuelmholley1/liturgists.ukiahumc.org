@@ -8,6 +8,7 @@ interface Service {
   date: string
   displayDate: string
   liturgist: any | null
+  liturgist2?: any | null
 }
 
 export default function ScheduleSummary() {
@@ -186,15 +187,21 @@ export default function ScheduleSummary() {
             <tbody>
               {services.map((service, index) => {
                 const rowClass = index % 2 === 0 ? 'bg-white' : 'bg-gray-200'
+                const isChristmasEve = service.displayDate?.includes('Christmas Eve')
                 const liturgistName = service.liturgist ? service.liturgist.name : ''
-                console.log(`🔍 SCHEDULE SUMMARY DEBUG: Row ${index}: Date=${service.displayDate}, Liturgist=${liturgistName}, Class=${rowClass}`)
+                const liturgist2Name = service.liturgist2 ? service.liturgist2.name : ''
+                const combinedLiturgists = isChristmasEve && liturgist2Name
+                  ? `${liturgistName}${liturgistName && liturgist2Name ? ' & ' : ''}${liturgist2Name}`
+                  : liturgistName
+                
+                console.log(`🔍 SCHEDULE SUMMARY DEBUG: Row ${index}: Date=${service.displayDate}, Liturgist=${combinedLiturgists}, IsChristmasEve=${isChristmasEve}, Class=${rowClass}`)
                 return (
                   <tr key={service.id} className={rowClass}>
                     <td className="border border-gray-400 px-4 py-2 text-gray-900">
                       {service.displayDate}
                     </td>
                     <td className="border border-gray-400 px-4 py-2 text-gray-900">
-                      {liturgistName}
+                      {combinedLiturgists}
                     </td>
                   </tr>
                 )

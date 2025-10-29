@@ -15,7 +15,21 @@ export default function ScheduleSummary() {
   const [loading, setLoading] = useState(true)
   const [currentQuarter, setCurrentQuarter] = useState('Q4-2025')
 
+  // Force cache busting
   useEffect(() => {
+    // Clear any cached version
+    if (typeof window !== 'undefined') {
+      console.log('Schedule Summary Page Loaded - Version 1.1.0')
+      // Force reload if this is a cached version
+      const lastUpdate = localStorage.getItem('schedule-summary-version')
+      const currentVersion = 'v1.1.0'
+      if (lastUpdate !== currentVersion) {
+        console.log('Updating version from', lastUpdate, 'to', currentVersion)
+        localStorage.setItem('schedule-summary-version', currentVersion)
+        window.location.reload()
+        return
+      }
+    }
     fetchServices()
   }, [currentQuarter])
 
@@ -69,7 +83,8 @@ export default function ScheduleSummary() {
           {/* Header */}
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Liturgist Schedule - {currentQuarter}</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Liturgist Schedule - {currentQuarter} (Simple View)</h1>
+              <p className="text-sm text-gray-600 mt-1">Version 1.1.0 - Last updated: {new Date().toLocaleString()}</p>
             </div>
             <div className="flex gap-2">
               <button

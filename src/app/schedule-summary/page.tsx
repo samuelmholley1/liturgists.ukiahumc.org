@@ -15,40 +15,60 @@ export default function ScheduleSummary() {
   const [loading, setLoading] = useState(true)
   const [currentQuarter, setCurrentQuarter] = useState('Q4-2025')
 
+  console.log('🔍 SCHEDULE SUMMARY DEBUG: Component initialized with quarter:', currentQuarter)
+
   // Force cache busting
   useEffect(() => {
+    console.log('🔍 SCHEDULE SUMMARY DEBUG: useEffect triggered for cache busting')
     // Clear any cached version
     if (typeof window !== 'undefined') {
+      console.log('🔍 SCHEDULE SUMMARY DEBUG: Running in browser environment')
       console.log('Schedule Summary Page Loaded - Version 1.1.0')
       // Force reload if this is a cached version
       const lastUpdate = localStorage.getItem('schedule-summary-version')
       const currentVersion = 'v1.1.0'
+      console.log('🔍 SCHEDULE SUMMARY DEBUG: Stored version:', lastUpdate, 'Current version:', currentVersion)
       if (lastUpdate !== currentVersion) {
+        console.log('🔍 SCHEDULE SUMMARY DEBUG: Version mismatch - forcing reload')
         console.log('Updating version from', lastUpdate, 'to', currentVersion)
         localStorage.setItem('schedule-summary-version', currentVersion)
         window.location.reload()
         return
+      } else {
+        console.log('🔍 SCHEDULE SUMMARY DEBUG: Version matches - no reload needed')
       }
+    } else {
+      console.log('🔍 SCHEDULE SUMMARY DEBUG: Running on server - skipping cache busting')
     }
+    console.log('🔍 SCHEDULE SUMMARY DEBUG: Cache busting complete, calling fetchServices')
     fetchServices()
   }, [currentQuarter])
 
   const fetchServices = async () => {
+    console.log('🔍 SCHEDULE SUMMARY DEBUG: fetchServices called for quarter:', currentQuarter)
     setLoading(true)
     try {
-      const response = await fetch(`/api/services?quarter=${currentQuarter}`, {
+      const apiUrl = `/api/services?quarter=${currentQuarter}`
+      console.log('🔍 SCHEDULE SUMMARY DEBUG: Fetching from URL:', apiUrl)
+      const response = await fetch(apiUrl, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache'
         }
       })
+      console.log('🔍 SCHEDULE SUMMARY DEBUG: API response status:', response.status)
       const data = await response.json()
+      console.log('🔍 SCHEDULE SUMMARY DEBUG: API response data:', data)
       if (data.success) {
+        console.log('🔍 SCHEDULE SUMMARY DEBUG: Setting services data:', data.services.length, 'services')
         setServices(data.services)
+      } else {
+        console.error('🔍 SCHEDULE SUMMARY DEBUG: API returned success=false:', data)
       }
     } catch (error) {
-      console.error('Error fetching services:', error)
+      console.error('🔍 SCHEDULE SUMMARY DEBUG: Error fetching services:', error)
     } finally {
+      console.log('🔍 SCHEDULE SUMMARY DEBUG: Setting loading to false')
       setLoading(false)
     }
   }
@@ -64,6 +84,7 @@ export default function ScheduleSummary() {
   }
 
   if (loading) {
+    console.log('🔍 SCHEDULE SUMMARY DEBUG: Rendering loading state')
     return (
       <PasswordGate>
         <main className="min-h-screen bg-white flex items-center justify-center">
@@ -75,6 +96,11 @@ export default function ScheduleSummary() {
       </PasswordGate>
     )
   }
+
+  console.log('🔍 SCHEDULE SUMMARY DEBUG: Rendering main component')
+  console.log('🔍 SCHEDULE SUMMARY DEBUG: Services array length:', services.length)
+  console.log('🔍 SCHEDULE SUMMARY DEBUG: Services data:', services)
+  console.log('🔍 SCHEDULE SUMMARY DEBUG: Rendering table rows for', services.length, 'services')
 
   return (
     <PasswordGate>
@@ -121,16 +147,21 @@ export default function ScheduleSummary() {
               </tr>
             </thead>
             <tbody>
-              {services.map((service, index) => (
-                <tr key={service.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-200'}>
-                  <td className="border border-gray-400 px-4 py-2 text-gray-900">
-                    {service.displayDate}
-                  </td>
-                  <td className="border border-gray-400 px-4 py-2 text-gray-900">
-                    {service.liturgist ? service.liturgist.name : ''}
-                  </td>
-                </tr>
-              ))}
+              {services.map((service, index) => {
+                const rowClass = index % 2 === 0 ? 'bg-white' : 'bg-gray-200'
+                const liturgistName = service.liturgist ? service.liturgist.name : ''
+                console.log(`🔍 SCHEDULE SUMMARY DEBUG: Row ${index}: Date=${service.displayDate}, Liturgist=${liturgistName}, Class=${rowClass}`)
+                return (
+                  <tr key={service.id} className={rowClass}>
+                    <td className="border border-gray-400 px-4 py-2 text-gray-900">
+                      {service.displayDate}
+                    </td>
+                    <td className="border border-gray-400 px-4 py-2 text-gray-900">
+                      {liturgistName}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>

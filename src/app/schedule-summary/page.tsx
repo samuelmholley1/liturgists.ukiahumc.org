@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import PasswordGate from '@/components/PasswordGate'
 
 interface Service {
@@ -180,28 +180,63 @@ export default function ScheduleSummary() {
           <table className="w-full border-collapse border border-gray-400">
             <thead>
               <tr className="bg-gray-200">
-                <th className="border border-gray-400 px-4 py-2 text-left font-semibold text-gray-900">Date</th>
+                <th className="border border-gray-400 px-4 py-2 text-left font-semibold text-gray-900">Service</th>
                 <th className="border border-gray-400 px-4 py-2 text-left font-semibold text-gray-900">Liturgist</th>
               </tr>
             </thead>
             <tbody>
               {services.map((service, index) => {
-                const rowClass = index % 2 === 0 ? 'bg-white' : 'bg-gray-200'
                 const isChristmasEve = service.displayDate?.includes('Christmas Eve')
-                const liturgistName = service.liturgist ? service.liturgist.name : ''
-                const liturgist2Name = service.liturgist2 ? service.liturgist2.name : ''
-                const combinedLiturgists = isChristmasEve && liturgist2Name
-                  ? `${liturgistName}${liturgistName && liturgist2Name ? ' & ' : ''}${liturgist2Name}`
-                  : liturgistName
                 
-                console.log(`🔍 SCHEDULE SUMMARY DEBUG: Row ${index}: Date=${service.displayDate}, Liturgist=${combinedLiturgists}, IsChristmasEve=${isChristmasEve}, Class=${rowClass}`)
+                // For Christmas Eve, create two rows if both liturgists exist
+                if (isChristmasEve && service.liturgist2) {
+                  return (
+                    <React.Fragment key={service.id}>
+                      {/* First liturgist row */}
+                      <tr className={index % 2 === 0 ? 'bg-white' : 'bg-gray-200'}>
+                        <td className="border border-gray-400 px-4 py-2 text-gray-900 font-semibold">
+                          Christmas Eve Liturgist #1
+                        </td>
+                        <td className="border border-gray-400 px-4 py-2 text-gray-900">
+                          {service.liturgist ? service.liturgist.name : ''}
+                        </td>
+                      </tr>
+                      {/* Second liturgist row */}
+                      <tr className={index % 2 === 0 ? 'bg-white' : 'bg-gray-200'}>
+                        <td className="border border-gray-400 px-4 py-2 text-gray-900 font-semibold">
+                          Christmas Eve Liturgist #2
+                        </td>
+                        <td className="border border-gray-400 px-4 py-2 text-gray-900">
+                          {service.liturgist2.name}
+                        </td>
+                      </tr>
+                    </React.Fragment>
+                  )
+                }
+                
+                // For Christmas Eve with only one liturgist
+                if (isChristmasEve && service.liturgist && !service.liturgist2) {
+                  return (
+                    <tr key={service.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-200'}>
+                      <td className="border border-gray-400 px-4 py-2 text-gray-900 font-semibold">
+                        Christmas Eve Liturgist
+                      </td>
+                      <td className="border border-gray-400 px-4 py-2 text-gray-900">
+                        {service.liturgist.name}
+                      </td>
+                    </tr>
+                  )
+                }
+                
+                // For regular services
+                const dateLabel = service.displayDate.replace(/, \d{4}$/, '') + ' Liturgist'
                 return (
-                  <tr key={service.id} className={rowClass}>
-                    <td className="border border-gray-400 px-4 py-2 text-gray-900">
-                      {service.displayDate}
+                  <tr key={service.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-200'}>
+                    <td className="border border-gray-400 px-4 py-2 text-gray-900 font-semibold">
+                      {dateLabel}
                     </td>
                     <td className="border border-gray-400 px-4 py-2 text-gray-900">
-                      {combinedLiturgists}
+                      {service.liturgist ? service.liturgist.name : ''}
                     </td>
                   </tr>
                 )

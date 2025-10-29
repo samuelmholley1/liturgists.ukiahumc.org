@@ -82,8 +82,9 @@ export default function ScheduleSummary() {
 
   return (
     <PasswordGate>
-      <main className="min-h-screen bg-white p-8">
-        <div className="max-w-[1400px] mx-auto">
+      <div className="fixed inset-0 bg-white overflow-auto">
+        <main className="min-h-screen p-8">
+          <div className="max-w-[1400px] mx-auto">
           {/* Minimal Header */}
           <div className="flex items-center justify-between mb-8 print:mb-6">
             <div className="flex items-center gap-4">
@@ -230,7 +231,8 @@ export default function ScheduleSummary() {
             </div>
           </div>
         </div>
-      </main>
+        </main>
+      </div>
     </PasswordGate>
   )
 }

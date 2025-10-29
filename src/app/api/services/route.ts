@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
     
     // Get all signups from Airtable
     const signups = await getSignups()
+    console.log('🔍 API DEBUG: Fetched', signups.length, 'signups from Airtable')
 
     // Create a map of services starting with all Sundays
     const serviceMap = new Map()
@@ -28,20 +29,36 @@ export async function GET(request: NextRequest) {
     // Merge in signups from Airtable (only for dates within this quarter)
     signups.forEach((signup: any) => {
       const serviceDate = signup.serviceDate
+      console.log(`🔍 API DEBUG: Processing signup: date="${serviceDate}", role="${signup.role}", name="${signup.name}"`)
       
       // Skip signups that are not in this quarter's date range
-      if (!serviceMap.has(serviceDate)) {
+      let matchingService = serviceMap.get(serviceDate)
+      
+      // If no direct match, try to find by displayDate (for legacy signups that stored displayDate)
+      if (!matchingService) {
+        const services = Array.from(serviceMap.values())
+        matchingService = services.find(s => s.displayDate === serviceDate)
+        if (matchingService) {
+          console.log(`🔍 API DEBUG: Found match by displayDate: ${serviceDate} -> ${matchingService.date}`)
+        }
+      }
+      
+      if (!matchingService) {
+        console.log(`🔍 API DEBUG: Skipping signup - date ${serviceDate} not in quarter range`)
         // Don't add services from outside the requested quarter
         return
       }
 
-      const service = serviceMap.get(serviceDate)
+      const service = matchingService
+      console.log(`🔍 API DEBUG: Found matching service for date ${serviceDate}`)
 
       // Normalize role for comparison (handle both capitalized and lowercase variants)
       const normalizedRole = signup.role?.toLowerCase().trim()
+      console.log(`🔍 API DEBUG: Normalized role: "${normalizedRole}"`)
 
       // Organize by role - check for all variants (old, new, and lowercase)
       if (signup.role === 'Liturgist' || normalizedRole === 'liturgist') {
+        console.log(`🔍 API DEBUG: Assigning as liturgist: ${signup.name}`)
         service.liturgist = {
           id: signup.id,
           name: signup.name,
@@ -50,6 +67,7 @@ export async function GET(request: NextRequest) {
           preferredContact: 'email' as const
         }
       } else if (signup.role === 'Second Liturgist' || signup.role === 'liturgist2' || normalizedRole === 'liturgist2' || normalizedRole === 'second liturgist') {
+        console.log(`🔍 API DEBUG: Assigning as liturgist2: ${signup.name}`)
         service.liturgist2 = {
           id: signup.id,
           name: signup.name,
@@ -58,6 +76,7 @@ export async function GET(request: NextRequest) {
           preferredContact: 'email' as const
         }
       } else if (signup.role === 'Backup Liturgist' || signup.role === 'Backup' || normalizedRole === 'backup' || normalizedRole === 'backup liturgist') {
+        console.log(`🔍 API DEBUG: Assigning as backup: ${signup.name}`)
         service.backup = {
           id: signup.id,
           name: signup.name,
@@ -66,10 +85,13 @@ export async function GET(request: NextRequest) {
           preferredContact: 'email' as const
         }
       } else if (signup.role === 'Attendance') {
+        console.log(`🔍 API DEBUG: Adding attendance: ${signup.name}`)
         service.attendance.push({
           name: signup.name,
           status: signup.attendanceStatus?.toLowerCase() || 'yes'
         })
+      } else {
+        console.log(`🔍 API DEBUG: Unknown role "${signup.role}" - not assigning`)
       }
     })
 
@@ -78,8 +100,32 @@ export async function GET(request: NextRequest) {
       a.date.localeCompare(b.date)
     )
 
+    // Debug: Log Christmas Eve service details
+    const christmasEveService = services.find(s => s.displayDate?.includes('Christmas Eve'))
+    if (christmasEveService) {
+      console.log('🔍 API DEBUG: Christmas Eve service final state:', {
+        date: christmasEveService.date,
+        displayDate: christmasEveService.displayDate,
+        hasLiturgist: !!christmasEveService.liturgist,
+        hasLiturgist2: !!christmasEveService.liturgist2,
+        liturgist: christmasEveService.liturgist?.name,
+        liturgist2: christmasEveService.liturgist2?.name
+      })
+    }
+
     return NextResponse.json(
-      { success: true, services },
+      { 
+        success: true, 
+        services,
+        debug: {
+          totalSignups: signups.length,
+          signups: signups.map(s => ({
+            serviceDate: s.serviceDate,
+            role: s.role,
+            name: s.name
+          }))
+        }
+      },
       { 
         headers: {
           'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',

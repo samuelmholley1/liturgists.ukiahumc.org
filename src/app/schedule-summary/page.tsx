@@ -69,6 +69,19 @@ export default function ScheduleSummary() {
       console.log('🔍 SCHEDULE SUMMARY DEBUG: API response status:', response.status)
       const data = await response.json()
       console.log('🔍 SCHEDULE SUMMARY DEBUG: API response data:', data)
+      console.log('🔍 SCHEDULE SUMMARY DEBUG: Debug info:', data.debug)
+      console.log('🔍 SCHEDULE SUMMARY DEBUG: Full services data:')
+      data.services?.forEach((service: any, index: number) => {
+        if (service.displayDate?.includes('Christmas Eve')) {
+          console.log(`🔍 SCHEDULE SUMMARY DEBUG: Christmas Eve service #${index}:`, {
+            date: service.date,
+            displayDate: service.displayDate,
+            liturgist: service.liturgist,
+            liturgist2: service.liturgist2,
+            backup: service.backup
+          })
+        }
+      })
       if (data.success) {
         console.log('🔍 SCHEDULE SUMMARY DEBUG: Setting services data:', data.services.length, 'services')
         setServices(data.services)

@@ -190,11 +190,11 @@ export default function ScheduleSummary() {
           </div>
 
           {/* Simple Spreadsheet Table */}
-          <table className="w-full border-collapse border border-gray-400">
+          <table className="w-auto border-collapse border border-gray-400 table-auto">
             <thead>
               <tr className="bg-gray-200">
-                <th className="border border-gray-400 px-3 py-1 text-left font-semibold text-gray-900">Service</th>
-                <th className="border border-gray-400 px-3 py-1 text-left font-semibold text-gray-900">Liturgist</th>
+                <th className="border border-gray-400 px-3 py-1 text-left font-semibold text-gray-900 whitespace-nowrap">Service</th>
+                <th className="border border-gray-400 px-3 py-1 text-left font-semibold text-gray-900 whitespace-nowrap">Liturgist</th>
               </tr>
             </thead>
             <tbody>
@@ -211,19 +211,19 @@ export default function ScheduleSummary() {
                       <React.Fragment key={service.id}>
                         {/* First liturgist row */}
                         <tr className={rowIndex++ % 2 === 0 ? 'bg-white' : 'bg-gray-200'}>
-                          <td className="border border-gray-400 px-3 py-1 text-gray-900 font-semibold">
+                          <td className="border border-gray-400 px-3 py-1 text-gray-900 font-semibold whitespace-nowrap">
                             Christmas Eve Liturgist #1
                           </td>
-                          <td className="border border-gray-400 px-3 py-1 text-gray-900">
+                          <td className="border border-gray-400 px-3 py-1 text-gray-900 whitespace-nowrap">
                             {service.liturgist ? service.liturgist.name : ''}
                           </td>
                         </tr>
                         {/* Second liturgist row */}
                         <tr className={rowIndex++ % 2 === 0 ? 'bg-white' : 'bg-gray-200'}>
-                          <td className="border border-gray-400 px-3 py-1 text-gray-900 font-semibold">
+                          <td className="border border-gray-400 px-3 py-1 text-gray-900 font-semibold whitespace-nowrap">
                             Christmas Eve Liturgist #2
                           </td>
-                          <td className="border border-gray-400 px-3 py-1 text-gray-900">
+                          <td className="border border-gray-400 px-3 py-1 text-gray-900 whitespace-nowrap">
                             {service.liturgist2 ? service.liturgist2.name : ''}
                           </td>
                         </tr>
@@ -236,10 +236,10 @@ export default function ScheduleSummary() {
                   console.log(`🔍 SCHEDULE SUMMARY DEBUG: Rendering regular service: dateLabel="${dateLabel}"`)
                   return (
                     <tr key={service.id} className={rowIndex++ % 2 === 0 ? 'bg-white' : 'bg-gray-200'}>
-                      <td className="border border-gray-400 px-3 py-1 text-gray-900 font-semibold">
+                      <td className="border border-gray-400 px-3 py-1 text-gray-900 font-semibold whitespace-nowrap">
                         {dateLabel}
                       </td>
-                      <td className="border border-gray-400 px-3 py-1 text-gray-900">
+                      <td className="border border-gray-400 px-3 py-1 text-gray-900 whitespace-nowrap">
                         {service.liturgist ? service.liturgist.name : ''}
                       </td>
                     </tr>

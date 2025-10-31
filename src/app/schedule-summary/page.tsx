@@ -18,6 +18,7 @@ export default function ScheduleSummary() {
   const [loading, setLoading] = useState(true)
   const [currentQuarter, setCurrentQuarter] = useState('Q4-2025')
   const [selectedMonths, setSelectedMonths] = useState<string[]>(['all'])
+  const [showBackupColumn, setShowBackupColumn] = useState(true)
 
   console.log('🔍 SCHEDULE SUMMARY DEBUG: Component initialized with quarter:', currentQuarter)
 
@@ -203,27 +204,84 @@ export default function ScheduleSummary() {
           </div>
 
           {/* Month Filter */}
-          <div className="mb-4 flex items-center gap-4">
-            <label className="text-sm font-medium text-gray-700">Filter by month:</label>
-            <select
-              multiple
-              value={selectedMonths}
-              onChange={(e) => {
-                const options = Array.from(e.target.selectedOptions, option => option.value)
-                // If "all" is selected, clear other selections
-                if (options.includes('all')) {
-                  setSelectedMonths(['all'])
-                } else {
-                  setSelectedMonths(options)
-                }
-              }}
-              className="px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px]"
-            >
-              <option value="all">All Months</option>
-              <option value="October">October</option>
-              <option value="November">November</option>
-              <option value="December">December</option>
-            </select>
+          <div className="mb-4 flex items-center gap-6">
+            <div className="flex items-center gap-4">
+              <label className="text-sm font-medium text-gray-700">Filter by month:</label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={selectedMonths.includes('all')}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedMonths(['all'])
+                    } else {
+                      setSelectedMonths([])
+                    }
+                  }}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">All Months</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={selectedMonths.includes('October')}
+                  disabled={selectedMonths.includes('all')}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedMonths(prev => [...prev.filter(m => m !== 'all'), 'October'])
+                    } else {
+                      setSelectedMonths(prev => prev.filter(m => m !== 'October'))
+                    }
+                  }}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 disabled:opacity-50"
+                />
+                <span className="text-sm text-gray-700">October</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={selectedMonths.includes('November')}
+                  disabled={selectedMonths.includes('all')}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedMonths(prev => [...prev.filter(m => m !== 'all'), 'November'])
+                    } else {
+                      setSelectedMonths(prev => prev.filter(m => m !== 'November'))
+                    }
+                  }}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 disabled:opacity-50"
+                />
+                <span className="text-sm text-gray-700">November</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={selectedMonths.includes('December')}
+                  disabled={selectedMonths.includes('all')}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedMonths(prev => [...prev.filter(m => m !== 'all'), 'December'])
+                    } else {
+                      setSelectedMonths(prev => prev.filter(m => m !== 'December'))
+                    }
+                  }}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 disabled:opacity-50"
+                />
+                <span className="text-sm text-gray-700">December</span>
+              </label>
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={showBackupColumn}
+                  onChange={(e) => setShowBackupColumn(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">Show Backup Column</span>
+              </label>
+            </div>
           </div>
 
           {/* Simple Spreadsheet Table */}
@@ -232,7 +290,9 @@ export default function ScheduleSummary() {
               <tr className="bg-gray-300 border-b-2 border-gray-600">
                 <th className="border border-gray-400 px-3 py-2 text-left font-bold text-gray-900 whitespace-nowrap bg-gray-300">Service</th>
                 <th className="border border-gray-400 px-3 py-2 text-left font-bold text-gray-900 whitespace-nowrap bg-gray-300">Liturgist</th>
-                <th className="border border-gray-400 px-3 py-2 text-left font-bold text-gray-900 whitespace-nowrap bg-gray-300">Backup</th>
+                {showBackupColumn && (
+                  <th className="border border-gray-400 px-3 py-2 text-left font-bold text-gray-900 whitespace-nowrap bg-gray-300">Backup</th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -255,9 +315,11 @@ export default function ScheduleSummary() {
                           <td className="border border-gray-400 px-3 py-1 text-gray-900 whitespace-nowrap">
                             {service.liturgist ? service.liturgist.name : ''}
                           </td>
-                          <td className="border border-gray-400 px-3 py-1 text-gray-900 whitespace-nowrap">
-                            {service.backup ? service.backup.name : ''}
-                          </td>
+                          {showBackupColumn && (
+                            <td className="border border-gray-400 px-3 py-1 text-gray-900 whitespace-nowrap">
+                              {service.backup ? service.backup.name : ''}
+                            </td>
+                          )}
                         </tr>
                         {/* Second liturgist row */}
                         <tr className={rowIndex++ % 2 === 0 ? 'bg-white' : 'bg-gray-200'}>
@@ -267,9 +329,11 @@ export default function ScheduleSummary() {
                           <td className="border border-gray-400 px-3 py-1 text-gray-900 whitespace-nowrap">
                             {service.liturgist2 ? service.liturgist2.name : ''}
                           </td>
-                          <td className="border border-gray-400 px-3 py-1 text-gray-900 whitespace-nowrap">
-                            {service.backup2 ? service.backup2.name : ''}
-                          </td>
+                          {showBackupColumn && (
+                            <td className="border border-gray-400 px-3 py-1 text-gray-900 whitespace-nowrap">
+                              {service.backup2 ? service.backup2.name : ''}
+                            </td>
+                          )}
                         </tr>
                       </React.Fragment>
                     )
@@ -286,9 +350,11 @@ export default function ScheduleSummary() {
                       <td className="border border-gray-400 px-3 py-1 text-gray-900 whitespace-nowrap">
                         {service.liturgist ? service.liturgist.name : ''}
                       </td>
-                      <td className="border border-gray-400 px-3 py-1 text-gray-900 whitespace-nowrap">
-                        {service.backup ? service.backup.name : ''}
-                      </td>
+                      {showBackupColumn && (
+                        <td className="border border-gray-400 px-3 py-1 text-gray-900 whitespace-nowrap">
+                          {service.backup ? service.backup.name : ''}
+                        </td>
+                      )}
                     </tr>
                   )
                 })

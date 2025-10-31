@@ -17,7 +17,7 @@ export default function ScheduleSummary() {
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
   const [currentQuarter, setCurrentQuarter] = useState('Q4-2025')
-  const [selectedMonth, setSelectedMonth] = useState<string>('all')
+  const [selectedMonths, setSelectedMonths] = useState<string[]>(['all'])
 
   console.log('🔍 SCHEDULE SUMMARY DEBUG: Component initialized with quarter:', currentQuarter)
 
@@ -149,15 +149,15 @@ export default function ScheduleSummary() {
   console.log('🔍 SCHEDULE SUMMARY DEBUG: Services data:', services)
   console.log('🔍 SCHEDULE SUMMARY DEBUG: Rendering table rows for', services.length, 'services')
 
-  // Filter services by selected month
-  const filteredServices = selectedMonth === 'all' 
+  // Filter services by selected months
+  const filteredServices = selectedMonths.includes('all') 
     ? services 
     : services.filter(service => {
         const monthName = service.displayDate.split(' ')[0] // Get first word (month)
-        return monthName === selectedMonth
+        return selectedMonths.includes(monthName)
       })
 
-  console.log('🔍 SCHEDULE SUMMARY DEBUG: Filtered services:', filteredServices.length, 'services for month:', selectedMonth)
+  console.log('🔍 SCHEDULE SUMMARY DEBUG: Filtered services:', filteredServices.length, 'services for months:', selectedMonths)
 
   return (
     <PasswordGate>
@@ -206,9 +206,18 @@ export default function ScheduleSummary() {
           <div className="mb-4 flex items-center gap-4">
             <label className="text-sm font-medium text-gray-700">Filter by month:</label>
             <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-              className="px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              multiple
+              value={selectedMonths}
+              onChange={(e) => {
+                const options = Array.from(e.target.selectedOptions, option => option.value)
+                // If "all" is selected, clear other selections
+                if (options.includes('all')) {
+                  setSelectedMonths(['all'])
+                } else {
+                  setSelectedMonths(options)
+                }
+              }}
+              className="px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px]"
             >
               <option value="all">All Months</option>
               <option value="October">October</option>
@@ -220,10 +229,10 @@ export default function ScheduleSummary() {
           {/* Simple Spreadsheet Table */}
           <table className="w-auto border-collapse border border-gray-400 table-auto">
             <thead>
-              <tr className="bg-gray-200">
-                <th className="border border-gray-400 px-3 py-1 text-left font-semibold text-gray-900 whitespace-nowrap">Service</th>
-                <th className="border border-gray-400 px-3 py-1 text-left font-semibold text-gray-900 whitespace-nowrap">Liturgist</th>
-                <th className="border border-gray-400 px-3 py-1 text-left font-semibold text-gray-900 whitespace-nowrap">Backup</th>
+              <tr className="bg-gray-300 border-b-2 border-gray-600">
+                <th className="border border-gray-400 px-3 py-2 text-left font-bold text-gray-900 whitespace-nowrap bg-gray-300">Service</th>
+                <th className="border border-gray-400 px-3 py-2 text-left font-bold text-gray-900 whitespace-nowrap bg-gray-300">Liturgist</th>
+                <th className="border border-gray-400 px-3 py-2 text-left font-bold text-gray-900 whitespace-nowrap bg-gray-300">Backup</th>
               </tr>
             </thead>
             <tbody>

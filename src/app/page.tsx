@@ -16,6 +16,7 @@ interface Service {
   liturgist: any | null
   liturgist2?: any | null  // Second liturgist for special services like Christmas Eve
   backup: any | null
+  backup2?: any | null  // Second backup for special services like Christmas Eve
   attendance: any[]
   notes?: string
 }
@@ -71,7 +72,7 @@ export default function Home() {
     lastName: '',
     email: '',
     phone: '',
-    role: 'liturgist' as 'liturgist' | 'liturgist2' | 'backup'
+    role: 'liturgist' as 'liturgist' | 'liturgist2' | 'backup' | 'backup2'
   })
   const [isClient, setIsClient] = useState(false)
   const [services, setServices] = useState<Service[]>([])
@@ -282,13 +283,13 @@ export default function Home() {
     generateCalendarData(services, mainServiceDate, month, calendarQuarter.year)
   )
 
-  const handleSignup = (serviceId: string, preferredRole?: 'liturgist' | 'liturgist2' | 'backup') => {
+  const handleSignup = (serviceId: string, preferredRole?: 'liturgist' | 'liturgist2' | 'backup' | 'backup2') => {
     const service = services.find(s => s.id === serviceId)
     
     // Determine which role to sign up for
-    let roleToSignup: 'liturgist' | 'liturgist2' | 'backup' = preferredRole || 'liturgist'
+    let roleToSignup: 'liturgist' | 'liturgist2' | 'backup' | 'backup2' = preferredRole || 'liturgist'
     
-    // For Christmas Eve, handle all three roles
+    // For Christmas Eve, handle all four roles
     const isChristmasEve = service?.displayDate?.includes('Christmas Eve')
     
     if (isChristmasEve) {
@@ -298,28 +299,42 @@ export default function Home() {
           roleToSignup = 'liturgist2'
         } else if (!service?.backup) {
           roleToSignup = 'backup'
+        } else if (!service?.backup2) {
+          roleToSignup = 'backup2'
         }
       } else if (roleToSignup === 'liturgist2' && service?.liturgist2) {
         if (!service?.liturgist) {
           roleToSignup = 'liturgist'
         } else if (!service?.backup) {
           roleToSignup = 'backup'
+        } else if (!service?.backup2) {
+          roleToSignup = 'backup2'
         }
       } else if (roleToSignup === 'backup' && service?.backup) {
         if (!service?.liturgist) {
           roleToSignup = 'liturgist'
         } else if (!service?.liturgist2) {
           roleToSignup = 'liturgist2'
+        } else if (!service?.backup2) {
+          roleToSignup = 'backup2'
+        }
+      } else if (roleToSignup === 'backup2' && service?.backup2) {
+        if (!service?.liturgist) {
+          roleToSignup = 'liturgist'
+        } else if (!service?.liturgist2) {
+          roleToSignup = 'liturgist2'
+        } else if (!service?.backup) {
+          roleToSignup = 'backup'
         }
       }
       
-      // Check if all three roles are taken for Christmas Eve
-      if (service?.liturgist && service?.liturgist2 && service?.backup) {
+      // Check if all four roles are taken for Christmas Eve
+      if (service?.liturgist && service?.liturgist2 && service?.backup && service?.backup2) {
         setModalState({
           isOpen: true,
           type: 'warning',
           title: 'Service Full',
-          message: 'All positions (Main Liturgist, Second Liturgist, and Backup) are filled for Christmas Eve. Please choose a different Sunday.'
+          message: 'All positions (Main Liturgist, Second Liturgist, First Backup, and Second Backup) are filled for Christmas Eve. Please choose a different Sunday.'
         })
         return
       }
@@ -853,6 +868,26 @@ export default function Home() {
                       <span className="text-gray-500">Available</span>
                     )}
                   </div>
+                  {selectedService?.displayDate?.includes('Christmas Eve') && (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-gray-700">Second Liturgist:</span>
+                        {selectedService?.liturgist2 ? (
+                          <span className="text-green-700 font-semibold">✓ Filled by {selectedService.liturgist2.name}</span>
+                        ) : (
+                          <span className="text-red-600 font-semibold">Available</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-gray-700">Second Backup:</span>
+                        {selectedService?.backup2 ? (
+                          <span className="text-orange-700 font-semibold">✓ Filled by {selectedService.backup2.name}</span>
+                        ) : (
+                          <span className="text-gray-500">Available</span>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
               
@@ -977,6 +1012,38 @@ export default function Home() {
                         </label>
                       )}
                       
+                      {/* Second Backup - Only show for Christmas Eve */}
+                      {selectedService?.displayDate?.includes('Christmas Eve') && (
+                        <label className={`flex items-center p-3 border-2 rounded-lg transition-all ${
+                          signupForm.role === 'backup2' 
+                            ? 'bg-blue-50 border-blue-500 shadow-sm' 
+                            : 'border-gray-200 hover:border-gray-300'
+                        } ${selectedService?.backup2 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+                          <input
+                            type="radio"
+                            name="role"
+                            value="backup2"
+                            checked={signupForm.role === 'backup2'}
+                            onChange={(e) => setSignupForm({ ...signupForm, role: 'backup2' })}
+                            disabled={!!selectedService?.backup2}
+                            className="mr-3 w-4 h-4 text-blue-600"
+                          />
+                          <div className="flex-1">
+                            <span className={`text-sm font-medium ${signupForm.role === 'backup2' ? 'text-blue-900' : 'text-gray-700'}`}>
+                              Second Backup Liturgist (Christmas Eve)
+                              {signupForm.role === 'backup2' && (
+                                <span className="ml-2 px-2 py-0.5 bg-blue-600 text-white text-xs rounded-full">Selected</span>
+                              )}
+                            </span>
+                            {selectedService?.backup2 && (
+                              <span className="ml-2 text-xs text-red-600 font-medium">
+                                (Taken by {selectedService.backup2.name})
+                              </span>
+                            )}
+                          </div>
+                        </label>
+                      )}
+                      
                       <label className={`flex items-center p-3 border-2 rounded-lg transition-all ${
                         signupForm.role === 'backup' 
                           ? 'bg-blue-50 border-blue-500 shadow-sm' 
@@ -1016,7 +1083,7 @@ export default function Home() {
                     {(() => {
                       const isChristmasEve = selectedService?.displayDate?.includes('Christmas Eve')
                       const allPositionsFilled = isChristmasEve 
-                        ? selectedService?.liturgist && selectedService?.liturgist2 && selectedService?.backup
+                        ? selectedService?.liturgist && selectedService?.liturgist2 && selectedService?.backup && selectedService?.backup2
                         : selectedService?.liturgist && selectedService?.backup
                       
                       return allPositionsFilled && (
@@ -1064,9 +1131,13 @@ export default function Home() {
                 <div className="flex gap-3 mt-6">
                   <button
                     type="submit"
-                    disabled={isSubmitting || (selectedService?.liturgist && selectedService?.backup)}
+                    disabled={isSubmitting || (selectedService?.displayDate?.includes('Christmas Eve') 
+                      ? selectedService?.liturgist && selectedService?.liturgist2 && selectedService?.backup && selectedService?.backup2
+                      : selectedService?.liturgist && selectedService?.backup)}
                     className={`flex-1 py-2 rounded-lg transition-colors ${
-                      isSubmitting || (selectedService?.liturgist && selectedService?.backup)
+                      isSubmitting || (selectedService?.displayDate?.includes('Christmas Eve') 
+                        ? selectedService?.liturgist && selectedService?.liturgist2 && selectedService?.backup && selectedService?.backup2
+                        : selectedService?.liturgist && selectedService?.backup)
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-blue-600 text-white hover:bg-blue-700'
                     }`}
@@ -1220,53 +1291,87 @@ export default function Home() {
                     })()}
                   </div>
                   
-                  {/* Two Rows: Liturgist and Backup - Always Visible */}
-                  <div className="space-y-2 text-sm">
-                    {/* Liturgist Row */}
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <span className="font-medium text-gray-700 whitespace-nowrap">Liturgist:</span>
-                        {service.liturgist ? (
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 min-w-0 flex-1">
-                            <span className="font-semibold text-green-900 truncate" title={service.liturgist.name}>
-                              {service.liturgist.name}
-                            </span>
-                            {service.liturgist.email && (
-                              <span className="text-green-700 text-xs truncate" title={service.liturgist.email}>
-                                {service.liturgist.email}
+                  {/* Service Rows - Different layout for Christmas Eve */}
+                  {service.displayDate?.includes('Christmas Eve') ? (
+                    <div className="space-y-2 text-sm">
+                      {/* Liturgist Row */}
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <span className="font-medium text-gray-700 whitespace-nowrap">Liturgist:</span>
+                          {service.liturgist ? (
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 min-w-0 flex-1">
+                              <span className="font-semibold text-green-900 truncate" title={service.liturgist.name}>
+                                {service.liturgist.name}
                               </span>
-                            )}
+                              {service.liturgist.email && (
+                                <span className="text-green-700 text-xs truncate" title={service.liturgist.email}>
+                                  {service.liturgist.email}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleSignup(service.id, 'liturgist')}
+                              disabled={isLockedQuarter}
+                              className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-full hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                            >
+                              Sign Up
+                            </button>
+                          )}
+                        </div>
+                        
+                        {/* Cancel Button - Right Side (only if filled) */}
+                        {service.liturgist && (
+                          <div className="flex-shrink-0 sm:ml-2">
+                            <button
+                              onClick={() => handleCancelSignup(service.liturgist!.id, service.liturgist!.name, service.displayDate, 'Liturgist')}
+                              disabled={isLockedQuarter}
+                              className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap w-full sm:w-auto"
+                            >
+                              Cancel
+                            </button>
                           </div>
-                        ) : (
-                          <button
-                            onClick={() => handleSignup(service.id, 'liturgist')}
-                            disabled={isLockedQuarter}
-                            className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-full hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                          >
-                            Sign Up
-                          </button>
                         )}
                       </div>
                       
-                      {/* Cancel Button - Right Side (only if filled) */}
-                      {service.liturgist && (
-                        <div className="flex-shrink-0 sm:ml-2">
-                          <button
-                            onClick={() => handleCancelSignup(service.liturgist!.id, service.liturgist!.name, service.displayDate, 'Liturgist')}
-                            disabled={isLockedQuarter}
-                            className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap w-full sm:w-auto"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Second Liturgist Row - Only for Christmas Eve */}
-                    {service.displayDate?.includes('Christmas Eve') && (
+                      {/* First Backup Row */}
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                         <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <span className="font-medium text-gray-700 whitespace-nowrap">Second:</span>
+                          <span className="font-medium text-gray-700 whitespace-nowrap">Backup:</span>
+                          {service.backup ? (
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 min-w-0 flex-1">
+                              <span className="font-semibold text-blue-900 truncate" title={service.backup.name}>
+                                {service.backup.name}
+                              </span>
+                              {service.backup.email && (
+                                <span className="text-blue-700 text-xs truncate" title={service.backup.email}>
+                                  {service.backup.email}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-gray-500 text-sm">Sign Up</span>
+                          )}
+                        </div>
+                        
+                        {/* Cancel Button - Right Side (only if filled) */}
+                        {service.backup && (
+                          <div className="flex-shrink-0 sm:ml-2">
+                            <button
+                              onClick={() => handleCancelSignup(service.backup!.id, service.backup!.name, service.displayDate, 'Backup')}
+                              disabled={isLockedQuarter}
+                              className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap w-full sm:w-auto"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Second Liturgist Row */}
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <span className="font-medium text-gray-700 whitespace-nowrap">Second Liturgist:</span>
                           {service.liturgist2 ? (
                             <div className="flex flex-col sm:flex-row sm:items-center gap-1 min-w-0 flex-1">
                               <span className="font-semibold text-green-900 truncate" title={service.liturgist2.name}>
@@ -1302,48 +1407,131 @@ export default function Home() {
                           </div>
                         )}
                       </div>
-                    )}
-                    
-                    {/* Backup Row */}
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <span className="font-medium text-gray-700 whitespace-nowrap">Backup:</span>
-                        {service.backup ? (
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 min-w-0 flex-1">
-                            <span className="font-semibold text-blue-900 truncate" title={service.backup.name}>
-                              {service.backup.name}
-                            </span>
-                            {service.backup.email && (
-                              <span className="text-blue-700 text-xs truncate" title={service.backup.email}>
-                                {service.backup.email}
+                      
+                      {/* Second Backup Row */}
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <span className="font-medium text-gray-700 whitespace-nowrap">Backup:</span>
+                          {service.backup2 ? (
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 min-w-0 flex-1">
+                              <span className="font-semibold text-blue-900 truncate" title={service.backup2.name}>
+                                {service.backup2.name}
                               </span>
-                            )}
+                              {service.backup2.email && (
+                                <span className="text-blue-700 text-xs truncate" title={service.backup2.email}>
+                                  {service.backup2.email}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleSignup(service.id, 'backup2')}
+                              disabled={isLockedQuarter}
+                              className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                            >
+                              Sign Up
+                            </button>
+                          )}
+                        </div>
+                        
+                        {/* Cancel Button - Right Side (only if filled) */}
+                        {service.backup2 && (
+                          <div className="flex-shrink-0 sm:ml-2">
+                            <button
+                              onClick={() => handleCancelSignup(service.backup2!.id, service.backup2!.name, service.displayDate, 'Second Backup')}
+                              disabled={isLockedQuarter}
+                              className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap w-full sm:w-auto"
+                            >
+                              Cancel
+                            </button>
                           </div>
-                        ) : (
-                          <button
-                            onClick={() => handleSignup(service.id, 'backup')}
-                            disabled={isLockedQuarter}
-                            className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                          >
-                            Sign Up
-                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    /* Regular Service Layout */
+                    <div className="space-y-2 text-sm">
+                      {/* Liturgist Row */}
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <span className="font-medium text-gray-700 whitespace-nowrap">Liturgist:</span>
+                          {service.liturgist ? (
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 min-w-0 flex-1">
+                              <span className="font-semibold text-green-900 truncate" title={service.liturgist.name}>
+                                {service.liturgist.name}
+                              </span>
+                              {service.liturgist.email && (
+                                <span className="text-green-700 text-xs truncate" title={service.liturgist.email}>
+                                  {service.liturgist.email}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleSignup(service.id, 'liturgist')}
+                              disabled={isLockedQuarter}
+                              className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-full hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                            >
+                              Sign Up
+                            </button>
+                          )}
+                        </div>
+                        
+                        {/* Cancel Button - Right Side (only if filled) */}
+                        {service.liturgist && (
+                          <div className="flex-shrink-0 sm:ml-2">
+                            <button
+                              onClick={() => handleCancelSignup(service.liturgist!.id, service.liturgist!.name, service.displayDate, 'Liturgist')}
+                              disabled={isLockedQuarter}
+                              className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap w-full sm:w-auto"
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         )}
                       </div>
                       
-                      {/* Cancel Button - Right Side (only if filled) */}
-                      {service.backup && (
-                        <div className="flex-shrink-0 sm:ml-2">
-                          <button
-                            onClick={() => handleCancelSignup(service.backup!.id, service.backup!.name, service.displayDate, 'Backup')}
-                            disabled={isLockedQuarter}
-                            className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap w-full sm:w-auto"
-                          >
-                            Cancel
-                          </button>
+                      {/* Backup Row */}
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <span className="font-medium text-gray-700 whitespace-nowrap">Backup:</span>
+                          {service.backup ? (
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 min-w-0 flex-1">
+                              <span className="font-semibold text-blue-900 truncate" title={service.backup.name}>
+                                {service.backup.name}
+                              </span>
+                              {service.backup.email && (
+                                <span className="text-blue-700 text-xs truncate" title={service.backup.email}>
+                                  {service.backup.email}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleSignup(service.id, 'backup')}
+                              disabled={isLockedQuarter}
+                              className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                            >
+                              Sign Up
+                            </button>
+                          )}
                         </div>
-                      )}
+                        
+                        {/* Cancel Button - Right Side (only if filled) */}
+                        {service.backup && (
+                          <div className="flex-shrink-0 sm:ml-2">
+                            <button
+                              onClick={() => handleCancelSignup(service.backup!.id, service.backup!.name, service.displayDate, 'Backup')}
+                              disabled={isLockedQuarter}
+                              className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-full hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap w-full sm:w-auto"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               )
             })}

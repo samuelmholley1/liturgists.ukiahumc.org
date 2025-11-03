@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSignups } from '@/lib/airtable'
+import { serviceCache } from '@/lib/cache'
 
 // Disable all caching for this API route
 export const dynamic = 'force-dynamic'
@@ -10,6 +11,25 @@ export async function GET(request: NextRequest) {
     // Get quarter from query params (format: "Q4-2025" or "Q1-2026")
     const { searchParams } = new URL(request.url)
     const quarter = searchParams.get('quarter') || 'Q4-2025' // Default to Q4 2025
+    
+    // Check cache first
+    const cachedData = serviceCache.get(quarter)
+    if (cachedData) {
+      console.log(`[API] Returning cached data for quarter: ${quarter}`)
+      return NextResponse.json(
+        cachedData,
+        { 
+          headers: {
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            'X-Cache': 'HIT'
+          }
+        }
+      )
+    }
+    
+    console.log(`[API] Cache miss for quarter: ${quarter}, fetching from Airtable`)
     
     // Generate Sundays for the requested quarter
     const allSundays = generateSundaysForQuarter(quarter)
@@ -122,24 +142,31 @@ export async function GET(request: NextRequest) {
       })
     }
 
+    const responseData = { 
+      success: true, 
+      services,
+      debug: {
+        totalSignups: signups.length,
+        signups: signups.map(s => ({
+          serviceDate: s.serviceDate,
+          role: s.role,
+          name: s.name
+        }))
+      }
+    }
+
+    // Store in cache
+    serviceCache.set(quarter, responseData)
+    console.log(`[API] Cached data for quarter: ${quarter}`)
+
     return NextResponse.json(
-      { 
-        success: true, 
-        services,
-        debug: {
-          totalSignups: signups.length,
-          signups: signups.map(s => ({
-            serviceDate: s.serviceDate,
-            role: s.role,
-            name: s.name
-          }))
-        }
-      },
+      responseData,
       { 
         headers: {
           'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
           'Pragma': 'no-cache',
           'Expires': '0',
+          'X-Cache': 'MISS'
         }
       }
     )

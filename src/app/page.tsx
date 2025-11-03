@@ -146,15 +146,54 @@ export default function Home() {
     
     fetchServices()
     
-    // Auto-refresh every 5 seconds for real-time updates (only for current unlocked quarter)
-    const intervalId = setInterval(() => {
-      if (!isLockedQuarter) {
-        fetchServices(true) // Silent refresh
-      }
-    }, 5000) // 5 seconds
+    // Setup SSE connection for real-time updates (only for current unlocked quarter)
+    let eventSource: EventSource | null = null
     
-    // Cleanup interval on unmount
-    return () => clearInterval(intervalId)
+    if (!isLockedQuarter && typeof window !== 'undefined') {
+      console.log(`[SSE Client] Connecting to SSE for quarter: ${currentQuarter}`)
+      eventSource = new EventSource(`/api/sse?quarter=${currentQuarter}`)
+      
+      eventSource.onopen = () => {
+        console.log('[SSE Client] Connection established')
+      }
+      
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data)
+          console.log('[SSE Client] Received update:', data)
+          
+          if (data.type === 'data-update' || data.type === 'test') {
+            console.log('[SSE Client] Data updated, refreshing services')
+            fetchServices(true) // Silent refresh
+          } else if (data.type === 'connected') {
+            console.log('[SSE Client] Connected successfully:', data.message)
+          }
+        } catch (error) {
+          console.error('[SSE Client] Error parsing SSE message:', error)
+        }
+      }
+      
+      eventSource.onerror = (error) => {
+        console.error('[SSE Client] Connection error:', error)
+        eventSource?.close()
+        
+        // Attempt to reconnect after 5 seconds
+        setTimeout(() => {
+          if (!isLockedQuarter) {
+            console.log('[SSE Client] Attempting to reconnect...')
+            // The effect will run again and recreate the connection
+          }
+        }, 5000)
+      }
+    }
+    
+    // Cleanup SSE connection on unmount or quarter change
+    return () => {
+      if (eventSource) {
+        console.log('[SSE Client] Closing SSE connection')
+        eventSource.close()
+      }
+    }
   }, [currentQuarter, isLockedQuarter])
 
   const fetchServices = async (silent = false) => {
